@@ -389,6 +389,7 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
         # go through the training set
         mean_cost = []
         for batch_index in xrange(n_train_batches):
+            print "batch_index: %d" % batch_index
             mean_cost += [train_rbm(batch_index)]
 
         print 'Training epoch %d, cost is ' % epoch, numpy.mean(mean_cost)
@@ -463,5 +464,14 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
     image.save('samples.png')
     os.chdir('../')
 
+def my_test():
+    datasets = load_data('../data/mnist.pkl.gz')
+    train_set_x, train_set_y = datasets[0]
+    a = T.matrix()
+    out = a
+    f = theano.function([a], out)
+    print train_set_x.get_value(borrow=True)[0]
+
 if __name__ == '__main__':
-    test_rbm()
+    #test_rbm()
+    my_test()
