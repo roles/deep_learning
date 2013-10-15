@@ -467,10 +467,14 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
 def my_test():
     datasets = load_data('../data/mnist.pkl.gz')
     train_set_x, train_set_y = datasets[0]
-    a = T.matrix()
-    out = a
-    f = theano.function([a], out)
-    print train_set_x.get_value(borrow=True)[0]
+    image_data = numpy.zeros((29 + 1, 29 * 10 - 1),
+                             dtype='uint8')
+    image_data[:,:,:] = tile_raster_images(X = train_set_x.get_value(borrow=True)[0:10],
+                                           img_shape = (28,28),
+                                           tile_shape = (1, 10),
+                                           tile_spacing = (1, 1))
+    image = PIL.Image.fromarray(image_data)
+    image.save('samples.png')
 
 if __name__ == '__main__':
     #test_rbm()

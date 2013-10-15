@@ -5,6 +5,7 @@
 #include<arpa/inet.h>
 #include<stdlib.h>
 #include<math.h>
+#include<time.h>
 
 #define DEFAULT_MAXSIZE 1000
 #define eta 0.1
@@ -51,6 +52,7 @@ void load_dataset_input(int fd, dataset *d){
     }
 #ifdef DEBUG
     printf("data loaded\n");
+    fflush(stdout);
 #endif
 }
 
@@ -195,6 +197,24 @@ void gibbs_sampling_hvh(const rbm *m, const double *hsample, int step, double *e
     }
 }
 
+void gibbs_sampling_vhv(const rbm *m, const double *vsample, int step, double *end_hprob, double *end_hsample, double *end_vprob, double *end_vsample){
+    int k;
+
+    memcpy(end_vsample, vsample, m->nvisible * sizeof(double));
+
+    for(k = 0; k < step; k++){
+        get_hprob_given_vsample(m, end_vsample, end_hprob);
+        sample_h_from_hprob(m, end_hprob, end_hsample);
+        get_vprob_given_hsample(m, end_hsample, end_vprob);
+        sample_v_from_vprob(m, end_vprob, end_vsample);
+#ifdef DEBUG
+        if((k+1) % 100 == 0){
+            printf("step :%d\n", k+1);
+        }
+#endif
+    }
+}
+
 double get_free_energy(const rbm *m, const double *v){
     double vterm, hterm, s;
     int i, j; 
@@ -226,9 +246,10 @@ double get_pseudo_likelihood_cost(const rbm *m, dataset *d){
 
         s += m->nvisible * log(sigmoid(fe_flip - fe));
 #ifdef DEBUG
-        if((i+1) % 1000 == 0){
-            printf("calculating pseudo likelihood cost! loop :%d\n", i);
+        if((i+1) % 10000 == 0){
+            printf("calculating pseudo likelihood cost! loop :%d\n", i+1);
         }
+        fflush(stdout);
 #endif
     }
 
@@ -254,25 +275,61 @@ void print_model(const rbm *m, const dataset *d){
     }
 }
 
-void print_vsample(const rbm *m, const double *vsample){
+void print_vsample(FILE *f, const rbm *m, const dataset *d, const double *vsample){
     int i;
     for(i = 0; i < m->nvisible; i++){
-        printf("%.2lf%s", vsample[i], (i+1) % 28 == 0 ? "\n" : "\t");
+        fprintf(f, "%.5lf%s", vsample[i], (i+1) % d->ncol == 0 ? "\n" : "\t");
     }
 }
 
-void print_hsample(const rbm *m, const double *hsample){
+void print_hsample(FILE *f, const rbm *m, const double *hsample){
     int i;
     for(i = 0; i < m->nhidden; i++){
-        printf("%.2lf%s", hsample[i], (i+1) % 25 == 0 ? "\n" : "\t");
+        fprintf(f, "%.5lf%s", hsample[i], (i+1) % 25 == 0 ? "\n" : "\t");
     }
+}
+
+void dump_weight(FILE *f, const rbm *m, const dataset *d){
+    int i, j, k;
+    for(i = 0; i < 100; i++){
+        fprintf(f, "Hidden Node %d\n", i);
+        for(j = 0; j < m->nvisible; j++){
+            fprintf(f, "%.5lf%s", m->W[i][j], (j+1) % d->ncol == 0 ? "\n" : "\t");
+        }
+        fflush(f);
+    }
+}
+
+void print_sample(FILE *f, const rbm *m, const dataset *d, double **vsample, int sample_size){
+    int i, j, k;
+    double v2_sample[DEFAULT_MAXSIZE], v2_prob[DEFAULT_MAXSIZE], h2_sample[DEFAULT_MAXSIZE], h2_prob[DEFAULT_MAXSIZE];
+    double **start_sample;
+    int n_sample = 10;
+    int step = 1000;
+
+    start_sample = (double**)calloc(sample_size ,sizeof(double*));
+    
+    for(i = 0; i < n_sample; i++){
+        fprintf(f, "sample %d\n", i);
+        for(j = 0; j < sample_size; j++){
+            if(start_sample[j] == NULL)
+                start_sample[j] = vsample[j];
+            gibbs_sampling_vhv(m, start_sample[j], step, h2_prob, h2_sample, v2_prob, v2_sample);
+            print_vsample(f, m, d, v2_prob);
+            start_sample[j] = v2_sample;
+        }
+    }
+
+    free(start_sample);
 }
 
 int main(){
     int image_fd, label_fd;
+    FILE *W_file, *V_sample_file, *log_file;
     uint32_t magic_n, N, nrow, ncol, data;
     int nvisible, nhidden;
     int mini_batch, training_epcho;
+    time_t start_time, end_time, total_time = 0;
     int i, j, k, p, q;
     int epcho;
     rbm m;
@@ -284,9 +341,9 @@ int main(){
     double *chain_start = NULL;
 
     image_fd = open("../data/train-images-idx3-ubyte", O_RDONLY);
-#ifndef DEBUG
-    freopen("test.out", "w", stdout);
-#endif
+    W_file = fopen("weight.txt", "w");
+    V_sample_file = fopen("sample.txt", "w");
+    freopen("rbm.log", "w", stdout);
 
     if(image_fd == -1){
         fprintf(stderr, "cannot open file");
@@ -308,6 +365,7 @@ int main(){
 
 #ifdef DEBUG
     printf("magic number: %u\nN: %u\nnrow: %u\nncol: %u\n", magic_n, N, nrow, ncol);
+    fflush(stdout);
 #endif
 
     init_dataset(&d, N, nrow, ncol);
@@ -321,13 +379,25 @@ int main(){
     training_epcho = 15;
     init_model(&m, nvisible, nhidden);
 
-    print_vsample(&m, d.input[59999]);
+    /*
+    fprintf(V_sample_file, "sample 0\n");
+    for(i = 0; i < 20; i++){
+        print_vsample(V_sample_file, &m, &d, d.input[100 + i]);
+    }
+    fclose(log_file);
+    fclose(W_file);
+    fclose(V_sample_file);
     free_dataset(&d);
     free_model(&m);
     exit(0);
+    */
+
+    fprintf(W_file, "epcho 0\n");
+    dump_weight(W_file, &m, &d);
     
     for(epcho = 0; epcho < training_epcho; epcho++){
 
+        start_time = time(NULL);
         for(k = 0; k < d.N / mini_batch; k++){
             for(j = 0; j < m.nhidden; j++){
                 delta_hbias[j] = 0;
@@ -339,15 +409,18 @@ int main(){
                 delta_vbias[p] = 0; 
             }
 #ifdef DEBUG
-            printf("epcho:%d\tstep:%d\n", epcho + 1, k + 1);
+            if((k+1) % 300 == 0){
+                printf("epcho:%d\tstep:%d\n", epcho + 1, k + 1);
+            }
+            fflush(stdout);
 #endif
 
             for(i = 0; i < mini_batch; i++){
 
-                memcpy(v1_sample, d.input[i], m.nhidden * sizeof(double));
+                memcpy(v1_sample, d.input[i], m.nvisible * sizeof(double));
 
                 //printf("vsample:\n");
-                //print_vsample(&m, v1_sample);
+                //print_vsample(out_file, &m, v1_sample);
 
                 get_hprob_given_vsample(&m, v1_sample, h1_prob);
                 sample_h_from_hprob(&m, h1_prob, h1_sample);
@@ -396,18 +469,28 @@ int main(){
                 }
             }
 
-#ifdef DEBUG
-            if((k+1) % 50 == 0){
-                printf("cost: %.5lf\n", get_pseudo_likelihood_cost(&m, &d));
-            }
-#endif
         }
+#ifdef DEBUG
+        printf("epcho %d cost: %.5lf\n", epcho, get_pseudo_likelihood_cost(&m, &d));
+#endif
+        fprintf(W_file, "epcho %d\n", epcho + 1);
+        dump_weight(W_file, &m, &d);
+        end_time = time(NULL);
+        printf("epcho %d time : %.2f min", epcho, (float)(end_time - start_time) / 60);
+        fflush(stdout);
+        total_time += end_time - start_time;
     }
+
+    print_sample(V_sample_file, &m, &d, d.input + 100, 20);
+    printf("total time : %.2f min", epcho, (float)(total_time) / 60);
 
     //print_dataset(&d);
 
     //print_model(&m, &d);
 
+    fclose(log_file);
+    fclose(W_file);
+    fclose(V_sample_file);
     free_dataset(&d);
     free_model(&m);
     return 0;
