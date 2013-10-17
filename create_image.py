@@ -47,7 +47,7 @@ def print_W_image_from_file(filename):
 def print_sample_image_from_file(filename):
     f = open(sys.argv[1])
     img_H = 28
-    n_sample = 10
+    n_sample = 2
     n_node = 20
     img_data = []
     for i in range(n_sample):
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     if(len(sys.argv) < 2):
         print "invaild arguments"
     else:
-        print_W_image_from_file(sys.argv[1])
-        #print_sample_image_from_file(sys.argv[1])
+        #print_W_image_from_file(sys.argv[1])
+        print_sample_image_from_file(sys.argv[1])
         #create_image(sys.argv[1], 28, 28)
