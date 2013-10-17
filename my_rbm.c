@@ -265,6 +265,7 @@ int main(){
     double v2_sample[DEFAULT_MAXSIZE], v2_prob[DEFAULT_MAXSIZE], h2_sample[DEFAULT_MAXSIZE], h2_prob[DEFAULT_MAXSIZE];
     double delta_W[DEFAULT_MAXSIZE][DEFAULT_MAXSIZE], delta_vbias[DEFAULT_MAXSIZE], delta_hbias[DEFAULT_MAXSIZE];
     double *chain_start = NULL;
+    rio_t rio_training_set_x;
 
     image_fd = open("../data/train-images-idx3-ubyte", O_RDONLY);
     W_file = fopen("weight.txt", "w");
@@ -276,6 +277,7 @@ int main(){
         exit(1);
     }
 
+    rio_readinitb(&rio_training_set_x, image_fd);
     /*
      * 按字节地读取文件
      while(1){
@@ -284,10 +286,10 @@ int main(){
      }
      */
 
-    read_uint32(image_fd, &magic_n);
-    read_uint32(image_fd, &N);
-    read_uint32(image_fd, &nrow);
-    read_uint32(image_fd, &ncol);
+    read_uint32(&rio_training_set_x, &magic_n);
+    read_uint32(&rio_training_set_x, &N);
+    read_uint32(&rio_training_set_x, &nrow);
+    read_uint32(&rio_training_set_x, &ncol);
 
 #ifdef DEBUG
     printf("magic number: %u\nN: %u\nnrow: %u\nncol: %u\n", magic_n, N, nrow, ncol);
@@ -295,7 +297,7 @@ int main(){
 #endif
 
     init_dataset(&d, N, nrow, ncol);
-    load_dataset_input(image_fd, &d);
+    load_dataset_input(&rio_training_set_x, &d);
     close(image_fd);
 
     srand(1234);
@@ -408,7 +410,7 @@ int main(){
     }
 
     print_sample(V_sample_file, &m, &d, d.input + 100, 20);
-    printf("total time : %.2f min\n", epcho, (float)(total_time) / 60);
+    printf("total time : %.2f min\n", (float)(total_time) / 60);
 
     //print_dataset(&d);
 
