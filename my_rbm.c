@@ -8,19 +8,6 @@ typedef struct rbm {
     double *hbias, *vbias;
 } rbm;
 
-int random_int(int low, int high){
-    return rand() % (high - low + 1) + low;
-}
-
-double random_double(double low, double high){
-    return ((double)rand() / RAND_MAX) * (high - low) + low;
-}
-
-double sigmoid(double x){
-    double ret;
-    ret = 1.0 / (1.0 + exp(-x));
-    return ret;
-}
 
 void init_model(rbm *m, int nvisible, int nhidden){
     double low, high; 

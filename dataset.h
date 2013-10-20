@@ -26,5 +26,11 @@ void load_dataset_output(rio_t *rp, dataset *d);
 void print_dataset(const dataset *d);
 void free_dataset(dataset *d);
 void read_uint32(rio_t *rp, uint32_t *data);
+int random_int(int low, int high);
+double random_double(double low, double high);
+double sigmoid(double x);
+double get_sigmoid_derivative(double y);
+double tanh(double x);
+double get_tanh_derivative(double y);
 
 #endif

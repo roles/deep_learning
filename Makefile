@@ -9,5 +9,8 @@ rbm: my_rbm.o $(OBJECTS)
 msgd: my_logistic_sgd.o $(OBJECTS)
 	${CC} -o msgd my_logistic_sgd.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
 
+mlp: my_mlp.o my_logistic_sgd.o $(OBJECTS)
+	${CC} -o mlp my_mlp.o my_logistic_sgd.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+
 clean:
-	rm -rf *.o rbm *.out *.png *.txt
+	rm -rf *.o rbm msgd mlp *.out *.png *.txt

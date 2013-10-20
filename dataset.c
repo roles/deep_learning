@@ -71,3 +71,29 @@ void read_uint32(rio_t *rp, uint32_t *data){
     rio_readnb(rp, data, sizeof(uint32_t));
     *data = ntohl(*data);
 }
+
+int random_int(int low, int high){
+    return rand() % (high - low + 1) + low;
+}
+
+double random_double(double low, double high){
+    return ((double)rand() / RAND_MAX) * (high - low) + low;
+}
+
+double sigmoid(double x){
+    double ret;
+    ret = 1.0 / (1.0 + exp(-x));
+    return ret;
+}
+
+double get_sigmoid_derivative(double y){
+    return 1.0 * (1.0 - y);
+}
+
+double tanh(double x){
+    return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+}
+
+double get_tanh_derivative(double y){
+    return 1 - y * y;
+}

@@ -13,7 +13,8 @@ typedef struct {
     char rio_buf[RIO_BUFFER_SIZE];
 } rio_t;
 
-void rio_readinitb(rio_t *rp, int fd);
+void rio_readinitb(rio_t *rp, int fd, int type);
 ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
+ssize_t rio_writenb(rio_t *rp, void *usrbuf, size_t n);
 
 #endif
