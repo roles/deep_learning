@@ -253,11 +253,11 @@ void train_mlp(){
 
             for(i = 0; i < mini_batch; i++){
 
-                target[train_set.output[i]] = 1.0;
+                target[train_set.output[k*mini_batch+i]] = 1.0;
                 /* feed-forward */
                 for(l = 0; l < hidden_layer + 1; l++){
                     if(l == 0){
-                        input[l] = train_set.input[i];
+                        input[l] = train_set.input[k*mini_batch+i];
                     }else{
                         input[l] = output[l-1];
                     }
@@ -272,7 +272,7 @@ void train_mlp(){
                 }
 
                 /* back-propagation */
-                for(l = hidden_layer; l > 0; l--){
+                for(l = hidden_layer; l >= 0; l--){
                     if(l == hidden_layer){
                         get_log_reg_delta(output[l], target, d[l], mlp_layers[l]->n_out);
                     }else{
@@ -286,7 +286,7 @@ void train_mlp(){
                         delta_b[l][j] += d[l][j] + 2 * L2_reg * mlp_layers[l]->b[j];
                     }
                 }
-                target[train_set.output[i]] = 0.0;
+                target[train_set.output[k*mini_batch+i]] = 0.0;
             }
 
             /* modify parameter */
@@ -299,9 +299,9 @@ void train_mlp(){
                 }
             }
 #ifdef DEBUG
-            if((k+1) % 500 == 0){
+            //if((k+1) % 500 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
-            }
+            //}
 #endif
         }
 #ifdef DEBUG

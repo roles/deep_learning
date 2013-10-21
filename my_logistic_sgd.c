@@ -251,6 +251,8 @@ void train_log_reg(){
                 }
                 m.b[j] -= delta_b[j] / mini_batch;
             }
+            
+            j = 0;
         }
 #ifdef DEBUG
         get_loss_error(&m, validate_set.input, validate_set.output, validate_set_size, &loss, &error);
@@ -287,7 +289,7 @@ void test_load_param(){
     close(param_fd);
     free_log_reg(&m);
 }
-#if 1
+#if 0
 int main(){
     train_log_reg();
     //test_load_param();
