@@ -12,5 +12,8 @@ msgd: my_logistic_sgd.o $(OBJECTS)
 mlp: my_mlp.o my_logistic_sgd.o $(OBJECTS)
 	${CC} -o mlp my_mlp.o my_logistic_sgd.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
 
+da: my_da.o $(OBJECTS)
+	${CC} -o da my_da.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+
 clean:
 	rm -rf *.o rbm msgd mlp *.out *.png *.txt

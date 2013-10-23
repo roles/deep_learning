@@ -111,6 +111,7 @@ void get_softmax_y_given_x(const log_reg *m, const double *x, double *y){
         for(k = 0; k < m->n_in; k++){
             a[j] += m->W[j][k] * x[k];
         }
+        a[j] += m->b[j];
         s += exp(a[j]);
     }
     for(j = 0; j < m->n_out; j++){
@@ -143,9 +144,8 @@ double get_log_reg_delta(const double *y, const double *t, double *d, const int 
 
 void train_log_reg(){
     int i, j, k, p, q;
-    int train_x_fd, train_y_fd;
-    int train_set_size = 50000, validate_set_size = 10000;
     int mini_batch = 500;
+    int train_set_size = 50000, validate_set_size = 10000;
     int epcho, n_epcho = 10;
     
     double grad_b[OUT_LAYER_SIZE];
@@ -156,7 +156,6 @@ void train_log_reg(){
 
     uint32_t N, nrow, ncol, magic_n;
     dataset train_set, validate_set;
-    rio_t rio_train_x, rio_train_y;
     log_reg m;
     time_t start_time, end_time;
     
@@ -166,48 +165,16 @@ void train_log_reg(){
     int param_fd;
     rio_t rio_param;
 
-    train_x_fd = open("../data/train-images-idx3-ubyte", O_RDONLY);
-    train_y_fd = open("../data/train-labels-idx1-ubyte", O_RDONLY);
     param_fd = open("log_sgd.param", O_TRUNC | O_WRONLY);
 
-    if(train_x_fd == -1){
-        fprintf(stderr, "cannot open train-images-idx3-ubyte\n");
-        exit(1);
-    }
-    if(train_y_fd == -1){
-        fprintf(stderr, "cannot open train-labels-idx1-ubyte\n");
-        exit(1);
-    }
     if(param_fd == -1){
         fprintf(stderr, "cannot open log_sgd.param\n");
         exit(1);
     }
 
-    rio_readinitb(&rio_train_x, train_x_fd, 0);
-    rio_readinitb(&rio_train_y, train_y_fd, 0);
-
     rio_readinitb(&rio_param, param_fd, 1);
 
-    read_uint32(&rio_train_x, &magic_n);
-    read_uint32(&rio_train_x, &N);
-    read_uint32(&rio_train_x, &nrow);
-    read_uint32(&rio_train_x, &ncol);
-    
-    read_uint32(&rio_train_y, &magic_n);
-    read_uint32(&rio_train_y, &N);
-#ifdef DEBUG
-    printf("magic number: %u\nN: %u\nnrow: %u\nncol: %u\n", magic_n, N, nrow, ncol);
-    fflush(stdout);
-#endif
-
-    init_dataset(&train_set, train_set_size, nrow, ncol);
-    init_dataset(&validate_set, validate_set_size, nrow, ncol);
-
-    load_dataset_input(&rio_train_x, &train_set);
-    load_dataset_output(&rio_train_y, &train_set);
-
-    load_dataset_input(&rio_train_x, &validate_set);
-    load_dataset_output(&rio_train_y, &validate_set);
+    load_mnist_dataset(&train_set, &validate_set);
 
     //print_dataset(&validate_set);
     
@@ -265,13 +232,12 @@ void train_log_reg(){
     //dump_param(&rio_param, &m);
 
     close(param_fd);
-    close(train_x_fd);
-    close(train_y_fd);
     
     for(i = 0; i < m.n_out; i++)
         free(grad_w[i]);
     free(grad_w);
     free_dataset(&train_set);
+    free_dataset(&validate_set);
     free_log_reg(&m);
 }
 
@@ -289,7 +255,7 @@ void test_load_param(){
     close(param_fd);
     free_log_reg(&m);
 }
-#if 0
+#if 1
 int main(){
     train_log_reg();
     //test_load_param();

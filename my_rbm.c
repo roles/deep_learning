@@ -332,7 +332,7 @@ int main(){
 
             for(i = 0; i < mini_batch; i++){
 
-                memcpy(v1_sample, d.input[i], m.nvisible * sizeof(double));
+                memcpy(v1_sample, d.input[k*mini_batch+i], m.nvisible * sizeof(double));
 
                 //printf("vsample:\n");
                 //print_vsample(out_file, &m, v1_sample);

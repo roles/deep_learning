@@ -59,6 +59,7 @@ void get_sigmoid_y_given_x(const hlayer *hl, const double *x, double *y){
         for(j = 0, a = 0.0; j < hl->n_in; j++){
             a += x[j] * hl->W[i][j];
         }
+        a += hl->b[i];
         y[i] = sigmoid(a);
     }
 }
@@ -71,6 +72,7 @@ void get_tanh_y_given_x(const hlayer *hl, const double *x, double *y){
         for(j = 0, a = 0.0; j < hl->n_in; j++){
             a += x[j] * hl->W[i][j];
         }
+        a += hl->b[i];
         y[i] = tanh(a);
     }
 }

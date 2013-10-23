@@ -72,6 +72,54 @@ void read_uint32(rio_t *rp, uint32_t *data){
     *data = ntohl(*data);
 }
 
+void load_mnist_dataset(dataset *train_set, dataset *validate_set){
+    uint32_t N, nrow, ncol, magic_n;
+    rio_t rio_train_x, rio_train_y;
+    int train_x_fd, train_y_fd;
+    int train_set_size = 50000, validate_set_size = 10000;
+
+    train_x_fd = open("../data/train-images-idx3-ubyte", O_RDONLY);
+    train_y_fd = open("../data/train-labels-idx1-ubyte", O_RDONLY);
+
+    if(train_x_fd == -1){
+        fprintf(stderr, "cannot open train-images-idx3-ubyte\n");
+        exit(1);
+    }
+    if(train_y_fd == -1){
+        fprintf(stderr, "cannot open train-labels-idx1-ubyte\n");
+        exit(1);
+    }
+
+    rio_readinitb(&rio_train_x, train_x_fd, 0);
+    rio_readinitb(&rio_train_y, train_y_fd, 0);
+
+    read_uint32(&rio_train_x, &magic_n);
+    read_uint32(&rio_train_x, &N);
+    read_uint32(&rio_train_x, &nrow);
+    read_uint32(&rio_train_x, &ncol);
+    
+    read_uint32(&rio_train_y, &magic_n);
+    read_uint32(&rio_train_y, &N);
+#ifdef DEBUG
+    printf("magic number: %u\nN: %u\nnrow: %u\nncol: %u\n", magic_n, N, nrow, ncol);
+    fflush(stdout);
+#endif
+
+    init_dataset(train_set, train_set_size, nrow, ncol);
+    init_dataset(validate_set, validate_set_size, nrow, ncol);
+
+    load_dataset_input(&rio_train_x, train_set);
+    load_dataset_output(&rio_train_y, train_set);
+
+    load_dataset_input(&rio_train_x, validate_set);
+    load_dataset_output(&rio_train_y, validate_set);
+
+    //print_dataset(&validate_set);
+
+    close(train_x_fd);
+    close(train_y_fd);
+}
+
 int random_int(int low, int high){
     return rand() % (high - low + 1) + low;
 }

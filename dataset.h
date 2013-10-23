@@ -32,5 +32,6 @@ double sigmoid(double x);
 double get_sigmoid_derivative(double y);
 double tanh(double x);
 double get_tanh_derivative(double y);
+void load_mnist_dataset(dataset *train_set, dataset *validate_set);
 
 #endif

@@ -233,9 +233,12 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     # the cost we minimize during training is the negative log likelihood of
     # the model plus the regularization terms (L1 and L2); cost is expressed
     # here symbolically
-    cost = classifier.negative_log_likelihood(y) \
-         + L1_reg * classifier.L1 \
-         + L2_reg * classifier.L2_sqr
+
+    #cost = classifier.negative_log_likelihood(y) \
+    #     + L1_reg * classifier.L1 \
+    #     + L2_reg * classifier.L2_sqr
+
+    cost = classifier.negative_log_likelihood(y)
 
     # compiling a Theano function that computes the mistakes that are made
     # by the model on a minibatch
