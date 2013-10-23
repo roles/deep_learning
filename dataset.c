@@ -135,7 +135,7 @@ double sigmoid(double x){
 }
 
 double get_sigmoid_derivative(double y){
-    return 1.0 * (1.0 - y);
+    return y * (1.0 - y);
 }
 
 double tanh(double x){
@@ -143,5 +143,5 @@ double tanh(double x){
 }
 
 double get_tanh_derivative(double y){
-    return 1 - y * y;
+    return 1.0 - y * y;
 }
