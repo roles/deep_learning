@@ -95,6 +95,17 @@ void get_second_delta(const da *m, const double *y_low, const double *d_high, do
     }
 }
 
+void dump_weight(FILE *f, const da *m, const ncol){
+    int i, j, k;
+    for(i = 0; i < 100; i++){
+        fprintf(f, "Hidden Node %d\n", i);
+        for(j = 0; j < m->n_in; j++){
+            fprintf(f, "%.5lf%s", m->W[i][j], (j+1) % ncol == 0 ? "\n" : "\t");
+        }
+        fflush(f);
+    }
+}
+
 void train_da(){
     int i, j, k, p, q;
     int mini_batch = 20;
@@ -106,6 +117,9 @@ void train_da(){
     double cost, total_cost;
     time_t start_time, end_time;
 
+    FILE *weight_file;
+
+    weight_file = fopen("da_weight.txt", "w");
     srand(1234);
 
     load_mnist_dataset(&train_set, &validate_set);
@@ -171,7 +185,13 @@ void train_da(){
         end_time = time(NULL);
         printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, total_cost / train_set.N * mini_batch, (int)(end_time - start_time));
     }
+
+    dump_weight(weight_file, &m, 28);
+
     free_da(&m);
+    free_dataset(&train_set);
+    free_dataset(&validate_set);
+    fclose(weight_file);
 }
 
 int main(){

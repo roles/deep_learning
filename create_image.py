@@ -60,10 +60,21 @@ def print_sample_image_from_file(filename):
             img_data.append(arr)
     create_image(numpy.array(img_data), n_sample, n_node, "sample.png", False)
 
+def print_da_weight_from_file(filename="da_weight.txt"):
+    f = open(filename)
+    img_H = 28
+    img_data = []
+    for i in range(100):
+        arr = []
+        line = f.readline()
+        for j in range(img_H):
+            line = f.readline()
+            arr.append([float(x) for x in line.split()])
+        img_data.append(arr)
+    create_image(numpy.array(img_data), 10, 10, "da_weight.png")
+
 if __name__ == "__main__":
-    if(len(sys.argv) < 2):
-        print "invaild arguments"
-    else:
-        #print_W_image_from_file(sys.argv[1])
-        print_sample_image_from_file(sys.argv[1])
-        #create_image(sys.argv[1], 28, 28)
+    print_da_weight_from_file()
+    #print_W_image_from_file(sys.argv[1])
+    #print_sample_image_from_file(sys.argv[1])
+    #create_image(sys.argv[1], 28, 28)
