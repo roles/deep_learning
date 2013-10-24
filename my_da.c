@@ -103,7 +103,7 @@ void train_da(){
 
     dataset train_set, validate_set;
     da m;
-    double cost;
+    double cost, total_cost;
     time_t start_time, end_time;
 
     srand(1234);
@@ -112,8 +112,9 @@ void train_da(){
 
     init_da(&m, 28*28, 500);
 
-    for(epcho = 0, cost = 0.0; epcho < n_epcho; epcho++){
+    for(epcho = 0; epcho < n_epcho; epcho++){
         
+        total_cost = 0.0;
         start_time = time(NULL);
         for(k = 0; k < train_set.N / mini_batch; k++){
 
@@ -124,6 +125,7 @@ void train_da(){
             bzero(delta_W, sizeof(delta_W));
             bzero(delta_b, sizeof(delta_b));
             bzero(delta_c, sizeof(delta_c));
+            cost = 0;
 
             for(i = 0; i < mini_batch; i++){
 
@@ -137,18 +139,20 @@ void train_da(){
 
                 for(j = 0; j < m.n_out; j++){
                     for(p = 0; p < m.n_in; p++){
-                        delta_W[j][p] = d_low[j] * train_set.input[k*mini_batch+i][p] + d_high[p] * h_out[j];
+                        delta_W[j][p] += d_low[j] * train_set.input[k*mini_batch+i][p] + d_high[p] * h_out[j];
                     }
-                    delta_b[j] = d_low[j];
+                    delta_b[j] += d_low[j];
                 }
                 for(j = 0; j < m.n_in; j++){
-                    delta_c[j] = d_high[j];
+                    delta_c[j] += d_high[j];
                 }
 
                 for(j = 0; j < m.n_in; j++){
                     cost -= train_set.input[k*mini_batch+i][j] * log(z_out[j]) + (1.0 - train_set.input[k*mini_batch+i][j]) * log(1.0 - z_out[j]);
                 }
             }
+
+            cost /= mini_batch;
 
             /* modify parameter */
             for(j = 0; j < m.n_out; j++){
@@ -161,10 +165,11 @@ void train_da(){
                 m.c[j] -= eta * delta_c[j] / mini_batch;
             }
             
+            total_cost += cost;
         }
 
         end_time = time(NULL);
-        printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, cost / train_set.N, (int)(end_time - start_time));
+        printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, total_cost / train_set.N * mini_batch, (int)(end_time - start_time));
     }
     free_da(&m);
 }
