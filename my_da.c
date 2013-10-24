@@ -95,7 +95,20 @@ void get_second_delta(const da *m, const double *y_low, const double *d_high, do
     }
 }
 
-void dump_weight(FILE *f, const da *m, const ncol){
+void corrupt_train_set_input(const dataset *train_set, double corrupt_level, dataset *corrupted_train_set){
+    int i, j;
+    double a = 0.0;
+    int size = train_set->nrow * train_set->ncol;
+
+    for(i = 0; i < train_set->N; i++){
+        for(j = 0; j < size; j++){
+            a = random_double(0.0, 1.0) < corrupt_level ? 0.0 : 1.0;
+            corrupted_train_set->input[i][j] = a * train_set->input[i][j];
+        }
+    }
+}
+
+void dump_weight(FILE *f, const da *m, const int ncol){
     int i, j, k;
     for(i = 0; i < 100; i++){
         fprintf(f, "Hidden Node %d\n", i);
@@ -106,31 +119,20 @@ void dump_weight(FILE *f, const da *m, const ncol){
     }
 }
 
-void train_da(){
+void train_da(da *m, dataset *train_set, dataset *expected_set, int mini_batch, int n_epcho, char* weight_filename){
     int i, j, k, p, q;
-    int mini_batch = 20;
-    int epcho, n_epcho = 15;
-    int train_set_size = 50000, validate_set_size = 10000;
-
-    dataset train_set, validate_set;
-    da m;
+    int epcho;
     double cost, total_cost;
     time_t start_time, end_time;
-
     FILE *weight_file;
 
-    weight_file = fopen("da_weight.txt", "w");
-    srand(1234);
-
-    load_mnist_dataset(&train_set, &validate_set);
-
-    init_da(&m, 28*28, 500);
+    weight_file = fopen(weight_filename, "w");
 
     for(epcho = 0; epcho < n_epcho; epcho++){
         
         total_cost = 0.0;
         start_time = time(NULL);
-        for(k = 0; k < train_set.N / mini_batch; k++){
+        for(k = 0; k < train_set->N / mini_batch; k++){
 
             //if((k+1) % 500 == 0){
             //    printf("epcho %d batch %d\n", epcho + 1, k + 1);
@@ -144,57 +146,84 @@ void train_da(){
             for(i = 0; i < mini_batch; i++){
 
                 /* feed-forward */
-                get_hidden_values(&m, train_set.input[k*mini_batch+i], h_out);
-                get_reconstruct_input(&m, h_out, z_out);
+                get_hidden_values(m, train_set->input[k*mini_batch+i], h_out);
+                get_reconstruct_input(m, h_out, z_out);
 
                 /* back-propagation*/
-                get_top_delta(&m, z_out, train_set.input[k*mini_batch+i], d_high);
-                get_second_delta(&m, h_out, d_high, d_low);
+                get_top_delta(m, z_out, expected_set->input[k*mini_batch+i], d_high);
+                get_second_delta(m, h_out, d_high, d_low);
 
-                for(j = 0; j < m.n_out; j++){
-                    for(p = 0; p < m.n_in; p++){
-                        delta_W[j][p] += d_low[j] * train_set.input[k*mini_batch+i][p] + d_high[p] * h_out[j];
+                for(j = 0; j < m->n_out; j++){
+                    for(p = 0; p < m->n_in; p++){
+                        delta_W[j][p] += d_low[j] * train_set->input[k*mini_batch+i][p] + d_high[p] * h_out[j];
                     }
                     delta_b[j] += d_low[j];
                 }
-                for(j = 0; j < m.n_in; j++){
+                for(j = 0; j < m->n_in; j++){
                     delta_c[j] += d_high[j];
                 }
 
-                for(j = 0; j < m.n_in; j++){
-                    cost -= train_set.input[k*mini_batch+i][j] * log(z_out[j]) + (1.0 - train_set.input[k*mini_batch+i][j]) * log(1.0 - z_out[j]);
+                for(j = 0; j < m->n_in; j++){
+                    cost -= expected_set->input[k*mini_batch+i][j] * log(z_out[j]) + (1.0 - expected_set->input[k*mini_batch+i][j]) * log(1.0 - z_out[j]);
                 }
             }
 
             cost /= mini_batch;
 
             /* modify parameter */
-            for(j = 0; j < m.n_out; j++){
-                for(p = 0; p < m.n_in; p++){
-                    m.W[j][p] -= eta * delta_W[j][p] / mini_batch;
+            for(j = 0; j < m->n_out; j++){
+                for(p = 0; p < m->n_in; p++){
+                    m->W[j][p] -= eta * delta_W[j][p] / mini_batch;
                 }
-                m.b[j] -= eta * delta_b[j] / mini_batch;
+                m->b[j] -= eta * delta_b[j] / mini_batch;
             }
-            for(j = 0; j < m.n_in; j++){
-                m.c[j] -= eta * delta_c[j] / mini_batch;
+            for(j = 0; j < m->n_in; j++){
+                m->c[j] -= eta * delta_c[j] / mini_batch;
             }
             
             total_cost += cost;
         }
 
         end_time = time(NULL);
-        printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, total_cost / train_set.N * mini_batch, (int)(end_time - start_time));
+        printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, total_cost / train_set->N * mini_batch, (int)(end_time - start_time));
     }
 
-    dump_weight(weight_file, &m, 28);
+    dump_weight(weight_file, m, 28);
+    fclose(weight_file);
+}
+
+void test_da(){
+    int i, j, k, p, q;
+    int mini_batch = 20;
+    int epcho, n_epcho = 15;
+    int train_set_size = 50000, validate_set_size = 10000;
+
+    dataset train_set, validate_set, corrupted_train_set;
+    da m, m_corrupt;
+
+    srand(1234);
+
+    load_mnist_dataset(&train_set, &validate_set);
+
+    init_da(&m, 28*28, 500);
+    init_da(&m_corrupt, 28*28, 500);
+
+    train_da(&m, &train_set, &train_set, mini_batch, n_epcho, "da_weight_origin.txt");
+
+    init_dataset(&corrupted_train_set, train_set.N, train_set.nrow, train_set.ncol);
+    free(corrupted_train_set.output);
+    corrupted_train_set.output = train_set.output;
+    corrupt_train_set_input(&train_set, 0.3, &corrupted_train_set);
+
+    train_da(&m_corrupt, &corrupted_train_set, &train_set, mini_batch, n_epcho, "da_weight_corrupt.txt");
 
     free_da(&m);
     free_dataset(&train_set);
     free_dataset(&validate_set);
-    fclose(weight_file);
+    free(corrupted_train_set.input);
 }
 
 int main(){
-    train_da();
+    test_da();
     return 0;
 }
