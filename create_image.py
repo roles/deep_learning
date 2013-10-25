@@ -71,10 +71,10 @@ def print_da_weight_from_file(filename="da_weight.txt"):
             line = f.readline()
             arr.append([float(x) for x in line.split()])
         img_data.append(arr)
-    create_image(numpy.array(img_data), 10, 10, "da_weight.png")
+    create_image(numpy.array(img_data), 10, 10, "da_weight_corrupt.png")
 
 if __name__ == "__main__":
-    print_da_weight_from_file()
+    print_da_weight_from_file("da_weight_corrupt.txt")
     #print_W_image_from_file(sys.argv[1])
     #print_sample_image_from_file(sys.argv[1])
     #create_image(sys.argv[1], 28, 28)
