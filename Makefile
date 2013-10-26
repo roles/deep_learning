@@ -2,9 +2,8 @@ CC=gcc
 LDFLAGS=-lm
 CFLAGS=-c -O3 -std=c99 -g -DDEBUG
 OBJECTS=dataset.o rio.o
-BLASLIB=librefblas.a
-LAPACKLIB=liblapack.a
-LAPACKELIB=liblapacke.a
+BLASLIB=./lib/libblas.a
+CBLASLIB=./lib/libcblas.a
 LOADER=gfortran
 
 rbm: my_rbm.o $(OBJECTS)
@@ -19,11 +18,14 @@ mlp: my_mlp.o my_logistic_sgd.o $(OBJECTS)
 da: my_da.o $(OBJECTS)
 	${CC} -o da my_da.o -I ./include $(OBJECTS) $(LDFLAGS) $(CFLAGS)
 
-test_lapack: test_lapack.o
-	$(LOADER) test_lapack.o lib/$(LAPACKELIB) lib/$(LAPACKLIB) lib/$(BLASLIB) -o $@
+da_blas: dpblas_da.o $(OBJECTS)
+	${CC} -o da_blas -I ./include dpblas_da.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+
+test_cblas: test_cblas.o
+	$(LOADER) test_cblas.o $(CBLASLIB) $(BLASLIB) -o $@
 
 .c.o:
 	${CC} $(CFLAGS) -I include/ -o $@ $<
 
 clean:
-	rm -rf *.o rbm msgd mlp *.out *.png *.txt
+	rm -rf *.o rbm msgd mlp test_cblas da_blas *.out *.png *.txt

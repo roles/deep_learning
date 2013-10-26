@@ -20,6 +20,13 @@ typedef struct dataset{
     uint8_t *output;
 } dataset;
 
+typedef struct dataset_blas{
+    uint32_t N;
+    uint32_t nrow, ncol;
+    double *input;
+    uint8_t *output;
+} dataset_blas;
+
 void init_dataset(dataset *d, uint32_t N, uint32_t nrow, uint32_t ncol);
 void load_dataset_input(rio_t *rp, dataset *d);
 void load_dataset_output(rio_t *rp, dataset *d);
@@ -33,5 +40,12 @@ double get_sigmoid_derivative(double y);
 double tanh(double x);
 double get_tanh_derivative(double y);
 void load_mnist_dataset(dataset *train_set, dataset *validate_set);
+
+void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol);
+void load_dataset_blas_input(rio_t *rp, dataset_blas *d);
+void load_dataset_blas_output(rio_t *rp, dataset_blas *d);
+void free_dataset_blas(dataset_blas *d);
+void print_dataset_blas(const dataset_blas *d);
+void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set);
 
 #endif

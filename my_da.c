@@ -95,7 +95,8 @@ void get_second_delta(const da *m, const double *y_low, const double *d_high, do
     }
 }
 
-void corrupt_train_set_input(const dataset *train_set, double corrupt_level, dataset *corrupted_train_set){
+void corrupt_train_set_input(const dataset *train_set, 
+                             double corrupt_level, dataset *corrupted_train_set){
     int i, j;
     double a = 0.0;
     int size = train_set->nrow * train_set->ncol;
@@ -119,7 +120,8 @@ void dump_weight(FILE *f, const da *m, const int ncol){
     }
 }
 
-void train_da(da *m, dataset *train_set, dataset *expected_set, int mini_batch, int n_epcho, char* weight_filename){
+void train_da(da *m, dataset *train_set, dataset *expected_set, 
+              int mini_batch, int n_epcho, char* weight_filename){
     int i, j, k, p, q;
     int epcho;
     double cost, total_cost;
@@ -208,7 +210,7 @@ void test_da(){
     init_da(&m, 28*28, 500);
     init_da(&m_corrupt, 28*28, 500);
 
-    train_da(&m, &train_set, &train_set, mini_batch, n_epcho, "da_weight_origin.txt");
+    //train_da(&m, &train_set, &train_set, mini_batch, n_epcho, "da_weight_origin.txt");
 
     init_dataset(&corrupted_train_set, train_set.N, train_set.nrow, train_set.ncol);
     free(corrupted_train_set.output);
