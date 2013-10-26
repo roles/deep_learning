@@ -17,7 +17,7 @@ void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol
     d->N = N;
     d->nrow = nrow;
     d->ncol = ncol;
-    d->input = (double*)malloc(d->N * d->nrow * d->ncol * sizeof(double*));
+    d->input = (double*)malloc(d->N * d->nrow * d->ncol * sizeof(double));
     d->output = (uint8_t*)malloc(d->N * sizeof(uint8_t));
 }
 

@@ -157,7 +157,8 @@ void train_da(da *m, dataset *train_set, dataset *expected_set,
 
                 for(j = 0; j < m->n_out; j++){
                     for(p = 0; p < m->n_in; p++){
-                        delta_W[j][p] += d_low[j] * train_set->input[k*mini_batch+i][p] + d_high[p] * h_out[j];
+                        delta_W[j][p] += d_low[j] * train_set->input[k*mini_batch+i][p] 
+                                         + d_high[p] * h_out[j];
                     }
                     delta_b[j] += d_low[j];
                 }
@@ -166,7 +167,8 @@ void train_da(da *m, dataset *train_set, dataset *expected_set,
                 }
 
                 for(j = 0; j < m->n_in; j++){
-                    cost -= expected_set->input[k*mini_batch+i][j] * log(z_out[j]) + (1.0 - expected_set->input[k*mini_batch+i][j]) * log(1.0 - z_out[j]);
+                    cost -= expected_set->input[k*mini_batch+i][j] * log(z_out[j]) 
+                            + (1.0 - expected_set->input[k*mini_batch+i][j]) * log(1.0 - z_out[j]);
                 }
             }
 
@@ -208,9 +210,9 @@ void test_da(){
     load_mnist_dataset(&train_set, &validate_set);
 
     init_da(&m, 28*28, 500);
-    init_da(&m_corrupt, 28*28, 500);
+    //init_da(&m_corrupt, 28*28, 500);
 
-    //train_da(&m, &train_set, &train_set, mini_batch, n_epcho, "da_weight_origin.txt");
+    train_da(&m, &train_set, &train_set, mini_batch, n_epcho, "da_weight_origin.txt");
 
     init_dataset(&corrupted_train_set, train_set.N, train_set.nrow, train_set.ncol);
     free(corrupted_train_set.output);

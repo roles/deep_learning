@@ -1,6 +1,6 @@
 CC=gcc
 LDFLAGS=-lm
-CFLAGS=-c -O3 -std=c99 -g -DDEBUG
+CFLAGS=-c -std=c99 -g -DDEBUG
 OBJECTS=dataset.o rio.o
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
@@ -16,10 +16,10 @@ mlp: my_mlp.o my_logistic_sgd.o $(OBJECTS)
 	${CC} -o mlp my_mlp.o my_logistic_sgd.o -I ./include $(OBJECTS) $(LDFLAGS) $(CFLAGS)
 
 da: my_da.o $(OBJECTS)
-	${CC} -o da my_da.o -I ./include $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+	${CC} -o da my_da.o -I ./include $(OBJECTS) $(LDFLAGS)
 
 da_blas: dpblas_da.o $(OBJECTS)
-	${CC} -o da_blas -I ./include dpblas_da.o $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+	$(LOADER) dpblas_da.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
 
 test_cblas: test_cblas.o
 	$(LOADER) test_cblas.o $(CBLASLIB) $(BLASLIB) -o $@
