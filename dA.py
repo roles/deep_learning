@@ -293,11 +293,13 @@ def test_dA(learning_rate=0.1, training_epochs=15,
     # go through training epochs
     for epoch in xrange(training_epochs):
         # go through trainng set
+        epoch_start_time = time.clock()
         c = []
         for batch_index in xrange(n_train_batches):
             c.append(train_da(batch_index))
+        epoch_end_time = time.clock()
 
-        print 'Training epoch %d, cost ' % epoch, numpy.mean(c)
+        print 'Training epoch %d, cost %.5f, time %ds' % epoch, numpy.mean(c), (end_time - start_time)
 
     end_time = time.clock()
 

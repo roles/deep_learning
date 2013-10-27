@@ -19,8 +19,7 @@ double h_out[MAX_BATCH_SIZE * MAX_SIZE], z_out[MAX_BATCH_SIZE * MAX_SIZE];
 double d_low[MAX_BATCH_SIZE * MAX_SIZE], d_high[MAX_BATCH_SIZE * MAX_SIZE];
 double delta_W[MAX_SIZE*MAX_SIZE], delta_b[MAX_SIZE], delta_c[MAX_SIZE];
 double Ivec[MAX_BATCH_SIZE * MAX_SIZE];
-double tr1[MAX_BATCH_SIZE * MAX_SIZE], tr2[MAX_BATCH_SIZE * MAX_SIZE];
-double cost[MAX_STEP];
+double tr1[MAX_SIZE * MAX_SIZE], tr2[MAX_SIZE * MAX_SIZE];
 
 void init_da(da *m, int n_in, int n_out){
     int i;
@@ -64,6 +63,7 @@ void get_hidden_values(const da *m, const double *x,
     cblas_dger(CblasColMajor, batch_size, m->n_out,
                1.0, m->b, 1, Ivec, 1, y, m->n_out);
 
+    /* TODO */
     for(i = 0; i < batch_size*m->n_out; i++){
         y[i] = sigmoid(y[i]);
     }
@@ -118,7 +118,7 @@ void train_da(da *m, dataset_blas *train_set, dataset_blas *expected_set,
               int mini_batch, int n_epcho, char* weight_filename){
     int i, j, k, p, q;
     int epcho;
-    double total_cost;
+    double cost, total_cost;
     time_t start_time, end_time;
     FILE *weight_file;
 
@@ -129,17 +129,21 @@ void train_da(da *m, dataset_blas *train_set, dataset_blas *expected_set,
         total_cost = 0.0;
         start_time = time(NULL);
         for(k = 0; k < train_set->N / mini_batch; k++){
-            get_hidden_values(m, train_set->input + k * mini_batch, h_out, mini_batch);
+
+            if((k+1) % 500 == 0){
+                printf("epcho %d batch %d\n", epcho + 1, k + 1);
+            }
+            get_hidden_values(m, train_set->input + k * mini_batch * m->n_in, h_out, mini_batch);
             get_reconstruct_input(m, h_out, z_out, mini_batch);
             
-            get_top_delta(m, z_out, expected_set->input + k * mini_batch, d_high, mini_batch);
+            get_top_delta(m, z_out, expected_set->input + k * mini_batch * m->n_in, d_high, mini_batch);
             get_second_delta(m, h_out, d_high, d_low, mini_batch);
 
             /* modify weight matrix W */
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->n_out, m->n_in, mini_batch,
                         1, d_low, m->n_out,
-                        train_set->input + k * mini_batch, m->n_in,
+                        train_set->input + k * mini_batch * m->n_in, m->n_in,
                         0, tr1, m->n_in);
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
@@ -154,18 +158,34 @@ void train_da(da *m, dataset_blas *train_set, dataset_blas *expected_set,
             /* modify bias vector */
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->n_out, 1, mini_batch,
-                        1.0 / mini_batch, d_low, m->n_out,
+                        1, d_low, m->n_out,
                         Ivec, 1, 0, tr1, 1);
 
-            cblas_daxpy(m->n_out, -eta, tr1, 1, m->b, 1);
+            cblas_daxpy(m->n_out, -eta / mini_batch, tr1, 1, m->b, 1);
             
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->n_in, 1, mini_batch,
-                        1.0 / mini_batch, d_high, m->n_in,
+                        1, d_high, m->n_in,
                         Ivec, 1, 0, tr1, 1);
 
-            cblas_daxpy(m->n_in, -eta, tr1, 1, m->c, 1);
+            cblas_daxpy(m->n_in, -eta / mini_batch, tr1, 1, m->c, 1);
+
+            for(i = 0; i < mini_batch * m->n_in; i++){
+                tr1[i] = log(z_out[i]);
+            }
+            total_cost -= cblas_ddot(mini_batch * m->n_in, expected_set->input + k * mini_batch * m->n_in, 1,
+                                     tr1, 1) / mini_batch;
+            for(i = 0; i < mini_batch * m->n_in; i++){
+                tr1[i] = log(1.0 - z_out[i]);
+            }
+            cblas_dcopy(mini_batch * m->n_in, Ivec, 1, tr2, 1);
+            cblas_daxpy(mini_batch * m->n_in, -1, expected_set->input + k * mini_batch * m->n_in,
+                        1, tr2, 1);
+            total_cost -= cblas_ddot(mini_batch * m->n_in, tr1, 1, tr2, 1) / mini_batch;
+
         }
+        end_time = time(NULL);
+        printf("epcho %d cost: %.5lf\ttime: %ds\n", epcho + 1, total_cost / train_set->N * mini_batch, (int)(end_time - start_time));
     }
 
     //fclose(weight_file);
