@@ -199,7 +199,7 @@ void dump_weight(FILE *weight_file, const rbm *m){
     fflush(weight_file);
 }
 
-void dump_sample(FILE *sample_file, const rbm *m, double *V, const int sample_count){
+void dump_sample(FILE *sample_file, const rbm *m, const double *V, const int sample_count){
     int item_per_line = 28;
     int i, j;
 
@@ -210,6 +210,20 @@ void dump_sample(FILE *sample_file, const rbm *m, double *V, const int sample_co
         }
     }
     fflush(sample_file);
+}
+
+void generate_sample(FILE *sample_file, const rbm *m, double *V_start, const int sample_count){
+    double *V_sample;
+    int sample_length = 10;
+    int i, j;
+
+    V_sample = V_start;
+
+    for(i = 0; i < sample_length; i++){
+        gibbs_sample_vhv(m, V_sample, H2, Ph2, V2, Pv2, 1000, sample_count);
+        dump_sample(sample_file, m, V2, sample_count);
+        V_sample = V2;
+    }
 }
 
 void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *validate_set, 
@@ -313,14 +327,15 @@ void test_rbm(){
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
-    //train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
+    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
 
     sample_file = fopen("rbm_sample.txt", "w");
     if(sample_file == NULL){
         fprintf(stderr, "cannot open rbm_sample.txt\n");
         exit(1);
     }
-    dump_sample(sample_file, &m, validate_set.input + 100, 20);
+    dump_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
+    generate_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
 
     free_rbm(&m);
     free_dataset_blas(&validate_set);
