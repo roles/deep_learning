@@ -28,7 +28,7 @@ void init_model(rbm *m, int nvisible, int nhidden){
         }
     }
     m->vbias = (double*)calloc(nvisible, sizeof(double));
-    m->hbias = (double*)calloc(nvisible, sizeof(double));
+    m->hbias = (double*)calloc(nhidden, sizeof(double));
 }
 
 void free_model(rbm *m){
