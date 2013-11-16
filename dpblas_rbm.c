@@ -199,6 +199,19 @@ void dump_weight(FILE *weight_file, const rbm *m){
     fflush(weight_file);
 }
 
+void dump_sample(FILE *sample_file, const rbm *m, double *V, const int sample_count){
+    int item_per_line = 28;
+    int i, j;
+
+    for(i = 0; i < sample_count; i++){
+        for(j = 0; j < m->nvisible; j++){
+            fprintf(sample_file, "%.5lf%s", V[i * m->nvisible + j], 
+                    ((j+1) % item_per_line == 0) ? "\n" : "\t");
+        }
+    }
+    fflush(sample_file);
+}
+
 void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *validate_set, 
                const int mini_batch, const int n_epcho, const char *weight_filename){
     int i, j, k, epcho; 
@@ -291,6 +304,7 @@ void test_rbm(){
     int train_set_size = 50000, validate_set_size = 10000;
     dataset_blas train_set, validate_set; 
     rbm m;
+    FILE *sample_file;
 
     srand(1234);
     load_mnist_dataset_blas(&train_set, &validate_set);
@@ -299,11 +313,19 @@ void test_rbm(){
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
-    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
+    //train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
+
+    sample_file = fopen("rbm_sample.txt", "w");
+    if(sample_file == NULL){
+        fprintf(stderr, "cannot open rbm_sample.txt\n");
+        exit(1);
+    }
+    dump_sample(sample_file, &m, validate_set.input + 100, 20);
 
     free_rbm(&m);
     free_dataset_blas(&validate_set);
     free_dataset_blas(&train_set);
+    fclose(sample_file);
 }
 
 int main(){
