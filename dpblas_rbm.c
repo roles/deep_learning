@@ -149,7 +149,6 @@ void get_FE(const rbm *m, const double *V, double *FE, const int size){
                 size, 1, m->nvisible,
                 -1, V, m->nvisible, m->b, 1,
                 -1, FE, 1);
-
 }
 
 double get_PL(const rbm *m, double *V, const int size){
@@ -217,13 +216,58 @@ void generate_sample(FILE *sample_file, const rbm *m, double *V_start, const int
     int sample_length = 10;
     int i, j;
 
-    V_sample = V_start;
+    V_sample = (double*)malloc(sample_count * m->nvisible * sizeof(double));
+    cblas_dcopy(sample_count * m->nvisible, V_start, 1, V_sample, 1);
 
     for(i = 0; i < sample_length; i++){
         gibbs_sample_vhv(m, V_sample, H2, Ph2, V2, Pv2, 1000, sample_count);
-        dump_sample(sample_file, m, V2, sample_count);
-        V_sample = V2;
+        dump_sample(sample_file, m, Pv2, sample_count);
+        cblas_dcopy(sample_count * m->nvisible, V2, 1, V_sample, 1);
     }
+
+    free(V_sample);
+}
+
+void dump_rbm(char *rbm_filename, rbm *m){
+    int rbm_fd;  
+    rio_t rbm_rio; 
+
+    rbm_fd = open(rbm_filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+    if(rbm_fd == -1){
+        fprintf(stderr, "cannot open %s\n", rbm_filename);
+        exit(1);
+    }
+    rio_readinitb(&rbm_rio, rbm_fd, 1);
+
+    rio_writenb(&rbm_rio, &m->nvisible, sizeof(int));
+    rio_writenb(&rbm_rio, &m->nhidden, sizeof(int));
+
+    rio_writenb(&rbm_rio, m->W, m->nhidden * m->nvisible * sizeof(double));
+    rio_writenb(&rbm_rio, m->b, m->nvisible * sizeof(double));
+    rio_writenb(&rbm_rio, m->c, m->nhidden * sizeof(double));
+
+    close(rbm_fd);
+}
+
+void load_rbm(char *rbm_filename, rbm *m){
+    int rbm_fd;  
+    rio_t rbm_rio; 
+
+    rbm_fd = open(rbm_filename, O_RDONLY);
+    if(rbm_fd == -1){
+        fprintf(stderr, "cannot open %s\n", rbm_filename);
+        exit(1);
+    }
+    rio_readinitb(&rbm_rio, rbm_fd, 0);
+
+    rio_readnb(&rbm_rio, &m->nvisible, sizeof(int));
+    rio_readnb(&rbm_rio, &m->nhidden, sizeof(int));
+
+    rio_readnb(&rbm_rio, m->W, m->nhidden * m->nvisible * sizeof(double));
+    rio_readnb(&rbm_rio, m->b, m->nvisible * sizeof(double));
+    rio_readnb(&rbm_rio, m->c, m->nhidden * sizeof(double));
+
+    close(rbm_fd);
 }
 
 void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *validate_set, 
@@ -320,14 +364,17 @@ void test_rbm(){
     rbm m;
     FILE *sample_file;
 
-    srand(1234);
+    srand(4321);
     load_mnist_dataset_blas(&train_set, &validate_set);
     init_rbm(&m, 28*28, 500);
 
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
+    //load_rbm("rbm_model.dat", &m);
+
     train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
+    dump_rbm("rbm_model.dat", &m);
 
     sample_file = fopen("rbm_sample.txt", "w");
     if(sample_file == NULL){
@@ -337,10 +384,11 @@ void test_rbm(){
     dump_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
     generate_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
 
+    fclose(sample_file);
+
     free_rbm(&m);
     free_dataset_blas(&validate_set);
     free_dataset_blas(&train_set);
-    fclose(sample_file);
 }
 
 int main(){

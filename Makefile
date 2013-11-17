@@ -1,6 +1,6 @@
 CC=gcc
 LDFLAGS=-lm
-CFLAGS=-O3 -c -std=c99 -g -DDEBUG
+CFLAGS=-c -std=c99 -g -DDEBUG
 OBJECTS=dataset.o rio.o
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a

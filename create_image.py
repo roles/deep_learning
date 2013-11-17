@@ -24,7 +24,7 @@ def create_image(img_data, nrow, ncol, outfile, scale = True):
     for i in range(nrow):
         for j in range(ncol):
             out_shape[(img_H + 1) * i : (img_H + 1) * i + img_H,
-                      (img_W + 1) * j : (img_W + 1) * j + img_W] = img_data[i * nrow + j] * 255
+                      (img_W + 1) * j : (img_W + 1) * j + img_W] = img_data[i * ncol + j] * 255
     image = PIL.Image.fromarray(out_shape)
     image.save(outfile)
 

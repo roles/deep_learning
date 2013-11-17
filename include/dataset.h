@@ -6,6 +6,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
+#include<sys/stat.h>
 #include"rio.h"
 
 #ifndef DATASET_H
