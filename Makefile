@@ -7,7 +7,7 @@ CBLASLIB=./lib/libcblas.a
 LOADER=gfortran
 
 rbm: my_rbm.o $(OBJECTS)
-	${CC} -o rbm my_rbm.o -I ./include $(OBJECTS) $(LDFLAGS) $(CFLAGS)
+	${CC} -o rbm my_rbm.o $(OBJECTS) -I ./include $(LDFLAGS)
 
 msgd: my_logistic_sgd.o $(OBJECTS)
 	${CC} -o msgd my_logistic_sgd.o -I ./include $(OBJECTS) $(LDFLAGS) $(CFLAGS)

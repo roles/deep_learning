@@ -308,7 +308,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
                 chain_start = H1;
             }
 
-            gibbs_sample_hvh(m, H1, H2, Ph2, V2, Pv2, cd_k, mini_batch);
+            gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, mini_batch);
 
             chain_start = H2;
 
@@ -364,7 +364,7 @@ void test_rbm(){
     rbm m;
     FILE *sample_file;
 
-    srand(4321);
+    srand(1234);
     load_mnist_dataset_blas(&train_set, &validate_set);
     init_rbm(&m, 28*28, 500);
 

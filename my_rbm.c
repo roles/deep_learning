@@ -264,14 +264,7 @@ int main(){
         exit(1);
     }
 
-    rio_readinitb(&rio_training_set_x, image_fd);
-    /*
-     * 按字节地读取文件
-     while(1){
-     read(image_fd, &x, sizeof(uint8_t));    
-     printf("%u\n", x);
-     }
-     */
+    rio_readinitb(&rio_training_set_x, image_fd, 0);
 
     read_uint32(&rio_training_set_x, &magic_n);
     read_uint32(&rio_training_set_x, &N);
@@ -290,22 +283,9 @@ int main(){
     srand(1234);
     nvisible = d.nrow * d.ncol;
     nhidden = 500;
-    mini_batch = 20;
+    mini_batch = 1;
     training_epcho = 15;
     init_model(&m, nvisible, nhidden);
-
-    /*
-    fprintf(V_sample_file, "sample 0\n");
-    for(i = 0; i < 20; i++){
-        print_vsample(V_sample_file, &m, &d, d.input[100 + i]);
-    }
-    fclose(log_file);
-    fclose(W_file);
-    fclose(V_sample_file);
-    free_dataset(&d);
-    free_model(&m);
-    exit(0);
-    */
 
     fprintf(W_file, "epcho 0\n");
     dump_weight(W_file, &m, &d);
@@ -373,15 +353,15 @@ int main(){
              * 根据delta调整参数
              */
             for(j = 0; j < m.nhidden; j++){
+                for(p = 0; p < m.nvisible; p++){
+                    m.W[j][p] += eta * delta_W[j][p] / mini_batch;
+                }
+            }
+            for(j = 0; j < m.nhidden; j++){
                 m.hbias[j] += eta * delta_hbias[j] / mini_batch;
             }
             for(j = 0; j < m.nvisible; j++){
                 m.vbias[j] += eta * delta_vbias[j] / mini_batch;
-            }
-            for(j = 0; j < m.nhidden; j++){
-                for(p = 0; p < m.nvisible; p++){
-                    m.W[j][p] += eta * delta_W[j][p] / mini_batch;
-                }
             }
 
         }
