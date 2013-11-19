@@ -120,8 +120,12 @@ void free_dataset(dataset *d){
 }
 
 void free_dataset_blas(dataset_blas *d){
-    free(d->input);
-    free(d->output);
+    if(d->input != NULL){
+        free(d->input);
+    }
+    if(d->output != NULL){
+        free(d->output);
+    }
 }
 
 void read_uint32(rio_t *rp, uint32_t *data){
@@ -271,6 +275,7 @@ void load_tcga_dataset_blas(dataset_blas *train_set, char *filename){
         }
     }
     printf("data loaded\n");
+    train_set->output = NULL;
 
     fclose(f);
 }

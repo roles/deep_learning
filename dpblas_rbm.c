@@ -305,6 +305,8 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
             if(k == (batch_count-1)){
                 batch_size = train_set->N - mini_batch * k;
+            }else{
+                batch_size = mini_batch;
             }
             get_hprob(m, V1, Ph1, batch_size);
             get_hsample(m, Ph1, H1, batch_size);
@@ -388,7 +390,7 @@ void test_rbm(){
 
     //load_rbm("rbm_model.dat", &m);
 
-    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
+    //train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
     dump_rbm("tcga_rbm_model.dat", &m);
 
     /*
@@ -406,7 +408,7 @@ void test_rbm(){
     */
 
     free_rbm(&m);
-    free_dataset_blas(&validate_set);
+    //free_dataset_blas(&validate_set);
     free_dataset_blas(&train_set);
 }
 
