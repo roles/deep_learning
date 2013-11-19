@@ -177,6 +177,7 @@ void load_mnist_dataset(dataset *train_set, dataset *validate_set){
     close(train_y_fd);
 }
 
+
 void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set){
     uint32_t N, nrow, ncol, magic_n;
     rio_t rio_train_x, rio_train_y;
@@ -248,4 +249,28 @@ double tanh(double x){
 
 double get_tanh_derivative(double y){
     return 1.0 - y * y;
+}
+
+void load_tcga_dataset_blas(dataset_blas *train_set, char *filename){
+    FILE *f;
+    int i, j;
+
+    f = fopen(filename, "r");
+    if(f == NULL){
+        fprintf(stderr, "cannot open %s\n", filename);
+        exit(1);
+    }
+
+    fscanf(f, "%d", &train_set->N);
+    fscanf(f, "%d", &train_set->n_feature);    
+
+    train_set->input = (double*)malloc(train_set->N * train_set->n_feature * sizeof(double));
+    for(i = 0; i < train_set->N; i++){
+        for(j = 0; j < train_set->n_feature; j++){
+            fscanf(f, "%lf", &train_set->input[i * train_set->n_feature + j]);
+        }
+    }
+    printf("data loaded\n");
+
+    fclose(f);
 }

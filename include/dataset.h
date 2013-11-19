@@ -26,6 +26,7 @@ typedef struct dataset_blas{
     uint32_t nrow, ncol;
     double *input;
     uint8_t *output;
+    uint32_t n_feature;
 } dataset_blas;
 
 void init_dataset(dataset *d, uint32_t N, uint32_t nrow, uint32_t ncol);
@@ -48,5 +49,7 @@ void load_dataset_blas_output(rio_t *rp, dataset_blas *d);
 void free_dataset_blas(dataset_blas *d);
 void print_dataset_blas(const dataset_blas *d);
 void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set);
+
+void load_tcga_dataset_blas(dataset_blas *train_set, char *filename);
 
 #endif

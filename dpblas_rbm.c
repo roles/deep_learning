@@ -3,8 +3,9 @@
 #include<strings.h>
 #include<time.h>
 
-#define MAX_SIZE 1000
-#define MAX_BATCH_SIZE 500
+#define MAX_SIZE 21000
+#define MAX_QUAR_SIZE 21000 * 3300
+#define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
 
@@ -19,9 +20,9 @@ double H1[MAX_BATCH_SIZE * MAX_SIZE], H2[MAX_BATCH_SIZE * MAX_SIZE];
 double Ph1[MAX_BATCH_SIZE * MAX_SIZE], Ph2[MAX_BATCH_SIZE * MAX_SIZE];
 double V2[MAX_BATCH_SIZE * MAX_SIZE];
 double Pv1[MAX_BATCH_SIZE * MAX_SIZE], Pv2[MAX_BATCH_SIZE * MAX_SIZE];
-double delta_W[MAX_SIZE * MAX_SIZE];
+double delta_W[MAX_QUAR_SIZE];
 double delta_c[MAX_SIZE], delta_b[MAX_SIZE];
-double t1[MAX_SIZE * MAX_SIZE], t2[MAX_SIZE * MAX_SIZE], Ivec[MAX_BATCH_SIZE * MAX_SIZE];
+double t1[MAX_QUAR_SIZE], t2[MAX_QUAR_SIZE], Ivec[MAX_BATCH_SIZE * MAX_SIZE];
 
 void init_rbm(rbm *m, int nvisible, int nhidden){
     double low, high; 
@@ -199,7 +200,7 @@ void dump_weight(FILE *weight_file, const rbm *m){
 }
 
 void dump_sample(FILE *sample_file, const rbm *m, const double *V, const int sample_count){
-    int item_per_line = 28;
+    int item_per_line = 100;
     int i, j;
 
     for(i = 0; i < sample_count; i++){
@@ -273,7 +274,7 @@ void load_rbm(char *rbm_filename, rbm *m){
 void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *validate_set, 
                const int mini_batch, const int n_epcho, const char *weight_filename){
     int i, j, k, epcho; 
-    int batch_count;
+    int batch_count, batch_size;
     int cd_k = 5;
     double *chain_start, *V1;
     double cost;
@@ -285,7 +286,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
         fprintf(stderr, "no such file %s\n", weight_filename);
         exit(1);
     }
-    batch_count = train_set->N / mini_batch;
+    batch_count = (train_set->N-1) / mini_batch + 1;
     chain_start = NULL;
 
     dump_weight(weight_file, m);
@@ -296,54 +297,58 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 500 == 0){
+            if((k+1) % 20 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
             V1 = train_set->input + k * mini_batch * m->nvisible;
-            get_hprob(m, V1, Ph1, mini_batch);
-            get_hsample(m, Ph1, H1, mini_batch);
+
+            if(k == (batch_count-1)){
+                batch_size = train_set->N - mini_batch * k;
+            }
+            get_hprob(m, V1, Ph1, batch_size);
+            get_hsample(m, Ph1, H1, batch_size);
 
             if(chain_start == NULL){
                 chain_start = H1;
             }
 
-            gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, mini_batch);
+            gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, batch_size);
 
             chain_start = H2;
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        m->nhidden, m->nvisible, mini_batch,
+                        m->nhidden, m->nvisible, batch_size,
                         1.0, Ph2, m->nhidden, V2, m->nvisible,
                         0, t1, m->nvisible);
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        m->nhidden, m->nvisible, mini_batch,
+                        m->nhidden, m->nvisible, batch_size,
                         1.0, Ph1, m->nhidden, V1, m->nvisible,
                         -1, t1, m->nvisible);
 
-            cblas_daxpy(m->nhidden * m->nvisible, eta / mini_batch,
+            cblas_daxpy(m->nhidden * m->nvisible, eta / batch_size,
                         t1, 1, m->W, 1);
 
-            cblas_dcopy(m->nvisible * mini_batch, V1, 1, t1, 1);
+            cblas_dcopy(m->nvisible * batch_size, V1, 1, t1, 1);
 
-            cblas_daxpy(m->nvisible * mini_batch, -1, V2, 1, t1, 1);
+            cblas_daxpy(m->nvisible * batch_size, -1, V2, 1, t1, 1);
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        m->nvisible, 1, mini_batch,
-                        eta / mini_batch, t1, m->nvisible,
+                        m->nvisible, 1, batch_size,
+                        eta / batch_size, t1, m->nvisible,
                         Ivec, 1, 1, m->b, 1);
 
-            cblas_dcopy(m->nhidden * mini_batch, Ph1, 1, t1, 1);
+            cblas_dcopy(m->nhidden * batch_size, Ph1, 1, t1, 1);
 
-            cblas_daxpy(m->nhidden * mini_batch, -1, Ph2, 1, t1, 1);
+            cblas_daxpy(m->nhidden * batch_size, -1, Ph2, 1, t1, 1);
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        m->nhidden, 1, mini_batch,
-                        eta / mini_batch, t1, m->nvisible,
+                        m->nhidden, 1, batch_size,
+                        eta / batch_size, t1, m->nvisible,
                         Ivec, 1, 1, m->c, 1);
 
-            cost += get_PL(m, V1, mini_batch);
+            cost += get_PL(m, V1, batch_size);
         }
 
         end_time = time(NULL);
@@ -357,25 +362,38 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
 void test_rbm(){
     int i, j, k, p, q;
-    int mini_batch = 20;
+    int mini_batch = 10;
     int epcho, n_epcho = 15;
     int train_set_size = 50000, validate_set_size = 10000;
     dataset_blas train_set, validate_set; 
     rbm m;
     FILE *sample_file;
 
+    int nhidden = 1000;
+
     srand(1234);
+
+    /*
+     * mnist dataset initialize
+     *
     load_mnist_dataset_blas(&train_set, &validate_set);
     init_rbm(&m, 28*28, 500);
+    */
+
+    load_tcga_dataset_blas(&train_set, "../data/tcga_table.txt");
+    init_rbm(&m, train_set.n_feature, nhidden);
 
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
     //load_rbm("rbm_model.dat", &m);
 
-    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "rbm_weight.txt");
-    dump_rbm("rbm_model.dat", &m);
+    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
+    dump_rbm("tcga_rbm_model.dat", &m);
 
+    /*
+     * dump sample
+     *
     sample_file = fopen("rbm_sample.txt", "w");
     if(sample_file == NULL){
         fprintf(stderr, "cannot open rbm_sample.txt\n");
@@ -385,6 +403,7 @@ void test_rbm(){
     generate_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
 
     fclose(sample_file);
+    */
 
     free_rbm(&m);
     free_dataset_blas(&validate_set);
