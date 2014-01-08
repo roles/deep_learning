@@ -8,6 +8,7 @@
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
+#define FOLD_NUM 10
 
 typedef struct rbm{
     int nvisible, nhidden;
@@ -185,9 +186,7 @@ double get_PL(const rbm *m, double *V, const int size){
     return PL / size;
 }
 
-void dump_weight(FILE *weight_file, const rbm *m){
-    int item_per_line = 28;
-    int hidden_unit_count = 100;
+void dump_weight(FILE *weight_file, const rbm *m, int item_per_line, int hidden_unit_count){
     int i, j;
 
     for(i = 0; i < hidden_unit_count; i++){
@@ -263,6 +262,7 @@ void load_rbm(char *rbm_filename, rbm *m){
 
     rio_readnb(&rbm_rio, &m->nvisible, sizeof(int));
     rio_readnb(&rbm_rio, &m->nhidden, sizeof(int));
+    init_rbm(m, m->nvisible, m->nhidden);
 
     rio_readnb(&rbm_rio, m->W, m->nhidden * m->nvisible * sizeof(double));
     rio_readnb(&rbm_rio, m->b, m->nvisible * sizeof(double));
@@ -289,7 +289,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
     batch_count = (train_set->N-1) / mini_batch + 1;
     chain_start = NULL;
 
-    dump_weight(weight_file, m);
+    //dump_weight(weight_file, m);
 
     for(epcho = 0; epcho < n_epcho; epcho++){
         cost = 0;
@@ -356,7 +356,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
         end_time = time(NULL);
         printf("epcho %d cost: %.8lf\ttime: %.2lf min\n", epcho+1, cost / batch_count, (double)(end_time - start_time) / 60);
 
-        dump_weight(weight_file, m);
+        dump_weight(weight_file, m, m->nvisible, m->nhidden);
     }
 
     fclose(weight_file);
@@ -412,6 +412,132 @@ void test_rbm(){
     free_dataset_blas(&train_set);
 }
 
+void cross_validation(){
+    int i, j;    
+    dataset_blas all_train_set, foldset[FOLD_NUM], train_set, *validate_set;
+    rbm m;
+    int mini_batch = 10;
+    int n_epcho = 15, nhidden = 1000;
+
+    srand(1234);
+    for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
+        Ivec[i] = 1.0;
+
+    load_tcga_dataset_blas(&all_train_set, "../data/yc_table_comb.txt"); 
+    init_rbm(&m, all_train_set.n_feature, nhidden);
+    partition_trainset(&all_train_set, foldset, FOLD_NUM);
+
+    train_set.input = (double*)malloc(all_train_set.N * all_train_set.n_feature * sizeof(double));
+
+    combine_foldset(foldset, FOLD_NUM, 0, &train_set, validate_set);
+    train_rbm(&m, &train_set, validate_set, mini_batch, n_epcho, "../data/yc_comb_weight.txt");
+    
+    dump_rbm("../data/yc/yc_model_cv0.dat", &m);
+
+    free_dataset_blas(&all_train_set); 
+    free(train_set.input);
+    free_rbm(&m);
+}
+
+void get_hidden_unit(){
+    rbm m;
+    dataset_blas train_set;
+    int i, j, k;
+    FILE *hidden_unit_file;
+    int batch_size, mini_batch = 20, batch_count;
+
+    hidden_unit_file = fopen("hidden_unit.txt", "w+");
+    if(hidden_unit_file == NULL){
+        fprintf(stderr, "cannot open hidden_unit.txt\n");
+        exit(1);
+    }
+
+    load_rbm("../data/tcga_rbm_model_7777.dat", &m);
+    load_tcga_dataset_blas(&train_set, "../data/tcga_table.txt");
+
+    batch_count = (train_set.N-1) / mini_batch + 1;
+    for(i = 0; i < batch_count; i++){
+#ifdef DEBUG
+        printf("batch %d\n", i+1);
+#endif
+        if(i == batch_count-1){
+            batch_size = train_set.N - i * mini_batch; 
+        }else{
+            batch_size = mini_batch;
+        }
+        get_hprob(&m, train_set.input + i * m.nvisible * mini_batch, Ph1, batch_size);
+        for(j = 0; j < batch_size; j++){
+            for(k = 0; k < m.nhidden; k++){
+                fprintf(hidden_unit_file, "%.5lf%s", Ph1[j * m.nhidden + k],
+                        k == m.nhidden-1 ? "\n" : "\t");
+            }
+        }
+    }
+
+    fclose(hidden_unit_file);
+    free_rbm(&m);
+    free_dataset_blas(&train_set);
+}
+
+void get_reconstruct_unit(){
+    rbm m;
+    dataset_blas train_set;
+    int i, j, k;
+    FILE *re_file;
+    int batch_size, mini_batch = 20, batch_count;
+
+    re_file = fopen("../data/yc_uni_re.txt", "w+");
+    if(re_file == NULL){
+        fprintf(stderr, "cannot open yc_uni_re.txt\n");
+        exit(1);
+    }
+
+    load_rbm("../data/yc_comb.dat", &m);
+    load_tcga_dataset_blas(&train_set, "../data/yc_table_comb.txt");
+
+    batch_count = (train_set.N-1) / mini_batch + 1;
+    for(i = 0; i < batch_count; i++){
+#ifdef DEBUG
+        printf("batch %d\n", i+1);
+#endif
+        if(i == batch_count-1){
+            batch_size = train_set.N - i * mini_batch; 
+        }else{
+            batch_size = mini_batch;
+        }
+        gibbs_sample_vhv(&m, train_set.input + i * m.nvisible * mini_batch,
+                         H1, Ph1, V2, Pv2, 1, batch_size);
+        for(j = 0; j < batch_size; j++){
+            for(k = 0; k < m.nvisible; k++){
+                fprintf(re_file, "%.5lf%s", Pv2[j * m.nvisible + k],
+                        k == m.nvisible-1 ? "\n" : "\t");
+            }
+        }
+    }
+
+    fclose(re_file);
+    free_rbm(&m);
+    free_dataset_blas(&train_set);
+}
+
+void dump_all_weight(){
+    rbm m;
+    FILE *weight_file;
+
+    load_rbm("../data/tcga_rbm_model_7777.dat", &m);
+    weight_file = fopen("../data/tcga_weight.txt", "w+");
+
+    dump_weight(weight_file, &m, 20947, 1000);
+    
+    fclose(weight_file);
+    free_rbm(&m);
+}
+
+
 int main(){
-    test_rbm();
+    //test_rbm();
+    //get_reconstruct_unit();
+    //get_hidden_unit();
+    //dump_all_weight();
+    cross_validation();
 }

@@ -279,3 +279,41 @@ void load_tcga_dataset_blas(dataset_blas *train_set, char *filename){
 
     fclose(f);
 }
+
+
+void partition_trainset(dataset_blas *all_trainset, 
+                        dataset_blas *foldset, int fold_num){
+    int i, j, k;    
+    int fold_size = all_trainset->N / fold_num;
+    for(i = 0; i < fold_num; i++){
+        if(i == fold_num - 1){
+            foldset[i].N = all_trainset->N - fold_size * (fold_num - 1);
+        }else{
+            foldset[i].N = fold_size;
+        }
+        foldset[i].n_feature = all_trainset->n_feature;
+        foldset[i].input = all_trainset->input + (i * fold_size * all_trainset->n_feature); 
+    }
+}
+
+void combine_foldset(dataset_blas *foldset, int fold_num, int valid_fold,
+                     dataset_blas *train_set, dataset_blas *validate_set){
+    int i, j, k, p;
+    int all_num = 0;
+
+    for(i = 0; i < fold_num; i++){
+        all_num += foldset[i].N;
+    }
+    train_set->N = all_num - foldset[valid_fold].N;
+    train_set->n_feature = foldset[valid_fold].n_feature;
+
+    for(i = 0, k = 0; i < fold_num; i++){
+        if(i != valid_fold){
+            memcpy(train_set->input + k, foldset[i].input, 
+                   foldset[i].N * train_set->n_feature * sizeof(double));
+            k += foldset[i].N * train_set->n_feature;
+        }
+    }
+
+    validate_set = &foldset[valid_fold];
+}

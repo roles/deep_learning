@@ -51,5 +51,7 @@ void print_dataset_blas(const dataset_blas *d);
 void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set);
 
 void load_tcga_dataset_blas(dataset_blas *train_set, char *filename);
+void partition_trainset(dataset_blas*, dataset_blas*, int);
+void combine_foldset(dataset_blas*, int, int, dataset_blas*, dataset_blas*);
 
 #endif
