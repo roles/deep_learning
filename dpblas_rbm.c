@@ -412,7 +412,7 @@ void test_rbm(){
     free_dataset_blas(&train_set);
 }
 
-void cross_validation(){
+void cross_validation_train(){
     int i, j;    
     dataset_blas all_train_set, foldset[FOLD_NUM], train_set, *validate_set;
     rbm m;
@@ -423,20 +423,39 @@ void cross_validation(){
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
-    load_tcga_dataset_blas(&all_train_set, "../data/yc_table_comb.txt"); 
+    load_tcga_dataset_blas(&all_train_set, "../data/yc/yc_table_comb.txt"); 
     init_rbm(&m, all_train_set.n_feature, nhidden);
     partition_trainset(&all_train_set, foldset, FOLD_NUM);
 
     train_set.input = (double*)malloc(all_train_set.N * all_train_set.n_feature * sizeof(double));
 
-    combine_foldset(foldset, FOLD_NUM, 0, &train_set, validate_set);
+    combine_foldset(foldset, FOLD_NUM, 1, &train_set, validate_set);
     train_rbm(&m, &train_set, validate_set, mini_batch, n_epcho, "../data/yc_comb_weight.txt");
     
-    dump_rbm("../data/yc/yc_model_cv0.dat", &m);
+    dump_rbm("../data/yc/yc_model_cv1.dat", &m);
 
     free_dataset_blas(&all_train_set); 
     free(train_set.input);
     free_rbm(&m);
+}
+
+void cross_validation_reconstruct(){
+    int i, j;    
+    dataset_blas all_train_set, foldset[FOLD_NUM], train_set, *validate_set;
+    rbm m;
+    int mini_batch = 10;
+    int n_epcho = 15, nhidden = 1000;
+
+    load_tcga_dataset_blas(&all_train_set, "../data/yc_table_comb.txt"); 
+    partition_trainset(&all_train_set, foldset, FOLD_NUM);
+
+    train_set.input = (double*)malloc(all_train_set.N * all_train_set.n_feature * sizeof(double));
+
+    combine_foldset(foldset, FOLD_NUM, 1, &train_set, validate_set);
+    get_reconstruct_unit(validate_set, "../data/yc/yc_cv1_re.txt", "../data/yc/yc_model_cv1.dat");
+
+    free_dataset_blas(&all_train_set); 
+    free(train_set.input);
 }
 
 void get_hidden_unit(){
@@ -479,33 +498,32 @@ void get_hidden_unit(){
     free_dataset_blas(&train_set);
 }
 
-void get_reconstruct_unit(){
+void get_reconstruct_unit(dataset_blas *validate_set, char *re_filename, char *model_filename){
     rbm m;
     dataset_blas train_set;
     int i, j, k;
     FILE *re_file;
     int batch_size, mini_batch = 20, batch_count;
 
-    re_file = fopen("../data/yc_uni_re.txt", "w+");
+    re_file = fopen(re_filename, "w+");
     if(re_file == NULL){
-        fprintf(stderr, "cannot open yc_uni_re.txt\n");
+        fprintf(stderr, "cannot open %s\n", re_filename);
         exit(1);
     }
 
-    load_rbm("../data/yc_comb.dat", &m);
-    load_tcga_dataset_blas(&train_set, "../data/yc_table_comb.txt");
+    load_rbm(model_filename, &m);
 
-    batch_count = (train_set.N-1) / mini_batch + 1;
+    batch_count = (validate_set->N-1) / mini_batch + 1;
     for(i = 0; i < batch_count; i++){
 #ifdef DEBUG
         printf("batch %d\n", i+1);
 #endif
         if(i == batch_count-1){
-            batch_size = train_set.N - i * mini_batch; 
+            batch_size = validate_set->N - i * mini_batch; 
         }else{
             batch_size = mini_batch;
         }
-        gibbs_sample_vhv(&m, train_set.input + i * m.nvisible * mini_batch,
+        gibbs_sample_vhv(&m, validate_set->input + i * m.nvisible * mini_batch,
                          H1, Ph1, V2, Pv2, 1, batch_size);
         for(j = 0; j < batch_size; j++){
             for(k = 0; k < m.nvisible; k++){
@@ -517,7 +535,6 @@ void get_reconstruct_unit(){
 
     fclose(re_file);
     free_rbm(&m);
-    free_dataset_blas(&train_set);
 }
 
 void dump_all_weight(){
@@ -539,5 +556,6 @@ int main(){
     //get_reconstruct_unit();
     //get_hidden_unit();
     //dump_all_weight();
-    cross_validation();
+    //cross_validation_train();
+    cross_validation_reconstruct();
 }
