@@ -550,12 +550,20 @@ void dump_all_weight(){
     free_rbm(&m);
 }
 
+void test_reconstruct(){
+    dataset_blas train_set;
+
+    load_tcga_dataset_blas(&train_set, "../yeast_cele/yc_uniform/yc_uniform_table_neg.txt");
+    get_reconstruct_unit(&train_set, "../yeast_cele/yc_uniform/yc_uniform_neg_re.txt", 
+                         "../yeast_cele/yc_uniform/yc_uniform_neg_1234.dat");
+}
+
 
 int main(){
     //test_rbm();
-    //get_reconstruct_unit();
+    test_reconstruct();
     //get_hidden_unit();
     //dump_all_weight();
     //cross_validation_train();
-    cross_validation_reconstruct();
+    //cross_validation_reconstruct();
 }
