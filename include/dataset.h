@@ -7,6 +7,8 @@
 #include<math.h>
 #include<time.h>
 #include<sys/stat.h>
+#include"ranlib.h"
+#include"rnglib.h"
 #include"rio.h"
 
 #ifndef DATASET_H
@@ -53,5 +55,7 @@ void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set
 void load_tcga_dataset_blas(dataset_blas *train_set, char *filename);
 void partition_trainset(dataset_blas*, dataset_blas*, int);
 void combine_foldset(dataset_blas*, int, int, dataset_blas*, dataset_blas*);
+void load_corpus(char* filename, dataset_blas* train_set);
+void shuffle(int*, int);
 
 #endif

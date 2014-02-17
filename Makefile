@@ -1,7 +1,7 @@
 CC=gcc
 LDFLAGS=-lm
 CFLAGS=-c -std=c99 -g -DDEBUG
-OBJECTS=dataset.o rio.o
+OBJECTS=dataset.o rio.o ranlib.o rnglib.o
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
 LOADER=gfortran
@@ -24,14 +24,14 @@ da_blas: dpblas_da.o $(OBJECTS)
 rbm_blas: dpblas_rbm.o $(OBJECTS)
 	$(LOADER) dpblas_rbm.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
 	
-rsm_blas: dpblas_rsm.o $(OBJECTS)
-	$(LOADER) dpblas_rsm.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
+rsm_blas: rsm_blas.o $(OBJECTS)
+	$(LOADER) rsm_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
 
 test_cblas: test_cblas.o
 	$(LOADER) test_cblas.o $(CBLASLIB) $(BLASLIB) -o $@
 
 .c.o:
-	${CC} $(CFLAGS) -I include/ -o $@ $<
+	${CC} $(CFLAGS) $(LDFLAGS) -I include/ -o $@ $<
 
 clean:
 	rm -rf *.o rbm msgd mlp test_cblas da_blas rbm_blas rsm_blas *.out *.png *.txt

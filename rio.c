@@ -1,3 +1,4 @@
+#include<string.h>
 #include "rio.h"
 
 void rio_readinitb(rio_t *rp, int fd, int type){        /* type表示是读buffer还是写buffer */

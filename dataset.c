@@ -1,3 +1,5 @@
+#include<string.h>
+#include<strings.h>
 #include "dataset.h"
 
 void init_dataset(dataset *d, uint32_t N, uint32_t nrow, uint32_t ncol){
@@ -19,6 +21,13 @@ void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol
     d->ncol = ncol;
     d->input = (double*)malloc(d->N * d->nrow * d->ncol * sizeof(double));
     d->output = (uint8_t*)malloc(d->N * sizeof(uint8_t));
+}
+
+void init_dataset_blas_simple(dataset_blas *d, int N, int n_feature){
+    d->N = N;
+    d->n_feature = n_feature;
+    d->input = (double*)malloc(N * n_feature * sizeof(double));
+    d->output = (uint8_t*)malloc(N * sizeof(uint8_t));
 }
 
 void load_dataset_input(rio_t *rp, dataset *d){
@@ -316,4 +325,52 @@ void combine_foldset(dataset_blas *foldset, int fold_num, int valid_fold,
     }
 
     validate_set = &foldset[valid_fold];
+}
+
+void load_corpus(char* filename, dataset_blas* train_set){
+    FILE* f;
+    int N, K;
+    char *str;
+    int len, nread;
+    //buffer need to be large
+    char line[100000];
+    char *token;
+    int i = 0;
+    int idx, cnt;
+
+    if((f = fopen(filename, "r")) == NULL){
+        fprintf(stderr, "cannot open %s\n", filename);
+        exit(1);
+    }
+    fscanf(f, "%d%d", &N, &K);
+    fgetc(f);
+    init_dataset_blas_simple(train_set, N, K);
+    bzero(train_set->input, sizeof(train_set->input));
+    
+    while(fgets(line, sizeof(line), f)){
+        token = strtok(line, " ");
+        while(token != NULL){
+            sscanf(token, "%d", &idx);
+            str = strchr(token, ':');
+            sscanf(str+1, "%d", &cnt);
+            //printf("%d %d\n", idx, cnt);
+            train_set->input[i * train_set->n_feature + idx - 1] = cnt;
+            token = strtok(NULL, " ");
+        }
+        i++;
+    }
+
+    fclose(f);
+}
+
+void shuffle(int *arr, int n){
+    int i, j;
+    int t;
+
+    for(i = n-1; i > 0; i--){
+        j = rand() % i;
+        t = arr[j];
+        arr[j] = arr[i];
+        arr[i] = t;
+    }
 }
