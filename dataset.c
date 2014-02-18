@@ -28,7 +28,9 @@ void init_dataset_blas_simple(dataset_blas *d, int N, int n_feature){
     d->n_feature = n_feature;
     d->input = (double*)malloc(N * n_feature * sizeof(double));
     d->output = (uint8_t*)malloc(N * sizeof(uint8_t));
+    d->label = NULL;
 }
+
 
 void load_dataset_input(rio_t *rp, dataset *d){
     int i, j, k;
@@ -134,6 +136,9 @@ void free_dataset_blas(dataset_blas *d){
     }
     if(d->output != NULL){
         free(d->output);
+    }
+    if(d->label != NULL){
+        free(d->label);
     }
 }
 
@@ -345,7 +350,7 @@ void load_corpus(char* filename, dataset_blas* train_set){
     fscanf(f, "%d%d", &N, &K);
     fgetc(f);
     init_dataset_blas_simple(train_set, N, K);
-    bzero(train_set->input, sizeof(train_set->input));
+    bzero(train_set->input, N * K * sizeof(double));
     
     while(fgets(line, sizeof(line), f)){
         token = strtok(line, " ");
@@ -361,6 +366,29 @@ void load_corpus(char* filename, dataset_blas* train_set){
     }
 
     fclose(f);
+}
+
+void load_corpus_label(char *filename, dataset_blas *train_set){
+    FILE *f;
+    int i, j, k;
+
+    if((f = fopen(filename, "r")) == NULL){
+        fprintf(stderr, "cannot open %s\n", filename);
+        exit(1);
+    }
+
+    fscanf(f, "%d", &train_set->nlabel);
+    train_set->label = (double*)malloc(train_set->N * train_set->nlabel * sizeof(double));
+    for(i = 0; i < train_set->N; i++){
+        fscanf(f, "%d", &k);
+        for(j = 0; j < train_set->nlabel; j++){
+            if((j+1) == k){
+                train_set->label[i*train_set->nlabel+j] = 1;
+            }else{
+                train_set->label[i*train_set->nlabel+j] = 0;
+            }
+        }
+    }
 }
 
 void shuffle(int *arr, int n){

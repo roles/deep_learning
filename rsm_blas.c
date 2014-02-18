@@ -70,7 +70,7 @@ void get_hidden(rsm *m, double *v, double *h, double *s, int batch_size){
     }
 }
 
-void get_visible_prob(rsm *m, double *h, double *pv, int batch_size){
+void get_visible(rsm *m, double *h, double *pv, int batch_size){
     int i;
     double sum;
 
@@ -244,7 +244,7 @@ void train_rsm(dataset_blas *train_set, int nvisible, int nhidden, int epoch, do
                 cblas_dcopy(m.nvisible, train_set->input + m.nvisible * idx[k*minibatch+i],
                             1, v1 + m.nvisible * i, 1);
             }
-            get_hidden(&m, v1, h1, s, batch_size);            
+            get_hidden(&m, v1, y1, h1, batch_size);            
             get_visible_prob(&m, h1, pv, batch_size);
             sample_visible(&m, pv, s, v2, batch_size);
             get_hidden(&m, v2, h2, NULL, batch_size);
@@ -320,6 +320,7 @@ void test_rsm(){
     load_corpus("../data/train", &train_set);
     train_rsm(&train_set, train_set.n_feature, nhidden, epoch, lr,
               minibatch, momentum, "../data/rsm/test.model");
+    free_dataset_blas(&train_set);
 }
 
 int init(){

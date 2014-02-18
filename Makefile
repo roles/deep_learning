@@ -27,6 +27,9 @@ rbm_blas: dpblas_rbm.o $(OBJECTS)
 rsm_blas: rsm_blas.o $(OBJECTS)
 	$(LOADER) rsm_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
 
+classRBM_blas: classRBM_blas.o $(OBJECTS)
+	$(LOADER) classRBM_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
+
 test_cblas: test_cblas.o
 	$(LOADER) test_cblas.o $(CBLASLIB) $(BLASLIB) -o $@
 
@@ -34,4 +37,4 @@ test_cblas: test_cblas.o
 	${CC} $(CFLAGS) $(LDFLAGS) -I include/ -o $@ $<
 
 clean:
-	rm -rf *.o rbm msgd mlp test_cblas da_blas rbm_blas rsm_blas *.out *.png *.txt
+	rm -rf *.o rbm msgd mlp test_cblas da_blas rbm_blas rsm_blas classRBM_blas *.out *.png *.txt

@@ -26,8 +26,10 @@ typedef struct dataset{
 typedef struct dataset_blas{
     uint32_t N;
     uint32_t nrow, ncol;
+    uint32_t nlabel;
     double *input;
     uint8_t *output;
+    double *label;
     uint32_t n_feature;
 } dataset_blas;
 
@@ -56,6 +58,7 @@ void load_tcga_dataset_blas(dataset_blas *train_set, char *filename);
 void partition_trainset(dataset_blas*, dataset_blas*, int);
 void combine_foldset(dataset_blas*, int, int, dataset_blas*, dataset_blas*);
 void load_corpus(char* filename, dataset_blas* train_set);
+void load_corpus_label(char *filename, dataset_blas *train_set);
 void shuffle(int*, int);
 
 #endif
