@@ -47,7 +47,7 @@ double tanh(double x);
 double get_tanh_derivative(double y);
 void load_mnist_dataset(dataset *train_set, dataset *validate_set);
 
-void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol);
+void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol, int nlabel);
 void load_dataset_blas_input(rio_t *rp, dataset_blas *d);
 void load_dataset_blas_output(rio_t *rp, dataset_blas *d);
 void free_dataset_blas(dataset_blas *d);

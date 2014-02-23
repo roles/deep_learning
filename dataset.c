@@ -14,13 +14,16 @@ void init_dataset(dataset *d, uint32_t N, uint32_t nrow, uint32_t ncol){
     d->output = (uint8_t*)malloc(d->N * sizeof(uint8_t));
 }
 
-void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol){
+void init_dataset_blas(dataset_blas *d, uint32_t N, uint32_t nrow, uint32_t ncol, int nlabel){
     int i;
     d->N = N;
     d->nrow = nrow;
     d->ncol = ncol;
+    d->n_feature = d->nrow * d->ncol;
+    d->nlabel = nlabel;
     d->input = (double*)malloc(d->N * d->nrow * d->ncol * sizeof(double));
     d->output = (uint8_t*)malloc(d->N * sizeof(uint8_t));
+    d->label = (double*)calloc(d->N * d->nlabel, sizeof(double));
 }
 
 void init_dataset_blas_simple(dataset_blas *d, int N, int n_feature){
@@ -80,16 +83,19 @@ void load_dataset_output(rio_t *rp, dataset *d){
     int i;
     uint8_t label;
     
-    for(i = 0; i < d->N; i++)
+    for(i = 0; i < d->N; i++){
         rio_readnb(rp, &d->output[i], sizeof(uint8_t));
+    }
 }
 
 void load_dataset_blas_output(rio_t *rp, dataset_blas *d){
     int i;
     uint8_t label;
     
-    for(i = 0; i < d->N; i++)
+    for(i = 0; i < d->N; i++){
         rio_readnb(rp, &d->output[i], sizeof(uint8_t));
+        d->label[i*d->nlabel + d->output[i]] = 1;
+    }
 }
 
 void print_dataset(const dataset *d){
@@ -201,6 +207,7 @@ void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set
     rio_t rio_train_x, rio_train_y;
     int train_x_fd, train_y_fd;
     int train_set_size = 50000, validate_set_size = 10000;
+    int i, nlabel = 10;
 
     train_x_fd = open("../data/train-images-idx3-ubyte", O_RDONLY);
     train_y_fd = open("../data/train-labels-idx1-ubyte", O_RDONLY);
@@ -229,11 +236,14 @@ void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set
     fflush(stdout);
 #endif
 
-    init_dataset_blas(train_set, train_set_size, nrow, ncol);
-    init_dataset_blas(validate_set, validate_set_size, nrow, ncol);
+    init_dataset_blas(train_set, train_set_size, nrow, ncol, nlabel);
+    init_dataset_blas(validate_set, validate_set_size, nrow, ncol, nlabel);
 
     load_dataset_blas_input(&rio_train_x, train_set);
     load_dataset_blas_output(&rio_train_y, train_set);
+    for(i = 0; i < train_set->N; i++){
+        train_set->label[i*nlabel + train_set->output[i]] = 1;
+    }
 
     load_dataset_blas_input(&rio_train_x, validate_set);
     load_dataset_blas_output(&rio_train_y, validate_set);
@@ -243,6 +253,7 @@ void load_mnist_dataset_blas(dataset_blas *train_set, dataset_blas *validate_set
     close(train_x_fd);
     close(train_y_fd);
 }
+
 int random_int(int low, int high){
     return rand() % (high - low + 1) + low;
 }
@@ -359,7 +370,8 @@ void load_corpus(char* filename, dataset_blas* train_set){
             str = strchr(token, ':');
             sscanf(str+1, "%d", &cnt);
             //printf("%d %d\n", idx, cnt);
-            train_set->input[i * train_set->n_feature + idx - 1] = cnt;
+            //train_set->input[i * train_set->n_feature + idx - 1] = cnt;
+            train_set->input[i * train_set->n_feature + idx - 1] = 1;
             token = strtok(NULL, " ");
         }
         i++;
@@ -381,6 +393,7 @@ void load_corpus_label(char *filename, dataset_blas *train_set){
     train_set->label = (double*)malloc(train_set->N * train_set->nlabel * sizeof(double));
     for(i = 0; i < train_set->N; i++){
         fscanf(f, "%d", &k);
+        train_set->output[i] = k-1;
         for(j = 0; j < train_set->nlabel; j++){
             if((j+1) == k){
                 train_set->label[i*train_set->nlabel+j] = 1;

@@ -275,7 +275,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
                const int mini_batch, const int n_epcho, const char *weight_filename){
     int i, j, k, epcho; 
     int batch_count, batch_size;
-    int cd_k = 5;
+    int cd_k = 1;
     double *chain_start, *V1;
     double cost;
     FILE *weight_file;
@@ -297,7 +297,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 20 == 0){
+            if((k+1) % 1000 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
@@ -311,13 +311,14 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
             get_hprob(m, V1, Ph1, batch_size);
             get_hsample(m, Ph1, H1, batch_size);
 
-            if(chain_start == NULL){
+            /*if(chain_start == NULL){
                 chain_start = H1;
-            }
+            }*/
+            chain_start = H1;
 
             gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, batch_size);
 
-            chain_start = H2;
+            //chain_start = H2;
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->nhidden, m->nvisible, batch_size,
@@ -341,14 +342,27 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
                         eta / batch_size, t1, m->nvisible,
                         Ivec, 1, 1, m->b, 1);
 
-            cblas_dcopy(m->nhidden * batch_size, Ph1, 1, t1, 1);
+            cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                        m->nhidden, 1, batch_size,
+                        1.0, Ph2, m->nhidden, Ivec, 1,
+                        0, t1, 1);
+
+            cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                        m->nhidden, 1, batch_size,
+                        1.0, Ph1, m->nhidden, Ivec, 1,
+                        -1, t1, 1);
+
+            cblas_daxpy(m->nhidden, eta / batch_size,
+                        t1, 1, m->c, 1);
+
+            /*cblas_dcopy(m->nhidden * batch_size, Ph1, 1, t1, 1);
 
             cblas_daxpy(m->nhidden * batch_size, -1, Ph2, 1, t1, 1);
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->nhidden, 1, batch_size,
                         eta / batch_size, t1, m->nvisible,
-                        Ivec, 1, 1, m->c, 1);
+                        Ivec, 1, 1, m->c, 1);*/
 
             cost += get_PL(m, V1, batch_size);
         }
@@ -371,26 +385,25 @@ void test_rbm(){
     rbm m;
     FILE *sample_file;
 
-    int nhidden = 1000;
+    int nhidden = 500;
 
     srand(1234);
 
     /*
      * mnist dataset initialize
-     *
+     */
     load_mnist_dataset_blas(&train_set, &validate_set);
-    init_rbm(&m, 28*28, 500);
-    */
+    init_rbm(&m, 28*28, nhidden);
 
-    load_tcga_dataset_blas(&train_set, "../data/tcga_table.txt");
-    init_rbm(&m, train_set.n_feature, nhidden);
+    /*load_tcga_dataset_blas(&train_set, "../data/tcga_table.txt");
+    init_rbm(&m, train_set.n_feature, nhidden);*/
 
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
         Ivec[i] = 1.0;
 
     //load_rbm("rbm_model.dat", &m);
 
-    //train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
+    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
     dump_rbm("tcga_rbm_model.dat", &m);
 
     /*
@@ -560,8 +573,8 @@ void test_reconstruct(){
 
 
 int main(){
-    //test_rbm();
-    test_reconstruct();
+    test_rbm();
+    //test_reconstruct();
     //get_hidden_unit();
     //dump_all_weight();
     //cross_validation_train();

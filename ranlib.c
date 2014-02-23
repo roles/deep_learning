@@ -682,6 +682,8 @@ int *genmul ( int n, float p[], int ncat )
     prob = p[icat] / ptot;
     if(prob >= 1){
         prob = 0.9;
+    }else if(prob <= 0){
+        prob = 1e-5;
     }
     ix[icat] = ignbin ( ntot, prob );
     ntot = ntot - ix[icat];
