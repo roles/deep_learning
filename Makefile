@@ -4,6 +4,8 @@ CFLAGS=-c -std=c99 -g -DDEBUG
 OBJECTS=dataset.o rio.o ranlib.o rnglib.o
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
+BLASLIB_FRANKLIN=./lib/blas_franklin.a
+CBLASLIB_FRANKLIN=./lib/cblas_franklin.a
 LOADER=gfortran
 
 rbm: my_rbm.o $(OBJECTS)
@@ -29,6 +31,9 @@ rsm_blas: rsm_blas.o $(OBJECTS)
 
 classRBM_blas: classRBM_blas.o $(OBJECTS)
 	$(LOADER) classRBM_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
+
+classRBM_blas_franklin: classRBM_blas.o $(OBJECTS)
+	$(LOADER) classRBM_blas.o  $(OBJECTS) $(CBLASLIB_FRANKLIN) $(BLASLIB_FRANKLIN) -o $@
 
 test_cblas: test_cblas.o
 	$(LOADER) test_cblas.o $(CBLASLIB) $(BLASLIB) -o $@
