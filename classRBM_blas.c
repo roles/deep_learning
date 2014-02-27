@@ -2,7 +2,7 @@
 #include"cblas.h"
 #include<strings.h>
 
-#define MAXUNIT 5000
+#define MAXUNIT 5500
 #define MAXBATCH_SIZE 100
 
 double v2[MAXUNIT*MAXBATCH_SIZE], h1[MAXUNIT*MAXBATCH_SIZE], h2[MAXUNIT*MAXBATCH_SIZE];
@@ -291,7 +291,7 @@ void train_crbm(dataset_blas *train_set, int nvisible, int nhidden, int nlabel,
 
         for(k = 0; k < niter; k++){
 #ifdef DEBUG
-            if((k+1) % 1000 == 0){
+            if((k+1) % 200 == 0){
                 printf("batch %d\n", k+1);
             }
 #endif
@@ -425,17 +425,18 @@ void test_crbm(){
     dataset_blas train_set, valid_set;
 
     int nhidden = 500;
-    int epoch = 15;
+    int epoch = 30;
     double lr = 0.1;
     int minibatch = 10;
     double momentum = 0;
 
-    //load_corpus("../data/tcga.train", &train_set);
-    load_corpus("../data/20newsgroup/train.data.format", &train_set);
-    load_corpus_label("../data/20newsgroup/train.label.format", &train_set);
+    //load_corpus("../data/20newsgroup/train.data.format", &train_set);
+    //load_corpus_label("../data/20newsgroup/train.label.format", &train_set);
+    load_corpus("../data/tcga/train.pm.data", &train_set);
+    load_corpus_label("../data/tcga/train.pm.label", &train_set);
     //load_mnist_dataset_blas(&train_set, &valid_set);
     train_crbm(&train_set, train_set.n_feature, nhidden, train_set.nlabel, epoch, lr,
-               minibatch, momentum, "../data/20newsgroup/crbm.model");
+               minibatch, momentum, "../data/tcga/crbm.pm.model");
 
     free_dataset_blas(&train_set);
 }
@@ -446,13 +447,13 @@ void analyse(){
     int i, j;
     FILE *u_file, *w_file;
     
-    load_model(&m, "../data/20newsgroup/crbm.model");
-    if((u_file = fopen("../data/20newsgroup/crbm.model.u", "w+")) == NULL){
-        printf("open %s failed\n", "crbm.model.u");
+    load_model(&m, "../data/tcga/crbm.pm.model");
+    if((u_file = fopen("../data/tcga/crbm.pm.model.u", "w+")) == NULL){
+        printf("open %s failed\n", "crbm.pm.model.u");
         exit(1);
     }   
-    if((w_file = fopen("../data/20newsgroup/crbm.model.w", "w+")) == NULL){
-        printf("open %s failed\n", "crbm.model.w");
+    if((w_file = fopen("../data/tcga/crbm.pm.model.w", "w+")) == NULL){
+        printf("open %s failed\n", "crbm.pm.model.w");
         exit(1);
     }   
     for(i = 0; i < m.nhidden; i++){
