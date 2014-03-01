@@ -25,6 +25,9 @@ da_blas: dpblas_da.o $(OBJECTS)
 
 rbm_blas: dpblas_rbm.o $(OBJECTS)
 	$(LOADER) dpblas_rbm.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
+
+rbm_blas_franklin: rbm_blas.o $(OBJECTS)
+	$(LOADER) rbm_blas.o  $(OBJECTS) $(CBLASLIB_FRANKLIN) $(BLASLIB_FRANKLIN) -o $@
 	
 rsm_blas: rsm_blas.o $(OBJECTS)
 	$(LOADER) rsm_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
