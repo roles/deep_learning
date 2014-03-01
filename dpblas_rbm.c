@@ -3,12 +3,14 @@
 #include<strings.h>
 #include<time.h>
 
-#define MAX_SIZE 21000
-#define MAX_QUAR_SIZE 21000 * 3300
+#define MAX_SIZE 10000
+#define MAX_QUAR_SIZE 10000 * 10000
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
 #define FOLD_NUM 10
+
+#define TYPE_COUNT 1
 
 typedef struct rbm{
     int nvisible, nhidden;
@@ -297,7 +299,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 1000 == 0){
+            if((k+1) % 10 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
@@ -370,13 +372,13 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
         end_time = time(NULL);
         printf("epcho %d cost: %.8lf\ttime: %.2lf min\n", epcho+1, cost / batch_count, (double)(end_time - start_time) / 60);
 
-        dump_weight(weight_file, m, m->nvisible, m->nhidden);
+        //dump_weight(weight_file, m, m->nvisible, m->nhidden);
     }
 
     fclose(weight_file);
 }
 
-void test_rbm(){
+void test_rbm(char* folder_prefix, char* type){
     int i, j, k, p, q;
     int mini_batch = 10;
     int epcho, n_epcho = 15;
@@ -384,45 +386,60 @@ void test_rbm(){
     dataset_blas train_set, validate_set; 
     rbm m;
     FILE *sample_file;
+    char comb_dat_file[200], neg_dat_file[200];
+    char comb_input_file[200], neg_input_file[200];
+    char *dat_file, *input_file;
 
-    int nhidden = 500;
+    int nhidden = 1000;
 
-    srand(1234);
+    sprintf(comb_dat_file, "%s%s/yc_comb.dat", folder_prefix, type);
+    sprintf(neg_dat_file, "%s%s/yc_neg.dat", folder_prefix, type);
+    sprintf(comb_input_file, "%s%s/yc_comb.txt", folder_prefix, type);
+    sprintf(neg_input_file, "%s%s/yc_neg.txt", folder_prefix, type);
 
-    /*
-     * mnist dataset initialize
-     */
-    load_mnist_dataset_blas(&train_set, &validate_set);
-    init_rbm(&m, 28*28, nhidden);
+    for(i = 0; i < 2; i++){
+        if(i == 0){
+            dat_file = comb_dat_file;
+            input_file = comb_input_file;
+        }else{
+            dat_file = neg_dat_file;
+            input_file = neg_input_file;
+        }
+        srand(1234);
 
-    /*load_tcga_dataset_blas(&train_set, "../data/tcga_table.txt");
-    init_rbm(&m, train_set.n_feature, nhidden);*/
+        /*
+         * mnist dataset initialize
+         */
+        //load_mnist_dataset_blas(&train_set, &validate_set);
+        //init_rbm(&m, 28*28, nhidden);
 
-    for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
-        Ivec[i] = 1.0;
+        load_tcga_dataset_blas(&train_set, input_file);
+        init_rbm(&m, train_set.n_feature, nhidden);
 
-    //load_rbm("rbm_model.dat", &m);
 
-    train_rbm(&m, &train_set, &validate_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
-    dump_rbm("tcga_rbm_model.dat", &m);
+        //load_rbm("rbm_model.dat", &m);
 
-    /*
-     * dump sample
-     *
-    sample_file = fopen("rbm_sample.txt", "w");
-    if(sample_file == NULL){
-        fprintf(stderr, "cannot open rbm_sample.txt\n");
-        exit(1);
+        train_rbm(&m, &train_set, &train_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
+        dump_rbm(dat_file, &m);
+
+        /*
+         * dump sample
+         *
+        sample_file = fopen("rbm_sample.txt", "w");
+        if(sample_file == NULL){
+            fprintf(stderr, "cannot open rbm_sample.txt\n");
+            exit(1);
+        }
+        dump_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
+        generate_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
+
+        fclose(sample_file);
+        */
+
+        free_rbm(&m);
+        //free_dataset_blas(&validate_set);
+        free_dataset_blas(&train_set);
     }
-    dump_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
-    generate_sample(sample_file, &m, validate_set.input + 100 * m.nvisible, 20);
-
-    fclose(sample_file);
-    */
-
-    free_rbm(&m);
-    //free_dataset_blas(&validate_set);
-    free_dataset_blas(&train_set);
 }
 
 void cross_validation_train(){
@@ -528,9 +545,6 @@ void get_reconstruct_unit(dataset_blas *validate_set, char *re_filename, char *m
 
     batch_count = (validate_set->N-1) / mini_batch + 1;
     for(i = 0; i < batch_count; i++){
-#ifdef DEBUG
-        printf("batch %d\n", i+1);
-#endif
         if(i == batch_count-1){
             batch_size = validate_set->N - i * mini_batch; 
         }else{
@@ -563,17 +577,46 @@ void dump_all_weight(){
     free_rbm(&m);
 }
 
-void test_reconstruct(){
+void test_reconstruct(char* folder_prefix, char* type){
     dataset_blas train_set;
+    char comb_dat_file[200], neg_dat_file[200];
+    char comb_output_file[200], neg_output_file[200];
+    char comb_input_file[200], neg_input_file[200];
 
-    load_tcga_dataset_blas(&train_set, "../yeast_cele/yc_uniform/yc_uniform_table_neg.txt");
-    get_reconstruct_unit(&train_set, "../yeast_cele/yc_uniform/yc_uniform_neg_re.txt", 
-                         "../yeast_cele/yc_uniform/yc_uniform_neg_1234.dat");
+    sprintf(comb_dat_file, "%s%s/yc_comb.dat", folder_prefix, type);
+    sprintf(neg_dat_file, "%s%s/yc_neg.dat", folder_prefix, type);
+    sprintf(comb_input_file, "%s%s/yc_comb.txt", folder_prefix, type);
+    sprintf(neg_input_file, "%s%s/yc_neg.txt", folder_prefix, type);
+    sprintf(comb_output_file, "%s%s/yc_comb_re.txt", folder_prefix, type);
+    sprintf(neg_output_file, "%s%s/yc_neg_re.txt", folder_prefix, type);
+    
+    printf("%s comb output\n", type);
+    load_tcga_dataset_blas(&train_set, comb_input_file);
+    get_reconstruct_unit(&train_set, comb_output_file, comb_dat_file);
+    free_dataset_blas(&train_set);
+
+    printf("%s neg output\n", type);
+    load_tcga_dataset_blas(&train_set, neg_input_file);
+    get_reconstruct_unit(&train_set, neg_output_file, neg_dat_file);
+    free_dataset_blas(&train_set);
 }
 
 
 int main(){
-    test_rbm();
+    int i;
+    char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/subprojects/";
+    char *type_list[TYPE_COUNT] = {
+        "yc_integrated_strict_binary_oriyy"
+    };
+
+    for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
+        Ivec[i] = 1.0;
+
+    for(i = 0; i < TYPE_COUNT; i++){
+        test_rbm(folder_prefix, type_list[i]);
+        test_reconstruct(folder_prefix, type_list[i]);
+        printf("%s completed\n", type_list[i]);
+    }
     //test_reconstruct();
     //get_hidden_unit();
     //dump_all_weight();

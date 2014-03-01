@@ -301,6 +301,7 @@ void load_tcga_dataset_blas(dataset_blas *train_set, char *filename){
     }
     printf("data loaded\n");
     train_set->output = NULL;
+    train_set->label = NULL;
 
     fclose(f);
 }
