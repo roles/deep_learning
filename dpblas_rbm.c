@@ -3,8 +3,8 @@
 #include<strings.h>
 #include<time.h>
 
-#define MAX_SIZE 10000
-#define MAX_QUAR_SIZE 10000 * 10000
+#define MAX_SIZE 17000
+#define MAX_QUAR_SIZE 17000 * 9000
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
@@ -604,9 +604,28 @@ void test_reconstruct(char* folder_prefix, char* type){
 
 int main(){
     int i;
-    char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/subprojects/";
+    char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
+    //char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/subprojects/";
     char *type_list[TYPE_COUNT] = {
-        "yc_integrated_strict_binary_oriyy"
+        "yc_intermediate_enlarge_binary",
+        "yc_intermediate_enlarge_identity",
+        "yc_intermediate_enlarge_similarity",
+        "yc_intermediate_integrate_binary",
+        "yc_intermediate_integrate_identity",
+        "yc_intermediate_integrate_similarity",
+        "yc_intermediate_ortholog_binary",
+        "yc_intermediate_ortholog_identity",
+        "yc_intermediate_ortholog_similarity",
+        "yc_stringent_enlarge_binary",
+        "yc_stringent_enlarge_identity",
+        "yc_stringent_enlarge_similarity",
+        "yc_stringent_integrate_binary",
+        "yc_stringent_integrate_identity",
+        "yc_stringent_integrate_similarity",
+        "yc_stringent_ortholog_binary",
+        "yc_stringent_ortholog_identity",
+        "yc_stringent_ortholog_similarity
+
     };
 
     for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
