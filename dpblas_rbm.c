@@ -10,7 +10,7 @@
 #define eta 0.1
 #define FOLD_NUM 10
 
-#define TYPE_COUNT 1
+#define TYPE_COUNT 18
 
 typedef struct rbm{
     int nvisible, nhidden;
@@ -624,7 +624,7 @@ int main(){
         "yc_stringent_integrate_similarity",
         "yc_stringent_ortholog_binary",
         "yc_stringent_ortholog_identity",
-        "yc_stringent_ortholog_similarity
+        "yc_stringent_ortholog_similarity"
 
     };
 
