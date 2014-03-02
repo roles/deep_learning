@@ -4,7 +4,7 @@
 #include<time.h>
 
 #define MAX_SIZE 17000
-#define MAX_QUAR_SIZE 17000 * 9000
+#define MAX_QUAR_SIZE 17000*9000
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
@@ -19,13 +19,18 @@ typedef struct rbm{
     double *c;
 } rbm;
 
-double H1[MAX_BATCH_SIZE * MAX_SIZE], H2[MAX_BATCH_SIZE * MAX_SIZE];
-double Ph1[MAX_BATCH_SIZE * MAX_SIZE], Ph2[MAX_BATCH_SIZE * MAX_SIZE];
-double V2[MAX_BATCH_SIZE * MAX_SIZE];
-double Pv1[MAX_BATCH_SIZE * MAX_SIZE], Pv2[MAX_BATCH_SIZE * MAX_SIZE];
-double delta_W[MAX_QUAR_SIZE];
-double delta_c[MAX_SIZE], delta_b[MAX_SIZE];
-double t1[MAX_QUAR_SIZE], t2[MAX_QUAR_SIZE], Ivec[MAX_BATCH_SIZE * MAX_SIZE];
+double *H1, *H2, *Ph1, *Ph2, *V2, *Pv1, *Pv2;
+double *delta_W, *delta_c, *delta_b;
+double *t1, *t2;
+double Ivec[MAX_BATCH_SIZE * MAX_SIZE];
+
+//double H1[MAX_BATCH_SIZE * MAX_SIZE], H2[MAX_BATCH_SIZE * MAX_SIZE];
+//double Ph1[MAX_BATCH_SIZE * MAX_SIZE], Ph2[MAX_BATCH_SIZE * MAX_SIZE];
+//double V2[MAX_BATCH_SIZE * MAX_SIZE];
+//double Pv1[MAX_BATCH_SIZE * MAX_SIZE], Pv2[MAX_BATCH_SIZE * MAX_SIZE];
+//double delta_W[MAX_QUAR_SIZE];
+//double delta_c[MAX_SIZE], delta_b[MAX_SIZE];
+//double t1[MAX_QUAR_SIZE], t2[MAX_QUAR_SIZE], Ivec[MAX_BATCH_SIZE * MAX_SIZE];
 
 void init_rbm(rbm *m, int nvisible, int nhidden){
     double low, high; 
@@ -601,11 +606,30 @@ void test_reconstruct(char* folder_prefix, char* type){
     free_dataset_blas(&train_set);
 }
 
+void init(){
+    int i;
+
+    for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
+        Ivec[i] = 1.0;
+    H1 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    H2 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    Ph1 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    Ph2 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    V2 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    Pv1 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    Pv2 = (double*)malloc(sizeof(double) * MAX_SIZE * MAX_BATCH_SIZE);
+    delta_W = (double*)malloc(sizeof(double) * MAX_QUAR_SIZE);
+    delta_c = (double*)malloc(sizeof(double) * MAX_SIZE);
+    delta_b = (double*)malloc(sizeof(double) * MAX_SIZE);
+    t1 = (double*)malloc(sizeof(double) * MAX_QUAR_SIZE);
+    t2 = (double*)malloc(sizeof(double) * MAX_QUAR_SIZE);
+}
+
 
 int main(){
     int i;
-    char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
-    //char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/subprojects/";
+    //char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
+    char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/training_data/";
     char *type_list[TYPE_COUNT] = {
         "yc_intermediate_enlarge_binary",
         "yc_intermediate_enlarge_identity",
@@ -627,9 +651,6 @@ int main(){
         "yc_stringent_ortholog_similarity"
 
     };
-
-    for(i = 0; i < MAX_BATCH_SIZE * MAX_SIZE; i++)
-        Ivec[i] = 1.0;
 
     for(i = 0; i < TYPE_COUNT; i++){
         test_rbm(folder_prefix, type_list[i]);
