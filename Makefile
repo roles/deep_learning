@@ -6,6 +6,8 @@ BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
 BLASLIB_FRANKLIN=./lib/blas_franklin.a
 CBLASLIB_FRANKLIN=./lib/cblas_franklin.a
+BLASLIB_HELIX=./lib/blas_helix.a
+CBLASLIB_HELIX=./lib/cblas_helix.a
 LOADER=gfortran
 
 rbm: my_rbm.o $(OBJECTS)
@@ -28,6 +30,9 @@ rbm_blas: dpblas_rbm.o $(OBJECTS)
 
 rbm_blas_franklin: dpblas_rbm.o $(OBJECTS)
 	$(LOADER) dpblas_rbm.o  $(OBJECTS) $(CBLASLIB_FRANKLIN) $(BLASLIB_FRANKLIN) -o $@
+
+rbm_blas_helix: dpblas_rbm.o $(OBJECTS)
+	$(LOADER) dpblas_rbm.o  $(OBJECTS) $(CBLASLIB_HELIX) $(BLASLIB_HELIX) -o $@
 	
 rsm_blas: rsm_blas.o $(OBJECTS)
 	$(LOADER) rsm_blas.o  $(OBJECTS) $(CBLASLIB) $(BLASLIB) -o $@
