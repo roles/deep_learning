@@ -3,8 +3,8 @@
 #include<strings.h>
 #include<time.h>
 
-#define MAX_SIZE 17000
-#define MAX_QUAR_SIZE 17000*9000
+#define MAX_SIZE 10100
+#define MAX_QUAR_SIZE 10100*5000
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
@@ -304,7 +304,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 10 == 0){
+            if((k+1) % 100 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
@@ -625,10 +625,24 @@ void init(){
     t2 = (double*)malloc(sizeof(double) * MAX_QUAR_SIZE);
 }
 
+void finalize(){
+    free(H1);
+    free(H2);
+    free(Ph1);
+    free(Ph2);
+    free(V2);
+    free(Pv1);
+    free(Pv2);
+    free(delta_W);
+    free(delta_c);
+    free(delta_b);
+    free(t1);
+    free(t2);
+}
 
-int main(){
+void run_yc(){
     int i;
-    //char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
+
     char folder_prefix[] = "/home/rolexye/project/Yeast_Cele/training_data/";
     char *type_list[TYPE_COUNT] = {
         "yc_intermediate_enlarge_binary",
@@ -651,15 +665,56 @@ int main(){
         "yc_stringent_ortholog_similarity"
 
     };
-
     for(i = 0; i < TYPE_COUNT; i++){
         test_rbm(folder_prefix, type_list[i]);
         test_reconstruct(folder_prefix, type_list[i]);
         printf("%s completed\n", type_list[i]);
     }
+}
+
+/*
+ * 新的cross validation方式
+ */
+void cross_valid(char *folder){
+    char train_file[200], valid_file[200], model_file[200];
+    char valid_out_file[200];
+    int i;
+    dataset_blas train_set, valid_set;
+    rbm m;
+    int nhidden = 1000;
+    int mini_batch = 10;
+    int n_epcho = 15;
+
+    for(i = 1; i <= 10; i++){
+        printf("fold %d\n", i);
+        sprintf(train_file, "%s/cross_valid/fold_%d/train.txt", folder, i);
+        sprintf(valid_file, "%s/cross_valid/fold_%d/valid.txt", folder, i);
+        sprintf(valid_out_file, "%s/cross_valid/fold_%d/valid_re.txt", folder, i);
+        sprintf(model_file, "%s/cross_valid/fold_%d/model.dat", folder, i);
+        srand(1234);        
+
+        load_tcga_dataset_blas(&train_set, train_file);
+        load_tcga_dataset_blas(&valid_set, valid_file);
+        init_rbm(&m, train_set.n_feature, nhidden);
+
+        train_rbm(&m, &train_set, &train_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
+        dump_rbm(model_file, &m);
+        get_reconstruct_unit(&valid_set, valid_out_file, model_file);
+
+        free_rbm(&m);
+        free_dataset_blas(&train_set);
+        free_dataset_blas(&valid_set);
+    }
+}
+
+int main(){
+    init();
+    cross_valid("../Yeast_Cele/subprojects/yc_stringent_integrate_binary");
+    //char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
     //test_reconstruct();
     //get_hidden_unit();
     //dump_all_weight();
     //cross_validation_train();
     //cross_validation_reconstruct();
+    finalize();
 }
