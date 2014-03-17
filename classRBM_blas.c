@@ -12,7 +12,23 @@ double I[MAXUNIT*MAXBATCH_SIZE];
 double w_u[MAXUNIT*MAXUNIT], u_u[MAXUNIT*MAXBATCH_SIZE];
 double by_u[MAXUNIT], bh_u[MAXUNIT], bv_u[MAXUNIT];
 //temporary variable
-double a[MAXUNIT*MAXUNIT], b[MAXUNIT*MAXUNIT];
+double a[MAXUNIT*MAXUNIT], b[MAXUNIT*MAXUNIT], c[MAXBATCH_SIZE*MAXUNIT];
+
+double softplus(double x){
+    return log(1 + exp(x));
+}
+
+int get_max_index(double *arr, int N){
+    double dmax = -1.0; 
+    int i, ind;
+    for(i = 0; i < N; i++){
+        if(arr[i] > dmax){
+            ind = i+1;
+            dmax = arr[i];
+        }
+    }
+    return ind;
+}
 
 typedef struct crbm{
     int nvisible, nhidden, ncat;
@@ -189,6 +205,82 @@ double get_likelihood(crbm *m, double *v1, double *pv, int batch_size){
         printf("lik:%.5lf\n", lik);
     }*/
     return(lik);
+}
+
+void get_y_given_x(crbm *m, double *x, double *y, int batch_size){
+    int i, j;
+    double **y_prob;
+    double *y_label;
+    double sum;
+    
+    y_prob = (double**)malloc(m->ncat * sizeof(double*));
+    y_label = (double*)calloc(m->ncat, sizeof(double));
+    for(i = 0; i < m->ncat; i++){
+        y_prob[i] = (double*)malloc(batch_size * sizeof(double));
+    }   
+
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+                batch_size, m->nhidden, m->nvisible,
+                1.0, x, m->nvisible, m->w, m->nvisible,
+                0, a, m->nhidden);
+
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+                batch_size, m->nhidden, 1,
+                1.0, I, 1, m->bh, 1,
+                1.0, a, m->nhidden);
+
+    for(i = 0; i < m->ncat; i++){
+        y_label[i] = 1.0;
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+                    batch_size, m->ncat, 1,
+                    1.0, I, 1, y_label, 1,
+                    0, b, m->ncat);
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+                    batch_size, m->nhidden, m->ncat,
+                    1.0, b, m->ncat, m->u, m->ncat,
+                    0, c, m->nhidden);
+
+        cblas_daxpy(batch_size * m->nhidden, 1.0, a, 1,
+                    c, 1);
+
+        for(j = 0; j < batch_size * m->nhidden; j++){
+            c[j] = softplus(c[j]);
+        }
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                    batch_size, 1, m->nhidden,
+                    1.0, c, m->nhidden, I, 1,
+                    0, y_prob[i], 1);
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                    batch_size, 1, m->ncat,
+                    1.0, b, m->ncat, m->by, 1,
+                    1.0, y_prob[i], 1);
+
+        for(j = 0; j < batch_size; j++){
+            y_prob[i][j] = exp(y_prob[i][j]); 
+        }
+
+        y_label[i] = 0;
+    }
+
+    for(i = 0; i < batch_size; i++){
+        sum = 0;
+        for(j = 0; j < m->ncat; j++){
+            sum += y_prob[j][i]; 
+        }
+        for(j = 0; j < m->ncat; j++){
+            y[i * m->ncat + j] = y_prob[j][i] / sum;
+        }
+    }
+
+    for(i = 0; i < batch_size; i++){
+        free(y_prob[i]);
+    }   
+    free(y_prob);
+    free(y_label);
 }
 
 int get_error(crbm *m, double *y, uint8_t *label, int batch_size){
@@ -430,13 +522,15 @@ void test_crbm(){
     int minibatch = 10;
     double momentum = 0;
 
+    load_corpus("../data/20newsgroup/cross_valid/data.out", &train_set);
+    load_corpus_label("../data/20newsgroup/cross_valid/label.out", &train_set);
     //load_corpus("../data/20newsgroup/train.data.format", &train_set);
     //load_corpus_label("../data/20newsgroup/train.label.format", &train_set);
-    load_corpus("../data/tcga/train.pm.data", &train_set);
-    load_corpus_label("../data/tcga/train.pm.label", &train_set);
+    //load_corpus("../data/tcga/train.pm.data", &train_set);
+    //load_corpus_label("../data/tcga/train.pm.label", &train_set);
     //load_mnist_dataset_blas(&train_set, &valid_set);
     train_crbm(&train_set, train_set.n_feature, nhidden, train_set.nlabel, epoch, lr,
-               minibatch, momentum, "../data/tcga/crbm.pm.model");
+               minibatch, momentum, "../data/20newsgroup/cross_valid/crbm.model");
 
     free_dataset_blas(&train_set);
 }
@@ -477,8 +571,40 @@ int init(){
         I[i] = 1;
 }
 
+void test_predict(){
+    crbm m;
+    dataset_blas train_set;
+    int i, j, k;
+    int minibatch = 20;
+    int batch_size, niter;
+    double *x, *y = py;
+
+    load_model(&m, "../data/20newsgroup/cross_valid/crbm.model");
+    load_corpus("../data/20newsgroup/train.data.format", &train_set);
+    load_corpus_label("../data/20newsgroup/train.label.format", &train_set);
+
+    niter = ceil(train_set.N * 1.0 / minibatch);
+    for(k = 0; k < niter; k++){
+        if(k == niter - 1){
+            batch_size = train_set.N - minibatch * (niter-1);
+        }else{
+            batch_size = minibatch;
+        }
+        x = train_set.input + m.nvisible * minibatch * k;
+        get_y_given_x(&m, x, y, batch_size);
+        for(j = 0; j < batch_size; j++){
+            printf("%d : %d\n", train_set.output[k*minibatch+j] + 1, 
+                    get_max_index(&y[j*m.ncat], m.ncat));
+        }
+    }
+
+    free_crbm(&m);
+    free_dataset_blas(&train_set);
+}
+
 int main(){
     init();
     //test_crbm();
-    analyse();
+    //analyse();
+    test_predict();
 }

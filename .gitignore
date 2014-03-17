@@ -1,3 +1,6 @@
 tags
 *.pyc
-
+*.o
+*.cmd
+*.txt
+*.gdb

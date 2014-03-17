@@ -304,7 +304,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 100 == 0){
+            if((k+1) % 10 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
@@ -318,14 +318,14 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
             get_hprob(m, V1, Ph1, batch_size);
             get_hsample(m, Ph1, H1, batch_size);
 
-            /*if(chain_start == NULL){
+            if(chain_start == NULL){
                 chain_start = H1;
-            }*/
-            chain_start = H1;
+            }
+            //chain_start = H1;
 
             gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, batch_size);
 
-            //chain_start = H2;
+            chain_start = H2;
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->nhidden, m->nvisible, batch_size,
@@ -371,11 +371,11 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
                         eta / batch_size, t1, m->nvisible,
                         Ivec, 1, 1, m->c, 1);*/
 
-            cost += get_PL(m, V1, batch_size);
+            cost += get_PL(m, V1, batch_size) / batch_count;
         }
 
         end_time = time(NULL);
-        printf("epcho %d cost: %.8lf\ttime: %.2lf min\n", epcho+1, cost / batch_count, (double)(end_time - start_time) / 60);
+        printf("epcho %d cost: %.8lf\ttime: %.2lf min\n", epcho+1, cost, (double)(end_time - start_time) / 60);
 
         //dump_weight(weight_file, m, m->nvisible, m->nhidden);
     }
@@ -677,7 +677,7 @@ void run_yc(){
  */
 void cross_valid(char *folder){
     char train_file[200], valid_file[200], model_file[200];
-    char valid_out_file[200];
+    char valid_out_file[200], train_out_file[200];
     int i;
     dataset_blas train_set, valid_set;
     rbm m;
@@ -690,6 +690,7 @@ void cross_valid(char *folder){
         sprintf(train_file, "%s/cross_valid/fold_%d/train.txt", folder, i);
         sprintf(valid_file, "%s/cross_valid/fold_%d/valid.txt", folder, i);
         sprintf(valid_out_file, "%s/cross_valid/fold_%d/valid_re.txt", folder, i);
+        sprintf(train_out_file, "%s/cross_valid/fold_%d/train_re.txt", folder, i);
         sprintf(model_file, "%s/cross_valid/fold_%d/model.dat", folder, i);
         srand(1234);        
 
@@ -699,7 +700,8 @@ void cross_valid(char *folder){
 
         train_rbm(&m, &train_set, &train_set, mini_batch, n_epcho, "tcga_rbm_weight.txt");
         dump_rbm(model_file, &m);
-        get_reconstruct_unit(&valid_set, valid_out_file, model_file);
+
+        get_reconstruct_unit(&train_set, train_out_file, model_file);
 
         free_rbm(&m);
         free_dataset_blas(&train_set);
@@ -709,7 +711,7 @@ void cross_valid(char *folder){
 
 int main(){
     init();
-    cross_valid("../Yeast_Cele/subprojects/yc_stringent_integrate_binary");
+    cross_valid("../Yeast_Cele/subprojects/yc_stringent_integrate_binary/cross_valid_1");
     //char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
     //test_reconstruct();
     //get_hidden_unit();
