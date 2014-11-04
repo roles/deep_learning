@@ -8,8 +8,8 @@
 #define MAX_BATCH_SIZE 20
 #define MAX_STEP 5000
 #define eta 0.1
-#define FOLD_NUM 10
 
+#define FOLD_NUM 10
 #define TYPE_COUNT 18
 
 typedef struct rbm{
@@ -31,6 +31,8 @@ double Ivec[MAX_BATCH_SIZE * MAX_SIZE];
 //double delta_W[MAX_QUAR_SIZE];
 //double delta_c[MAX_SIZE], delta_b[MAX_SIZE];
 //double t1[MAX_QUAR_SIZE], t2[MAX_QUAR_SIZE], Ivec[MAX_BATCH_SIZE * MAX_SIZE];
+
+void get_reconstruct_unit(dataset_blas *validate_set, char *re_filename, char *model_filename);
 
 void init_rbm(rbm *m, int nvisible, int nhidden){
     double low, high; 
@@ -296,7 +298,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
     batch_count = (train_set->N-1) / mini_batch + 1;
     chain_start = NULL;
 
-    //dump_weight(weight_file, m);
+    //dump_weight(weight_file, m, 28, 100);
 
     for(epcho = 0; epcho < n_epcho; epcho++){
         cost = 0;
@@ -304,7 +306,7 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
 
         for(k = 0; k < batch_count; k++){
 #ifdef DEBUG
-            if((k+1) % 10 == 0){
+            if((k+1) % 1000 == 0){
                 printf("epcho %d batch %d\n", epcho + 1, k + 1);
             }
 #endif
@@ -324,8 +326,6 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
             //chain_start = H1;
 
             gibbs_sample_hvh(m, chain_start, H2, Ph2, V2, Pv2, cd_k, batch_size);
-
-            chain_start = H2;
 
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                         m->nhidden, m->nvisible, batch_size,
@@ -377,10 +377,28 @@ void train_rbm(rbm *m, const dataset_blas *train_set, const dataset_blas *valida
         end_time = time(NULL);
         printf("epcho %d cost: %.8lf\ttime: %.2lf min\n", epcho+1, cost, (double)(end_time - start_time) / 60);
 
-        //dump_weight(weight_file, m, m->nvisible, m->nhidden);
+        dump_weight(weight_file, m, 28, 100);
     }
 
     fclose(weight_file);
+}
+
+void test_mnist(){
+    int i, j, k, p, q;
+    int mini_batch = 20;
+    int epcho, n_epcho = 15;
+    int nhidden = 500;
+    int train_set_size = 50000, validate_set_size = 10000;
+    dataset_blas train_set, validate_set; 
+    rbm m;
+
+    load_mnist_dataset_blas(&train_set, &validate_set);
+    init_rbm(&m, 28*28, nhidden);
+
+    train_rbm(&m, &train_set, &train_set, mini_batch, n_epcho, "mnist_rbm_weight.txt");
+
+    free_dataset_blas(&validate_set);
+    free_dataset_blas(&train_set);
 }
 
 void test_rbm(char* folder_prefix, char* type){
@@ -711,12 +729,15 @@ void cross_valid(char *folder){
 
 int main(){
     init();
-    cross_valid("../Yeast_Cele/subprojects/yc_stringent_integrate_binary/cross_valid_1");
+    //cross_valid("../Yeast_Cele/subprojects/yc_stringent_integrate_binary/cross_valid_1");
     //char folder_prefix[] = "/home/wang/yys/data/yeast_cele/";
     //test_reconstruct();
     //get_hidden_unit();
     //dump_all_weight();
     //cross_validation_train();
     //cross_validation_reconstruct();
+    
+    test_mnist();
+
     finalize();
 }

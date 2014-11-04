@@ -236,6 +236,10 @@ void print_sample(FILE *f, const rbm *m, const dataset *d, double **vsample, int
     free(start_sample);
 }
 
+double v1_sample[DEFAULT_MAXSIZE], v1_prob[DEFAULT_MAXSIZE], h1_sample[DEFAULT_MAXSIZE], h1_prob[DEFAULT_MAXSIZE];
+double v2_sample[DEFAULT_MAXSIZE], v2_prob[DEFAULT_MAXSIZE], h2_sample[DEFAULT_MAXSIZE], h2_prob[DEFAULT_MAXSIZE];
+double delta_W[DEFAULT_MAXSIZE][DEFAULT_MAXSIZE], delta_vbias[DEFAULT_MAXSIZE], delta_hbias[DEFAULT_MAXSIZE];
+
 int main(){
     int image_fd, label_fd;
     FILE *W_file, *V_sample_file, *log_file;
@@ -248,9 +252,6 @@ int main(){
     rbm m;
     dataset d;
     uint8_t x;
-    double v1_sample[DEFAULT_MAXSIZE], v1_prob[DEFAULT_MAXSIZE], h1_sample[DEFAULT_MAXSIZE], h1_prob[DEFAULT_MAXSIZE];
-    double v2_sample[DEFAULT_MAXSIZE], v2_prob[DEFAULT_MAXSIZE], h2_sample[DEFAULT_MAXSIZE], h2_prob[DEFAULT_MAXSIZE];
-    double delta_W[DEFAULT_MAXSIZE][DEFAULT_MAXSIZE], delta_vbias[DEFAULT_MAXSIZE], delta_hbias[DEFAULT_MAXSIZE];
     double *chain_start = NULL;
     rio_t rio_training_set_x;
 
