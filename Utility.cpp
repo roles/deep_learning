@@ -1,8 +1,9 @@
 #include "Config.h"
 #include "Utility.h"
 
+static double _I[maxUnit*maxBatchSize];
+
 double* I(){
-    static double _I[maxUnit*maxBatchSize];
     static bool hasVisit = false;
     if(!hasVisit){
         for(int i = 0; i < maxUnit*maxBatchSize; i++)

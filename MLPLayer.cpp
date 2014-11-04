@@ -10,11 +10,13 @@ MLPLayer::MLPLayer(int nIn, int nOut) :
     init();
 }
 
+double* MLPLayer::getOutput() { return out; }
+
 void MLPLayer::init(){
     weight = new double[numIn*numOut];
     bias = new double[numOut];
-    delta = new double[numOut];
-    out = new double[numOut];
+    delta = NULL;
+    out = NULL;
 
     initializeWeight(weight, numIn, numOut);
     memset(bias, 0, numOut*sizeof(double));
@@ -28,6 +30,9 @@ MLPLayer::~MLPLayer(){
 }
 
 void MLPLayer::forward(int size){
+    if(out == NULL){
+        out = new double[numOut*size];
+    }
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                 size, numOut, numIn,
                 1, in, numIn, weight, numOut,
@@ -102,6 +107,9 @@ void MLPLayer::computeDelta(int size, MLPLayer *prevLayer){
 }
 
 void MLPLayer::backpropagate(int size, MLPLayer *prevLayer){
+    if(delta == NULL){
+        delta = new double[numOut*size];
+    }
     computeDelta(size, prevLayer);
     updateWeight(size);
     updateBias(size);

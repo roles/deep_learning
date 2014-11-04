@@ -16,6 +16,7 @@ class TrainComponent {
         virtual double* getOutput() = 0;
         virtual double* getLabel() = 0;
         inline TrainType getTrainType() { return trainType; }
+        virtual ~TrainComponent();
     private:
         TrainType trainType;
 };
@@ -24,7 +25,7 @@ class TrainModel {
     public:
         TrainModel(TrainComponent& comp);
         void train(Dataset *, double, int, int);
-        double getValidError(Dataset *);
+        double getValidError(Dataset *, int);
     private:
         TrainComponent& component;
 };

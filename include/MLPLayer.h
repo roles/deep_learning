@@ -27,8 +27,11 @@ class MLPLayer {
         inline int getOutputNumber() {return numOut;}
         inline double* getDelta() { return delta; }
         inline double* getWeight() { return weight; }
-        inline double* getOutput() { return out; }
+        double* getOutput();
         inline void setUnitType(UnitType t) { unitType = t; }
+
+        virtual void setLabel(double* label) { }    //用于最后一层有监督
+        virtual double* getLabel() { return NULL; }
     private:
         virtual void computeDelta(int, MLPLayer*);
         virtual void updateWeight(int);

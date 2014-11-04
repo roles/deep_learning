@@ -4,6 +4,8 @@
 
 TrainComponent::TrainComponent(TrainType t) : trainType(t) {}
 
+TrainComponent::~TrainComponent(){}
+
 TrainModel::TrainModel(TrainComponent& comp) : component(comp) {}
 
 void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch){
@@ -16,9 +18,9 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
 
         for(int k = 0; k < numBatch; k++){
 #ifdef DEBUG
-            /*if((k+1) % 10 == 0){
+            if((k+1) % 500 == 0){
                 printf("epoch %d batch %d\n", epoch + 1, k + 1);
-            }*/
+            }
 #endif
             int theBatchSize;
 
@@ -37,16 +39,15 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
         }
 
         if(component.getTrainType() == Supervise){
-            double err = getValidError(data);
+            double err = getValidError(data, batchSize);
             time_t endTime = time(NULL);
             printf("epoch %d error: %.8lf%%\ttime: %ds \n", epoch+1, err * 100, (int)(endTime - startTime));
         }
     }
 }
 
-double TrainModel::getValidError(Dataset* data){
+double TrainModel::getValidError(Dataset* data, int batchSize){
     int err = 0;
-    int batchSize = 100;
     int numBatch = (data->getValidateNumber()-1) / batchSize + 1;
     double *out = component.getOutput();
     int numOut = data->getLabelNumber();

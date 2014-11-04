@@ -1,7 +1,7 @@
 CC=gcc
 CPP=g++
-LDFLAGS=-lm
-CFLAGS=-c -g -DDEBUG
+LDFLAGS=-lm -pg -lgfortran
+CFLAGS=-c -g -DDEBUG -pg
 OBJECTS=dataset.o rio.o ranlib.o rnglib.o RBM.o Logistic.o MLPLayer.o TrainModel.o Dataset.o Utility.o
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
@@ -12,13 +12,13 @@ CBLASLIB_HELIX=./lib/cblas_helix.a
 LOADER=gfortran
 
 DBN: DBN.o $(OBJECTS)
-	$(CPP) DBN.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -lgfortran -o $@
+	$(CPP) DBN.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
 
 LogisticModel: LogisticModel.o $(OBJECTS)
-	$(CPP) LogisticModel.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -lgfortran -o $@
+	$(CPP) LogisticModel.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
 
 MLP: MLP.o $(OBJECTS)
-	$(CPP) MLP.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) -lgfortran -o $@
+	$(CPP) MLP.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
 	
 rbm: my_rbm.o $(OBJECTS)
 	${CC} -o rbm my_rbm.o $(OBJECTS) -I ./include $(LDFLAGS)
