@@ -20,7 +20,7 @@ void testMNIST(){
     mnist.loadData();
     MLP mlp; 
 
-    MLPLayer *firstLayer = new MLPLayer(mnist.getFeatureNumber(), 500, Tanh);
+    MLPLayer *firstLayer = new MLPLayer(mnist.getFeatureNumber(), 500);
     Logistic *secondLayer = new Logistic(500, mnist.getLabelNumber());
     mlp.addLayer(firstLayer);
     mlp.addLayer(secondLayer);
@@ -30,7 +30,7 @@ void testMNIST(){
 }
 
 int main(){
-    testWFICA();
+    testMNIST();
 
     return 0;
 }

@@ -36,6 +36,7 @@ double* Logistic::getLabel(){
 void Logistic::computeDelta(int size, MLPLayer *prevLayer){
     int numOut = getOutputNumber();
     double *out = getOutput(), *delta = getDelta();
+
     // get delta dE/d{ai}
     cblas_dcopy(size*numOut, out, 1, delta, 1);
     cblas_daxpy(size*numOut, -1.0, label, 1, delta, 1);

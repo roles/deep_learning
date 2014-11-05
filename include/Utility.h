@@ -5,7 +5,8 @@
 #define _UTILITY_H
 
 double* I();
-void initializeWeight(double *weight, int numIn, int numOut);
+void initializeWeightSigmoid(double *weight, int numIn, int numOut);
+void initializeWeightTanh(double *weight, int numIn, int numOut);
 void softmax(double *arr, int size);
 int maxElem(double *arr, int size);
 

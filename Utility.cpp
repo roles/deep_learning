@@ -13,11 +13,22 @@ double* I(){
     return _I;
 }
 
-void initializeWeight(double *weight, int numIn, int numOut){
+void initializeWeightSigmoid(double *weight, int numIn, int numOut){
     double low, high; 
 
     low = -4 * sqrt((double)6 / (numIn + numOut));
     high = 4 * sqrt((double)6 / (numIn + numOut));
+
+    for(int i = 0; i < numIn*numOut; i++){
+        weight[i] = random_double(low, high);
+    }
+}
+
+void initializeWeightTanh(double *weight, int numIn, int numOut){
+    double low, high; 
+
+    low = -sqrt((double)6 / (numIn + numOut));
+    high = sqrt((double)6 / (numIn + numOut));
 
     for(int i = 0; i < numIn*numOut; i++){
         weight[i] = random_double(low, high);

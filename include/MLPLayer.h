@@ -10,9 +10,7 @@ extern "C"{
 
 enum UnitType { Sigmoid, Tanh , Softmax };
 
-typedef double MLPBuffer[maxUnit*maxBatchSize];
-
-static MLPBuffer temp, temp2;
+typedef double MLPBuffer[maxUnit*maxUnit];
 
 class MLPLayer {
     public:

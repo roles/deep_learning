@@ -114,7 +114,6 @@ void TrivialDataset::loadData(const char *trainingDataFile, const char *training
 
     FILE *traingDataFd = fopen(trainingDataFile, "rb");
 
-    //读入样本数据，50000个做training，10000个做validate
     printf("loading training data...\n");
 
     fread(&numTrain, sizeof(int), 1, traingDataFd);

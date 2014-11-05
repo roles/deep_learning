@@ -1,5 +1,7 @@
 #include "MLPLayer.h"
 
+static MLPBuffer temp, temp2;
+
 MLPLayer::MLPLayer(int nIn, int nOut, UnitType t) :
     numIn(nIn), numOut(nOut), unitType(t){
     init(); 
@@ -18,7 +20,18 @@ void MLPLayer::init(){
     delta = NULL;
     out = NULL;
 
-    initializeWeight(weight, numIn, numOut);
+    switch(unitType){
+        case Softmax:
+            //initializeWeightSigmoid(weight, numIn, numOut);
+            memset(weight, 0, numIn*numOut*sizeof(double));
+            break;
+        case Sigmoid:
+            initializeWeightSigmoid(weight, numIn, numOut);
+            break;
+        case Tanh:
+            initializeWeightTanh(weight, numIn, numOut);
+            break;
+    }
     memset(bias, 0, numOut*sizeof(double));
 }
 
@@ -62,6 +75,10 @@ void MLPLayer::forward(int size){
 
 void MLPLayer::updateWeight(int size){
     // update weight
+    
+    // L2 normalization
+    cblas_dscal(numIn*numOut, 1.0- 2.0*L2Reg/size , weight, 1);
+
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                 numIn, numOut, size,
                 -1.0 * learningRate / size, in, numIn,

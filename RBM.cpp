@@ -7,7 +7,7 @@ RBM::RBM(int numVis, int numHid)
       weightFile(NULL)
 {
     weight = new double[numVis*numHid];
-    initializeWeight(weight, numVis, numHid);
+    initializeWeightSigmoid(weight, numVis, numHid);
 
     vbias = new double[numVis];
     hbias = new double[numHid];
