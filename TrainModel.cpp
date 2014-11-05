@@ -20,6 +20,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
 #ifdef DEBUG
             if((k+1) % 500 == 0){
                 printf("epoch %d batch %d\n", epoch + 1, k + 1);
+                fflush(stdout);
             }
 #endif
             int theBatchSize;

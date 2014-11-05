@@ -49,6 +49,12 @@ class Dataset {
         double  *testLabel;
 };
 
+class TrivialDataset : public Dataset {
+    public:
+        void loadData(const char *trainingDataFile, const char *trainingLabelFile);
+        ~TrivialDataset();
+};
+
 class MNISTDataset : public Dataset {
     public:
         void loadData(const char *trainingDataFile = "../data/train-images-idx3-ubyte", 
