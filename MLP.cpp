@@ -1,31 +1,6 @@
-#include "Dataset.h"
-#include "TrainModel.h"
-#include "MLPLayer.h"
-#include "Logistic.h"
-#include <vector>
+#include "MLP.h"
 
 using namespace std;
-
-class MLP : public TrainComponent{
-    public:
-        MLP();
-        ~MLP();
-        void trainBatch(int);
-        void runBatch(int);
-        void setLearningRate(double lr);
-        void setInput(double *input);
-        void setLabel(double *label);
-        double* getOutput();
-        double* getLabel();
-
-        inline void addLayer(MLPLayer* l) { layers[numLayer++] = l; }
-    private:
-        MLPLayer* layers[maxLayer];
-        int numLayer;
-
-        double learningRate;
-        double *label;
-};
 
 MLP::MLP() : TrainComponent(Supervise), numLayer(0) {}
 
@@ -82,22 +57,4 @@ double* MLP::getOutput(){
 
 double* MLP::getLabel(){
     return layers[numLayer-1]->getLabel();
-}
-
-MLP mlp; 
-
-int main(){
-    MNISTDataset mnist;
-    mnist.loadData();
-
-    MLPLayer *firstLayer = new MLPLayer(mnist.getFeatureNumber(), 500);
-    Logistic *secondLayer = new Logistic(500, mnist.getLabelNumber());
-    mlp.addLayer(firstLayer);
-    mlp.addLayer(secondLayer);
-
-    TrainModel mlpModel(mlp);
-    //mlpModel.train(&mnist, 0.01, 20, 1000);
-    mlpModel.train(&mnist, 0.01, 20, 10);
-
-    return 0;
 }

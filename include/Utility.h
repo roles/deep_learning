@@ -25,8 +25,13 @@ inline double get_sigmoid_derivative(double y){
     return y * (1.0 - y);
 }
 
+inline double square(double x){
+    return x * x;
+}
+
 inline double tanh(double x){
-    return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    double a = square(exp(x));
+    return (a - 1.0) / (a + 1.0);
 }
 
 inline double get_tanh_derivative(double y){
