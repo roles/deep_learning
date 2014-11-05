@@ -5,3 +5,5 @@ tags
 *.txt
 *.gdb
 *.swp
+lib/libblas.a
+lib/libcblas.a
