@@ -3,7 +3,7 @@
 
 void testWFICA(){
     TrivialDataset data;
-    data.loadData("", "");
+    data.loadData("../data/minist1_lcn_mlp.bin", "../data/minist1_lcn_label.bin");
     MLP mlp; 
 
     MLPLayer *firstLayer = new MLPLayer(data.getFeatureNumber(), 500, Tanh);
@@ -30,7 +30,7 @@ void testMNIST(){
 }
 
 int main(){
-    testMNIST();
+    testWFICA();
 
     return 0;
 }

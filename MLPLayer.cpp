@@ -77,7 +77,7 @@ void MLPLayer::updateWeight(int size){
     // update weight
     
     // L2 normalization
-    cblas_dscal(numIn*numOut, 1.0- 2.0*L2Reg/size , weight, 1);
+    cblas_dscal(numIn*numOut, 1.0 - 2.0 * L2Reg * learningRate , weight, 1);
 
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                 numIn, numOut, size,

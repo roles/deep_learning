@@ -19,6 +19,6 @@ void testMNIST(){
 }
 
 int main(){
-    srand(1234);
-    testMNIST();
+    //testMNIST();
+    testICA();
 }
