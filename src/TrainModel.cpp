@@ -54,6 +54,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             double err = getValidError(data, batchSize);
             time_t endTime = time(NULL);
             printf("epoch %d validate error: %.8lf%%\ttime: %ds \n", epoch+1, err * 100, (int)(endTime - startTime));
+            fflush(stdout);
 
             // early stopping
             if(err < bestErr){
@@ -71,6 +72,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
         }else { // unsupervise model
             time_t endTime = time(NULL);
             printf("epoch %d cost: %.8lf\ttime: %.2lf min\n", epoch+1, cost, (double)(endTime - startTime) / 60);
+            fflush(stdout);
         }
 
         component.operationPerEpoch();
@@ -121,6 +123,7 @@ void MultiLayerTrainModel::train(Dataset* data,
             curData = transData;
         }
         printf("Training layer %d ********\n", i+1);
+        fflush(stdout);
         model.train(curData, learningRate, batchSize, numEpoch);
     }
     if(curData != data)
