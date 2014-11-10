@@ -25,6 +25,15 @@ MLPLayer::MLPLayer(const char* file, const char* name) :
     fclose(fd);
 }
 
+MLPLayer::MLPLayer(int nIn, int nOut, double* weight, double* bias, const char *name) :
+    numIn(nIn), numOut(nOut), out(NULL), delta(NULL)
+{
+    strcpy(layerName, name);
+    init();
+    memcpy(this->weight, weight, sizeof(double)*numIn*numOut);
+    memcpy(this->bias, bias, sizeof(double)*numOut);
+}
+
 
 void MLPLayer::loadModel(FILE* fd){
     fread(&numIn, sizeof(int), 1, fd);
@@ -140,6 +149,8 @@ SigmoidLayer::SigmoidLayer(FILE* modelFileFd) :
     MLPLayer(modelFileFd, "Sigmoid") { }
 SigmoidLayer::SigmoidLayer(const char* file) :
     MLPLayer(file, "Sigmoid") { }
+SigmoidLayer::SigmoidLayer(int nIn, int nOut, double* weight, double* bias) :
+    MLPLayer(nIn, nOut, weight, bias, "Sigmoid") { }
 
 void SigmoidLayer::computeNeuron(int size){
     double *out = getOutput();
@@ -171,6 +182,8 @@ TanhLayer::TanhLayer(FILE* modelFileFd) :
     MLPLayer(modelFileFd, "Tanh") { }
 TanhLayer::TanhLayer(const char* file) :
     MLPLayer(file, "Tanh") { }
+TanhLayer::TanhLayer(int nIn, int nOut, double* weight, double* bias) :
+    MLPLayer(nIn, nOut, weight, bias, "Tanh") { }
 
 void TanhLayer::computeNeuron(int size){
     double *out = getOutput();
@@ -202,6 +215,8 @@ SoftmaxLayer::SoftmaxLayer(FILE* modelFileFd, const char* name) :
     MLPLayer(modelFileFd, name) { }
 SoftmaxLayer::SoftmaxLayer(const char* file, const char* name) :
     MLPLayer(file, name) { }
+SoftmaxLayer::SoftmaxLayer(int nIn, int nOut, double* weight, double* bias, const char* name) :
+    MLPLayer(nIn, nOut, weight, bias, name) { }
 
 void SoftmaxLayer::computeNeuron(int size){
     double *out = getOutput();

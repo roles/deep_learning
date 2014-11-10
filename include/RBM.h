@@ -12,6 +12,8 @@ extern "C" {
 #ifndef _RBM_H
 #define _RBM_H
 
+class MultiLayerRBM;
+
 class RBM : public UnsuperviseTrainComponent {
     public:
         RBM(int, int);
@@ -62,6 +64,7 @@ class RBM : public UnsuperviseTrainComponent {
         double learningRate;
 
         char *weightFile;
+        friend class MultiLayerRBM;
 };
 
 #endif

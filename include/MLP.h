@@ -21,7 +21,10 @@ class MLP : public TrainComponent{
         double* getLabel();
         void saveModel(FILE*);
 
+        void setLayerNumber(int n) { numLayer = n; }
+
         inline void addLayer(MLPLayer* l) { layers[numLayer++] = l; }
+        inline void setLayer(int i, MLPLayer* l) { layers[i] = l; }
     private:
         MLPLayer* layers[maxLayer];
         int numLayer;

@@ -18,6 +18,7 @@ class MLPLayer {
         MLPLayer(int, int, const char* name = "MLPLayer"); 
         MLPLayer(FILE* modelFileFd, const char *name = "MLPLayer");
         MLPLayer(const char*, const char *name = "MLPLayer");
+        MLPLayer(int, int, double*, double*, const char *name = "MLPLayer");
         virtual ~MLPLayer();
         virtual void forward(int);     
         virtual void backpropagate(int size, MLPLayer *prevLayer);
@@ -64,6 +65,7 @@ class SigmoidLayer : public MLPLayer {
         SigmoidLayer(int, int); 
         SigmoidLayer(FILE* modelFileFd);
         SigmoidLayer(const char*);
+        SigmoidLayer(int, int, double*, double*);
     private:
         void computeNeuron(int);
         void computeNeuronDerivative(double*, int);
@@ -75,6 +77,7 @@ class TanhLayer : public MLPLayer {
         TanhLayer(int, int); 
         TanhLayer(FILE* modelFileFd);
         TanhLayer(const char*);
+        TanhLayer(int, int, double*, double*);
     private:
         void computeNeuron(int);
         void computeNeuronDerivative(double*, int);
@@ -86,6 +89,7 @@ class SoftmaxLayer : public MLPLayer {
         SoftmaxLayer(int, int, const char* name = "Softmax"); 
         SoftmaxLayer(FILE* modelFileFd, const char* name = "Softmax");
         SoftmaxLayer(const char*, const char* name = "Softmax");
+        SoftmaxLayer(int, int, double*, double*, const char* name = "Softmax");
     private:
         void computeNeuron(int);
         void computeNeuronDerivative(double*, int);
