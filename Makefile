@@ -2,21 +2,16 @@ CC=gcc
 CPP=g++
 LDFLAGS=-lm -pg -lgfortran
 CFLAGS=-c -g -DDEBUG -pg -Iinclude -I../include
-OBJECTS=MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o Dataset.o Utility.o
+OBJECTS=MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
+OBJECTS:=$(patsubst %.o, src/%.o, $(OBJECTS))
+MODELS=LogisticModel MLPModel RBMModel DBN
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
 LOADER=gfortran
 BITS=
 
-
-DBN: DBN.o $(OBJECTS)
-	$(CPP) DBN.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
-
-LogisticModel: LogisticModel.o $(OBJECTS)
-	$(CPP) LogisticModel.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
-
-MLPModel: MLPModel.o $(OBJECTS)
-	$(CPP) MLPModel.o $(OBJECTS) $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
+$(MODELS) : % : src/%.o $(OBJECTS)
+	$(CPP) $^ $(CBLASLIB) $(BLASLIB) $(LDFLAGS) -o $@
 
 .cpp.o:
 	${CPP} $(CFLAGS) $(LDFLAGS) -I include/ -o $@ $<
@@ -24,7 +19,7 @@ MLPModel: MLPModel.o $(OBJECTS)
 .c.o:
 	${CC} $(CFLAGS) $(LDFLAGS) -I include/ -o $@ $<
 
-.PHONY: clean blas
+.PHONY: clean blas test
 
 blas:
 ifeq ("$(BITS)", "32")
@@ -37,5 +32,7 @@ ifeq ("$(BITS)", "64")
 endif
 
 clean:
-	rm -rf *.o DBN LogisticModel MLPModel *.out *.png *.txt
+	rm -rf $(MODELS) $(OBJECTS) *.out *.png *.txt
 
+test:
+	echo $(OBJECTS)

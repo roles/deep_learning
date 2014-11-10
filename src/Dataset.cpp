@@ -1,13 +1,22 @@
 #include "Dataset.h"
+#include "TrainModel.h"
 
 Dataset::Dataset(){
     numFeature = 0;
+    numLabel = 0;
     numTrain = numValid = numTest = 0;
     trainingData = validateData = testData = NULL;
     trainingLabel = validateLabel = testLabel = NULL;
 }
 
-Dataset::~Dataset(){}
+Dataset::~Dataset(){
+    delete[] trainingData;
+    delete[] validateData;
+    delete[] testData;
+    delete[] trainingLabel;
+    delete[] validateLabel;
+    delete[] testLabel;
+}
 
 static int changeEndian(int a){
     int nbyte = sizeof(int);
@@ -99,14 +108,7 @@ void MNISTDataset::loadData(const char *trainingDataFile, const char *trainingLa
     printf("loading ok...\n");
 }
 
-MNISTDataset::~MNISTDataset(){
-    delete[] trainingData;
-    delete[] validateData;
-    delete[] testData;
-    delete[] trainingLabel;
-    delete[] validateLabel;
-    delete[] testLabel;
-}
+MNISTDataset::~MNISTDataset(){ }
 
 void TrivialDataset::loadData(const char *trainingDataFile, const char *trainingLabelFile){
 
@@ -168,3 +170,49 @@ void TrivialDataset::loadData(const char *trainingDataFile, const char *training
 }
 
 TrivialDataset::~TrivialDataset(){}
+
+TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& component){
+    numFeature = component.getOutputNumber();
+    numLabel = originData.getLabelNumber();
+    numTrain = originData.getTrainingNumber();
+    numValid = originData.getValidateNumber();
+
+    trainingData = new double[numTrain*numFeature];
+    validateData = new double[numValid*numFeature];
+
+    int batchSize = 100;
+
+    // get training data
+    int numBatch = (numTrain-1) / batchSize + 1;
+    for(int k = 0; k < numBatch; k++){
+        int theBatchSize;
+
+        if(k == (numBatch-1)){
+            theBatchSize = numTrain - batchSize * k;
+        }else{
+            theBatchSize = batchSize;
+        }
+        component.setInput(originData.getTrainingData(k * batchSize));
+        component.runBatch(theBatchSize);
+        memcpy(trainingData+k*batchSize*numFeature, 
+                component.getOutput(), theBatchSize*numFeature*sizeof(double));
+    }
+
+    // get validate data
+    numBatch = (numValid-1) / batchSize + 1;
+    for(int k = 0; k < numBatch; k++){
+        int theBatchSize;
+
+        if(k == (numBatch-1)){
+            theBatchSize = numValid - batchSize * k;
+        }else{
+            theBatchSize = batchSize;
+        }
+        component.setInput(originData.getValidateData(k * batchSize));
+        component.runBatch(theBatchSize);
+        memcpy(validateData+k*batchSize*numFeature, 
+                component.getOutput(), theBatchSize*numFeature*sizeof(double));
+    }
+}
+
+TransmissionDataset::~TransmissionDataset(){ }

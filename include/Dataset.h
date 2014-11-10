@@ -7,6 +7,8 @@ extern "C" {
 #ifndef _DATASET_H_
 #define _DATASET_H_
 
+class TrainComponent;
+
 class Dataset {
     public:
         Dataset();
@@ -47,6 +49,12 @@ class Dataset {
         double  *trainingLabel;
         double  *validateLabel;
         double  *testLabel;
+};
+
+class TransmissionDataset : public Dataset {
+    public:
+        TransmissionDataset(Dataset& originData, TrainComponent& component);
+        ~TransmissionDataset();
 };
 
 class TrivialDataset : public Dataset {

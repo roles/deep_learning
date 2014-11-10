@@ -6,7 +6,7 @@ void testWFICA(){
     data.loadData("../data/minist1_lcn_mlp.bin", "../data/minist1_lcn_label.bin");
     MLP mlp; 
 
-    MLPLayer *firstLayer = new MLPLayer(data.getFeatureNumber(), 500, Tanh);
+    MLPLayer *firstLayer = new TanhLayer(data.getFeatureNumber(), 500);
     Logistic *secondLayer = new Logistic(500, data.getLabelNumber());
     mlp.addLayer(firstLayer);
     mlp.addLayer(secondLayer);
@@ -20,17 +20,29 @@ void testMNIST(){
     mnist.loadData();
     MLP mlp; 
 
-    MLPLayer *firstLayer = new MLPLayer(mnist.getFeatureNumber(), 500);
+    SigmoidLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
     Logistic *secondLayer = new Logistic(500, mnist.getLabelNumber());
     mlp.addLayer(firstLayer);
     mlp.addLayer(secondLayer);
+    mlp.setModelFile("result/MLPModel.dat");
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&mnist, 0.01, 20, 1000);
+    mlpModel.train(&mnist, 0.01, 20, 1);
+}
+
+void testMNISTLoading(){
+    MNISTDataset mnist;
+    mnist.loadData();
+    MLP mlp("result/MLPModel.dat");
+
+    TrainModel mlpModel(mlp);
+    printf("validate error : %.8lf%%\n", 100.0 * mlpModel.getValidError(&mnist, 20));
 }
 
 int main(){
-    testWFICA();
+    //testWFICA();
+    testMNIST();
+    testMNISTLoading();
 
     return 0;
 }

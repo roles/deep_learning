@@ -2,7 +2,17 @@
 
 using namespace std;
 
-Logistic::Logistic(int nIn, int nOut) : MLPLayer(nIn, nOut, Softmax) , TrainComponent(Supervise){ }
+Logistic::Logistic(int nIn, int nOut) : 
+    SoftmaxLayer(nIn, nOut, "Logistic") , 
+    TrainComponent(Supervise, "Logistic") { }
+
+Logistic::Logistic(FILE* fd) : 
+    SoftmaxLayer(fd, "Logistic") , 
+    TrainComponent(Supervise, "Logistic") { }
+
+Logistic::Logistic(const char* file) : 
+    SoftmaxLayer(file, "Logistic") , 
+    TrainComponent(Supervise, "Logistic") { }
 
 void Logistic::trainBatch(int size){
     forward(size);
@@ -19,6 +29,10 @@ void Logistic::setLearningRate(double lr){
 
 void Logistic::setInput(double *input){
     MLPLayer::setInput(input);
+}
+
+int Logistic::getOutputNumber() { 
+    return SoftmaxLayer::getOutputNumber(); 
 }
 
 void Logistic::setLabel(double *label){
@@ -40,4 +54,8 @@ void Logistic::computeDelta(int size, MLPLayer *prevLayer){
     // get delta dE/d{ai}
     cblas_dcopy(size*numOut, out, 1, delta, 1);
     cblas_daxpy(size*numOut, -1.0, label, 1, delta, 1);
+}
+
+void Logistic::saveModel(FILE* fd){
+    MLPLayer::saveModel(fd);
 }

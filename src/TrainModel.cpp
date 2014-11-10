@@ -1,14 +1,13 @@
+#include "Config.h"
 #include "TrainModel.h"
 #include "Utility.h"
 #include <ctime>
 
-TrainComponent::TrainComponent(TrainType t) : trainType(t) {}
-
-TrainComponent::~TrainComponent(){}
-
 TrainModel::TrainModel(TrainComponent& comp) : component(comp) {}
 
 void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch){
+
+    component.beforeTraining(batchSize);
 
     int numBatch = (data->getTrainingNumber()-1) / batchSize + 1;
     component.setLearningRate(learningRate);
@@ -19,10 +18,11 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
 
     for(int epoch = 0; epoch < numEpoch && !stop; epoch++){
         time_t startTime = time(NULL);
+        double cost = 0.0;
 
         for(int k = 0; k < numBatch; k++){
 #ifdef DEBUG
-            if((k+1) % 500 == 0){
+            if(numBatchPerLog != 0 && (k+1) % numBatchPerLog == 0){
                 printf("epoch %d batch %d\n", epoch + 1, k + 1);
                 fflush(stdout);
             }
@@ -41,10 +41,14 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             }
             
             component.trainBatch(theBatchSize);
+
+            if(component.getTrainType() == Unsupervise){
+                cost += component.getTrainingCost(theBatchSize, numBatch);
+            }
         }
 
 
-        if(component.getTrainType() == Supervise){
+        if(component.getTrainType() == Supervise){  //supervised model
             int iterCount = numBatch * (epoch + 1);     //已经运行minibatch数量
 
             double err = getValidError(data, batchSize);
@@ -64,14 +68,19 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             if(iterCount > patience){
                 stop = true;
             }
+        }else { // unsupervise model
+            time_t endTime = time(NULL);
+            printf("epoch %d cost: %.8lf\ttime: %.2lf min\n", epoch+1, cost, (double)(endTime - startTime) / 60);
         }
+
+        component.operationPerEpoch();
     }
+    component.afterTraining(batchSize);
 }
 
 double TrainModel::getValidError(Dataset* data, int batchSize){
     int err = 0;
     int numBatch = (data->getValidateNumber()-1) / batchSize + 1;
-    double *out = component.getOutput();
     int numOut = data->getLabelNumber();
 
     for(int k = 0; k < numBatch; k++){
@@ -86,9 +95,9 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
 
         component.setInput(data->getValidateData(k * batchSize));
         component.setLabel(data->getValidateLabel(k * batchSize));
-
         component.runBatch(theBatchSize);
         for(int i = 0; i < theBatchSize; i++){
+            double *out = component.getOutput();
             int l = maxElem(out+i*numOut, numOut);
             if(*(component.getLabel() + i*numOut+l) != 1.0){
                 err++;
@@ -97,3 +106,26 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
     }
     return ((double)err) / data->getValidateNumber();
 }
+
+void MultiLayerTrainModel::train(Dataset* data, 
+        double learningRate, int batchSize, int numEpoch)
+{
+    int numLayer = component.getLayerNumber();
+    Dataset* curData = data;
+    for(int i = 0; i < numLayer; i++){
+        TrainModel model(component.getLayer(i));
+        if(i != 0){
+            Dataset* transData = new TransmissionDataset(*curData, component.getLayer(i-1));
+            if(curData != data)
+                delete curData;
+            curData = transData;
+        }
+        printf("Training layer %d ********\n", i+1);
+        model.train(curData, learningRate, batchSize, numEpoch);
+    }
+    if(curData != data)
+        delete curData;
+    component.saveModel();
+}
+
+
