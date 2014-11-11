@@ -3,7 +3,7 @@
 static double temp[maxUnit*maxUnit];
 
 RBM::RBM(int numVis, int numHid)
-    : numVis(numVis), numHid(numHid), chainStart(NULL),
+    : numVis(numVis), numHid(numHid), chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
       weightFile(NULL), UnsuperviseTrainComponent("RBM")
@@ -32,7 +32,7 @@ void RBM::loadModel(FILE* fd)
     fread(hbias, sizeof(double), numHid, fd);
 }
 
-RBM::RBM(const char *modelFile) : chainStart(NULL),
+RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
     weightFile(NULL), UnsuperviseTrainComponent("RBM")
@@ -47,7 +47,7 @@ RBM::RBM(const char *modelFile) : chainStart(NULL),
     fclose(fd);
 }
 
-RBM::RBM(FILE* fd) : chainStart(NULL),
+RBM::RBM(FILE* fd) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
     weightFile(NULL), UnsuperviseTrainComponent("RBM")
@@ -112,11 +112,15 @@ void RBM::runBatch(int size){
 void RBM::runChain(int size, int step){
     getHProb(v1, ph1, size);
     getHSample(ph1, h1, size);
-    if(chainStart == NULL){ //PCD
-        chainStart = h1;
+    if(persistent){
+        if(chainStart == NULL){ //PCD
+            chainStart = h1;
+        }
+        gibbsSampleHVH(chainStart, h2, ph2, v2, pv, step, size);
+        chainStart = h2;
+    }else{
+        gibbsSampleHVH(h1, h2, ph2, v2, pv, step, size);
     }
-    gibbsSampleHVH(chainStart, h2, ph2, v2, pv, step, size);
-    chainStart = h2;
 }
 
 void RBM::setLearningRate(double lr){

@@ -289,7 +289,7 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] / batch_size
 
     # numpy random generator
-    numpy_rng = numpy.random.RandomState(123)
+    numpy_rng = numpy.random.RandomState(1234)
     print '... building the model'
     # construct the Deep Belief Network
     dbn = DBN(numpy_rng=numpy_rng, n_ins=28 * 28,

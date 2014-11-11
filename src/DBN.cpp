@@ -26,6 +26,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
     char weightFile[100], modelFile[20];
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layersSize[i], layersSize[i+1]); 
+        layers[i]->setPersistent(false);
 
         //sprintf(weightFile, "result/DBN_Layer%d_weight.txt", i+1);
         //sprintf(modelFile, "result/DBN_Layer%d.dat", i+1);
@@ -39,6 +40,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const vector<const char*> &layerModel
 {
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layerModelFiles[i]);
+        layers[i]->setPersistent(false);
     }
 }
 
@@ -53,6 +55,7 @@ MultiLayerRBM::MultiLayerRBM(const char* file) :
     fread(&numLayer, sizeof(int), 1, fd);
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(fd);
+        layers[i]->setPersistent(false);
     }
     fclose(fd);
 }
@@ -110,6 +113,8 @@ void testMNISTLoading(){
 }
 
 int main(){
-    testMNISTLoading();
+    srand(1235);
+    testMNISTTraining();
+    //testMNISTLoading();
     return 0;
 }

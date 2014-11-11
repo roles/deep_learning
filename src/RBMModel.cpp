@@ -22,6 +22,7 @@ void testMNISTLoading(){
 }
 
 int main(){
+    srand(1234);
     testMNIST();
     //testMNISTLoading();
 }

@@ -29,6 +29,7 @@ class RBM : public UnsuperviseTrainComponent {
         void trainBatch(int);
         void runBatch(int);
         void setLearningRate(double lr);
+        void setPersistent(bool p) { persistent = p; };
         void setInput(double *input);
         double* getOutput() { return ph1; }
         int getOutputNumber() { return numHid; }
@@ -62,6 +63,7 @@ class RBM : public UnsuperviseTrainComponent {
         double *chainStart;
 
         double learningRate;
+        bool persistent;
 
         char *weightFile;
         friend class MultiLayerRBM;

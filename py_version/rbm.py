@@ -315,7 +315,7 @@ class RBM(object):
 
 
 def test_rbm(learning_rate=0.1, training_epochs=15,
-             dataset='../data/mnist.pkl.gz', batch_size=20,
+             dataset='../../data/mnist.pkl.gz', batch_size=20,
              n_chains=20, n_samples=10, output_folder='rbm_plots',
              n_hidden=500):
     """
@@ -363,7 +363,7 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
 
     # get the cost and the gradient corresponding to one step of CD-15
     cost, updates = rbm.get_cost_updates(lr=learning_rate,
-                                         persistent=persistent_chain, k=15)
+                                         persistent=persistent_chain, k=1)
 
     #################################
     #     Training the RBM          #
@@ -389,7 +389,6 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
         # go through the training set
         mean_cost = []
         for batch_index in xrange(n_train_batches):
-            print "batch_index: %d" % batch_index
             mean_cost += [train_rbm(batch_index)]
 
         print 'Training epoch %d, cost is ' % epoch, numpy.mean(mean_cost)
@@ -477,5 +476,5 @@ def my_test():
     image.save('samples.png')
 
 if __name__ == '__main__':
-    #test_rbm()
-    my_test()
+    test_rbm()
+    #my_test()
