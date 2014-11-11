@@ -9,7 +9,7 @@ void testMNIST(){
     rbm.setWeightFile("result/mnist_rbm_weight.txt"); //设置导出权重的文件
 
     TrainModel RBMModel(rbm);
-    RBMModel.train(&mnist, 0.1, 20, 5);
+    RBMModel.train(&mnist, 0.1, 20, 15);
 }
 
 void testMNISTLoading(){
@@ -25,7 +25,8 @@ void testMNISTDumpSample(){
     MNISTDataset mnist;
     mnist.loadData();
 
-    RBM rbm("result/DBN_Layer1.dat");
+    //RBM rbm("result/DBN_Layer1.dat");
+    RBM rbm("result/RBMModel.dat");
     double *sample = mnist.getValidateData(0);
     int sampleCount = 20;
 
