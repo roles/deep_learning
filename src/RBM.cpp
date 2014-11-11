@@ -110,16 +110,17 @@ void RBM::runBatch(int size){
 }
 
 void RBM::runChain(int size, int step){
+    getHProb(v1, ph1, size);
+    getHSample(ph1, h1, size);
     if(persistent){
         if(chainStart == NULL){ //PCD
-            chainStart = h1;
-            memset(h1, 0, sizeof(double)*numHid*size);
+            chainStart = h2;
+            memset(h2, 0, sizeof(double)*numHid*size);
         }
-        gibbsSampleHVH(chainStart, h2, ph2, v2, pv, step, size);
-        chainStart = h2;
+        gibbsSampleHVH(h2, h2, ph2, v2, pv, step, size);
+        //gibbsSampleHVH(chainStart, h2, ph2, v2, pv, step, size);
+        //chainStart = h2;
     }else{
-        getHProb(v1, ph1, size);
-        getHSample(ph1, h1, size);
         gibbsSampleHVH(h1, h2, ph2, v2, pv, step, size);
     }
 }
