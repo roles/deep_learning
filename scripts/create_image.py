@@ -54,7 +54,7 @@ def print_sample_image_from_file(filename):
                 line = f.readline()
                 arr.append([float(x) for x in line.split()])
             img_data.append(arr)
-    create_image(numpy.array(img_data), n_sample, n_node, "sample.png", False)
+    create_image(numpy.array(img_data), n_sample, n_node, "../result/sample.png", False)
 
 def print_da_weight_from_file(filename="da_weight.txt"):
     f = open(filename)
@@ -71,6 +71,6 @@ def print_da_weight_from_file(filename="da_weight.txt"):
 
 if __name__ == "__main__":
     #print_da_weight_from_file("da_weight_corrupt.txt")
-    print_W_image_from_file("../result/DBN_Layer1_weight.txt")
-    #print_sample_image_from_file("rbm_sample.txt")
+    #print_W_image_from_file("../result/DBN_Layer1_weight.txt")
+    print_sample_image_from_file("../result/rbm_sample.txt")
     #create_image(sys.argv[1], 28, 28)

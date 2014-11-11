@@ -37,15 +37,18 @@ class RBM : public UnsuperviseTrainComponent {
         void operationPerEpoch();
 
         void saveModel(FILE* modelFileFd);
+
+        void generateSample(const char*, double*, int);
     private:
         void getHProb(const double *v, double *ph, const int size);
         void getHSample(const double *ph, double *h, const int size);
         void getVProb(const double *h, double *pv, const int size);
         void getVSample(const double *pv, double *v, const int size);
-        void gibbsSampleHVH(const double *hStart, double *h, double *ph, 
+        void gibbsSampleHVH(double *hStart, double *h, double *ph, 
                                   double *v, double *pv, const int step, const int size);
         void getFE(const double *v, double *FE, const int size);
         double getPL(double *v, const int size);
+        void dumpSample(FILE*, double*, int);
 
         void runChain(int, int);
         void updateWeight(int);

@@ -198,9 +198,10 @@ void RBM::getVSample(const double *pv, double *v, const int size){
     }
 }
 
-void RBM::gibbsSampleHVH(const double *hStart, double *h, double *ph, 
+void RBM::gibbsSampleHVH(double *hStart, double *h, double *ph, 
                       double *v, double *pv, const int step, const int size){
-    cblas_dcopy(size * numHid, hStart, 1, h, 1);
+    if(h != hStart)
+        cblas_dcopy(size * numHid, hStart, 1, h, 1);
 
     for(int i = 0; i < step; i++){
         getVProb(h, pv, size);
@@ -326,4 +327,30 @@ void RBM::saveModel(FILE *fd){
     fwrite(weight, sizeof(double), numVis*numHid, fd);
     fwrite(vbias, sizeof(double), numVis, fd);
     fwrite(hbias, sizeof(double), numHid, fd);
+}
+
+void RBM::generateSample(const char* sampleFile, double* v, int count){
+    FILE* fd = fopen(sampleFile, "w+"); 
+    int chainStep = 10, generateCount = 10;
+    allocateBuffer(count);
+
+    dumpSample(fd, v, count);
+    getHProb(v, ph2, count);
+    getHSample(ph2, h2, count);
+    for(int i = 0; i < generateCount-1; i++){
+        gibbsSampleHVH(h2, h2, ph2, v2, pv, chainStep, count);
+        dumpSample(fd, pv, count);
+    } 
+    freeBuffer();
+    fclose(fd);
+}
+
+void RBM::dumpSample(FILE* fd, double *v, int count){
+    int numVisPerLine = 28;
+    for(int i = 0; i < count; i++){
+        for(int j = 0; j < numVis; j++){
+            fprintf(fd, "%.5lf%s", v[i*numVis+j], 
+                ((j+1) % numVisPerLine == 0) ? "\n" : "\t");
+        }
+    }
 }

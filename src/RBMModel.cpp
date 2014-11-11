@@ -21,8 +21,20 @@ void testMNISTLoading(){
     rbm.dumpWeight(100, 28);
 }
 
+void testMNISTDumpSample(){
+    MNISTDataset mnist;
+    mnist.loadData();
+
+    RBM rbm("result/DBN_Layer1.dat");
+    double *sample = mnist.getValidateData(0);
+    int sampleCount = 20;
+
+    rbm.generateSample("result/rbm_sample.txt", sample, sampleCount);
+}
+
 int main(){
     srand(1234);
-    testMNIST();
+    //testMNIST();
     //testMNISTLoading();
+    testMNISTDumpSample();
 }
