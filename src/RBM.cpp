@@ -285,6 +285,8 @@ void RBM::updateWeight(int size){
             1.0, ph1, numHid, v1, numVis,
             -1, temp, numVis);
 
+    cblas_dscal(numVis*numHid, 1.0 - 2.0 * L2Reg * learningRate , weight, 1);
+
     cblas_daxpy(numHid*numVis, learningRate / size,
             temp, 1, weight, 1);
 }
