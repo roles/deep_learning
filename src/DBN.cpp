@@ -15,15 +15,19 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         int getLayerNumber() { return numLayer; }
         void saveModel(FILE*);
         void toMLP(MLP*, int);
+        void loadLayer(int, const char*);
+        void setLayerToTrain(int i, bool b) { layersToTrain[i] = b; }
+        bool getLayerToTrain(int i) { return layersToTrain[i]; }
     private:
         RBM* layers[maxLayer];
         int numLayer;
+        vector<bool> layersToTrain;
 };
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
-    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer)
+    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), layersToTrain(numLayer, true)
 {
-    char weightFile[100], modelFile[20];
+    char weightFile[100], modelFile[100];
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layersSize[i], layersSize[i+1]); 
         //layers[i]->setPersistent(false);
@@ -36,7 +40,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
 }
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const vector<const char*> &layerModelFiles) :
-    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer)
+    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), layersToTrain(numLayer, true)
 {
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layerModelFiles[i]);
@@ -58,6 +62,7 @@ MultiLayerRBM::MultiLayerRBM(const char* file) :
         //layers[i]->setPersistent(false);
     }
     fclose(fd);
+    layersToTrain = vector<bool>(numLayer, true);
 }
 
 void MultiLayerRBM::saveModel(FILE* fd){
@@ -83,6 +88,11 @@ void MultiLayerRBM::toMLP(MLP* mlp, int lastNumOut){
         mlp->setLayer(i, new SigmoidLayer(layers[i]->numVis, layers[i]->numHid, layers[i]->weight, layers[i]->hbias));
     }
     mlp->addLayer(new Logistic(layers[numLayer-1]->numHid, lastNumOut));
+}
+
+void MultiLayerRBM::loadLayer(int i, const char* file){
+    delete layers[i];
+    layers[i] = new RBM(file);
 }
 
 void testMNISTTraining(){
@@ -113,9 +123,25 @@ void testMNISTLoading(){
     dbn.train(&mnist, 0.1, 10, 1000);
 }
 
+void testMNISTDBNSecondLayerTrain(){
+    MNISTDataset mnist;
+    mnist.loadData();
+
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500, 500};
+
+    MultiLayerRBM multirbm(2, rbmLayerSize);
+    multirbm.setModelFile("result/MultiLayerRBM.dat");
+    multirbm.loadLayer(0, "result/DBN_Layer1.dat");
+    multirbm.setLayerToTrain(0, false);
+
+    MultiLayerTrainModel dbn(multirbm);
+    dbn.train(&mnist, 0.01, 20, 50);
+}
+
 int main(){
     srand(1234);
-    testMNISTTraining();
+    //testMNISTTraining();
     //testMNISTLoading();
+    testMNISTDBNSecondLayerTrain();
     return 0;
 }

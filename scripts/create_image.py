@@ -31,7 +31,7 @@ def create_image(img_data, nrow, ncol, outfile, scale = True):
 def print_W_image_from_file(filename):
     f = open(filename)
     img_H = 28
-    for epcho in range(20):
+    for epcho in range(50):
         img_data = []
         for i in range(100):
             arr = []
@@ -71,6 +71,6 @@ def print_da_weight_from_file(filename="da_weight.txt"):
 
 if __name__ == "__main__":
     #print_da_weight_from_file("da_weight_corrupt.txt")
-    #print_W_image_from_file("../result/DBN_Layer1_weight.txt")
+    #print_W_image_from_file("../result/mnist_rbm_weight.txt")
     print_sample_image_from_file("../result/rbm_sample.txt")
     #create_image(sys.argv[1], 28, 28)

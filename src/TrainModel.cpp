@@ -124,7 +124,9 @@ void MultiLayerTrainModel::train(Dataset* data,
         }
         printf("Training layer %d ********\n", i+1);
         fflush(stdout);
-        model.train(curData, learningRate, batchSize, numEpoch);
+        if(component.getLayerToTrain(i)){
+            model.train(curData, learningRate, batchSize, numEpoch);
+        }
     }
     if(curData != data)
         delete curData;
