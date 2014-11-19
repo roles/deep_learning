@@ -31,7 +31,7 @@ def create_image(img_data, nrow, ncol, outfile, scale = True):
 def print_W_image_from_file(filename):
     f = open(filename)
     img_H = 28
-    for epcho in range(50):
+    for epcho in range(15):
         img_data = []
         for i in range(100):
             arr = []

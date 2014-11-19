@@ -71,7 +71,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             }
         }else { // unsupervise model
             time_t endTime = time(NULL);
-            printf("epoch %d cost: %.8lf\ttime: %.2lf min\n", epoch+1, cost, (double)(endTime - startTime) / 60);
+            printf("epoch %d cost: %.8lf\ttime: %.2lf min\n", epoch+1, cost / numBatch, (double)(endTime - startTime) / 60);
             fflush(stdout);
         }
 

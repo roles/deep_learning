@@ -45,6 +45,7 @@ class RBM : public UnsuperviseTrainComponent {
                                   double *v, double *pv, const int step, const int size);
         void getFE(const double *v, double *FE, const int size);
         double getPL(double *v, const int size);
+        double getReconstructCost(double *v, double *pv, int size);
         void dumpSample(FILE*, double*, int);
 
         void runChain(int, int);

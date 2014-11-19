@@ -14,6 +14,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         TrainComponent& getLayer(int);
         int getLayerNumber() { return numLayer; }
         void saveModel(FILE*);
+        void setPersistent(bool);
         void toMLP(MLP*, int);
         void loadLayer(int, const char*);
         void setLayerToTrain(int i, bool b) { layersToTrain[i] = b; }
@@ -22,15 +23,16 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         RBM* layers[maxLayer];
         int numLayer;
         vector<bool> layersToTrain;
+        bool persistent;
 };
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
-    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), layersToTrain(numLayer, true)
+    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), 
+    layersToTrain(numLayer, true), persistent(true)
 {
     char weightFile[100], modelFile[100];
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layersSize[i], layersSize[i+1]); 
-        //layers[i]->setPersistent(false);
 
         sprintf(weightFile, "result/DBN_Layer%d_weight.txt", i+1);
         sprintf(modelFile, "result/DBN_Layer%d.dat", i+1);
@@ -40,16 +42,17 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
 }
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const vector<const char*> &layerModelFiles) :
-    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), layersToTrain(numLayer, true)
+    MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), 
+    layersToTrain(numLayer, true), persistent(true)
 {
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layerModelFiles[i]);
-        //layers[i]->setPersistent(false);
     }
 }
 
 MultiLayerRBM::MultiLayerRBM(const char* file) :
-    MultiLayerTrainComponent("MultiLayerRBM")
+    MultiLayerTrainComponent("MultiLayerRBM"), 
+    layersToTrain(numLayer, true), persistent(true)
 {
     FILE* fd = fopen(file, "rb");
     if(fd == NULL){
@@ -59,10 +62,8 @@ MultiLayerRBM::MultiLayerRBM(const char* file) :
     fread(&numLayer, sizeof(int), 1, fd);
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(fd);
-        //layers[i]->setPersistent(false);
     }
     fclose(fd);
-    layersToTrain = vector<bool>(numLayer, true);
 }
 
 void MultiLayerRBM::saveModel(FILE* fd){
@@ -76,6 +77,11 @@ MultiLayerRBM::~MultiLayerRBM(){
     for(int i = 0; i < numLayer; i++){
         delete layers[i];
     }
+}
+
+void MultiLayerRBM::setPersistent(bool p){
+    for(int i = 0; i < numLayer; i++)
+        layers[i]->setPersistent(p);
 }
 
 TrainComponent& MultiLayerRBM::getLayer(int i){
@@ -98,12 +104,21 @@ void MultiLayerRBM::loadLayer(int i, const char* file){
 void testMNISTTraining(){
     MNISTDataset mnist;
     mnist.loadData();
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500, 500};
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
 
-    MultiLayerRBM multirbm(2, rbmLayerSize);
+    MultiLayerRBM multirbm(1, rbmLayerSize);
     multirbm.setModelFile("result/MultiLayerRBM.dat");
-    MultiLayerTrainModel dbn(multirbm);
-    dbn.train(&mnist, 0.01, 10, 20);
+    multirbm.setPersistent(false);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&mnist, 0.1, 10, 20);
+
+    MLP mlp;
+    multirbm.toMLP(&mlp, mnist.getLabelNumber());
+    mlp.setModelFile("result/DBN.dat");
+
+    TrainModel supervisedModel(mlp);
+    supervisedModel.train(&mnist, 0.1, 10, 1000);
 }
 
 void testMNISTLoading(){
@@ -140,8 +155,8 @@ void testMNISTDBNSecondLayerTrain(){
 
 int main(){
     srand(1234);
-    //testMNISTTraining();
+    testMNISTTraining();
     //testMNISTLoading();
-    testMNISTDBNSecondLayerTrain();
+    //testMNISTDBNSecondLayerTrain();
     return 0;
 }

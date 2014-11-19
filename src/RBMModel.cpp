@@ -7,9 +7,10 @@ void testMNIST(){
     RBM rbm(mnist.getFeatureNumber(), 500); //500个隐藏结点
     rbm.setModelFile("result/RBMModel.dat");
     rbm.setWeightFile("result/mnist_rbm_weight.txt"); //设置导出权重的文件
+    rbm.setPersistent(false);
 
     TrainModel RBMModel(rbm);
-    RBMModel.train(&mnist, 0.005, 20, 20);
+    RBMModel.train(&mnist, 0.1, 20, 15);
 }
 
 void testMNISTLoading(){

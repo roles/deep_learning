@@ -362,8 +362,10 @@ def test_rbm(learning_rate=0.1, training_epochs=15,
               n_hidden=n_hidden, numpy_rng=rng, theano_rng=theano_rng)
 
     # get the cost and the gradient corresponding to one step of CD-15
+    #cost, updates = rbm.get_cost_updates(lr=learning_rate,
+    #                                     persistent=persistent_chain, k=1)
     cost, updates = rbm.get_cost_updates(lr=learning_rate,
-                                         persistent=persistent_chain, k=1)
+                                         persistent=None, k=1)
 
     #################################
     #     Training the RBM          #

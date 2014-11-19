@@ -1,7 +1,7 @@
 #include "RBM.h"
 #include "mkl_cblas.h"
 
-static double temp[maxUnit*maxUnit];
+static double temp[maxUnit*maxUnit], temp2[maxUnit*maxUnit];
 
 RBM::RBM(int numVis, int numHid)
     : numVis(numVis), numHid(numHid), chainStart(NULL), persistent(true),
@@ -275,6 +275,26 @@ double RBM::getPL(double *v, const int size){
     return PL / size;
 }
 
+/*
+ * cross-entropy
+ */
+double RBM::getReconstructCost(double *v, double *pv, int size){
+    double res;
+
+    for(int i = 0; i < numVis * size; i++){
+        temp[i] = log(pv[i]);
+    }
+    res = cblas_ddot(size * numVis, v, 1, temp, 1);
+
+    for(int i = 0; i < numVis * size; i++){
+        temp[i] = 1.0 - v[i];
+        temp2[i] = log(1.0 - pv[i]);
+    }
+
+    res += cblas_ddot(size * numVis, temp, 1, temp2, 1);
+    return res / size;
+}
+
 void RBM::updateWeight(int size){
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
             numHid, numVis, size,
@@ -286,7 +306,7 @@ void RBM::updateWeight(int size){
             1.0, ph1, numHid, v1, numVis,
             -1, temp, numVis);
 
-    cblas_dscal(numVis*numHid, 1.0 - 2.0 * L2Reg * learningRate , weight, 1);
+    //cblas_dscal(numVis*numHid, 1.0 - 2.0 * L2Reg * learningRate , weight, 1);
 
     cblas_daxpy(numHid*numVis, learningRate / size,
             temp, 1, weight, 1);
@@ -319,7 +339,11 @@ void RBM::updateBias(int size){
 }
 
 double RBM::getTrainingCost(int size, int numBatch){
-    return getPL(v1, size) / numBatch;
+    if(persistent){
+        return getPL(v1, size);
+    }else{
+        return getReconstructCost(v1, pv, size);
+    }
 }
 
 void RBM::operationPerEpoch(){
