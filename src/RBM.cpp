@@ -1,4 +1,5 @@
 #include "RBM.h"
+#include "mkl_cblas.h"
 
 static double temp[maxUnit*maxUnit];
 

@@ -9,7 +9,7 @@ void testMNIST(){
     rbm.setWeightFile("result/mnist_rbm_weight.txt"); //设置导出权重的文件
 
     TrainModel RBMModel(rbm);
-    RBMModel.train(&mnist, 0.1, 20, 15);
+    RBMModel.train(&mnist, 0.005, 20, 20);
 }
 
 void testMNISTLoading(){

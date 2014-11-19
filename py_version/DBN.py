@@ -29,7 +29,7 @@ class DBN(object):
     """
 
     def __init__(self, numpy_rng, theano_rng=None, n_ins=784,
-                 hidden_layers_sizes=[500, 500], n_outs=10):
+                 hidden_layers_sizes=[500], n_outs=10):
         """This class is made to support a variable number of layers.
 
         :type numpy_rng: numpy.random.RandomState

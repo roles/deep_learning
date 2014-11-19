@@ -1,4 +1,5 @@
 #include "Logistic.h"
+#include "mkl_cblas.h"
 
 using namespace std;
 

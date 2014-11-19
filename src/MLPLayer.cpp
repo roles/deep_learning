@@ -1,4 +1,5 @@
 #include "MLPLayer.h"
+#include "mkl_cblas.h"
 
 static MLPBuffer temp, temp2;
 

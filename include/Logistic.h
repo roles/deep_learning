@@ -1,6 +1,3 @@
-extern "C" {
-#include "cblas.h"
-}
 #include "Config.h"
 #include "TrainModel.h"
 #include "Utility.h"
