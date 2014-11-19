@@ -89,11 +89,14 @@ TrainComponent& MultiLayerRBM::getLayer(int i){
 }
 
 void MultiLayerRBM::toMLP(MLP* mlp, int lastNumOut){
+    double *transWeight = new double[maxUnit*maxUnit];
     mlp->setLayerNumber(numLayer);
     for(int i = 0; i < numLayer; i++){
-        mlp->setLayer(i, new SigmoidLayer(layers[i]->numVis, layers[i]->numHid, layers[i]->weight, layers[i]->hbias));
+        layers[i]->getWeightTrans(transWeight);
+        mlp->setLayer(i, new SigmoidLayer(layers[i]->numVis, layers[i]->numHid, transWeight, layers[i]->hbias));
     }
     mlp->addLayer(new Logistic(layers[numLayer-1]->numHid, lastNumOut));
+    delete[] transWeight;
 }
 
 void MultiLayerRBM::loadLayer(int i, const char* file){
@@ -125,11 +128,7 @@ void testMNISTLoading(){
     MNISTDataset mnist;
     mnist.loadData();
 
-    vector<const char*> layerModelFiles;
-    layerModelFiles.push_back("result/DBN_Layer1.dat");
-    layerModelFiles.push_back("result/DBN_Layer2.dat");
-
-    MultiLayerRBM multirbm(2, layerModelFiles);
+    MultiLayerRBM multirbm("result/MultiLayerRBM.dat");
     MLP mlp;
     multirbm.toMLP(&mlp, mnist.getLabelNumber());
     mlp.setModelFile("result/DBN.dat");

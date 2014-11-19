@@ -34,6 +34,7 @@ class RBM : public UnsuperviseTrainComponent {
         void operationPerEpoch();
 
         void saveModel(FILE* modelFileFd);
+        void getWeightTrans(double *weight);
 
         void generateSample(const char*, double*, int);
     private:

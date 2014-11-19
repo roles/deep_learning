@@ -383,3 +383,9 @@ void RBM::dumpSample(FILE* fd, double *v, int count){
         }
     }
 }
+
+void RBM::getWeightTrans(double *transWeight){
+    for(int i = 0; i < numHid; i++)
+        for(int j = 0; j < numVis; j++)
+            transWeight[j*numHid+i] = weight[i*numVis+j];
+}
