@@ -25,7 +25,7 @@ LDFLAGS:=$(LDFLAGS) $(MKLLDFLAGS_64)
 endif
 
 CFLAGS=-c -g -DDEBUG -pg -Iinclude -I../include -I/opt/intel/composer_xe_2013.5.192/mkl/include
-OBJECTS=MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
+OBJECTS=MultiLayerRBM.o MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
 OBJECTS:=$(patsubst %.o, src/%.o, $(OBJECTS))
 MKLOBJECTS=Logistic.o MLPLayer.o RBM.o
 MKLOBJECTS:=$(patsubst %, src/%, $(MKLOBJECTS))
