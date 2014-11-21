@@ -25,6 +25,11 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             if(numBatchPerLog != 0 && (k+1) % numBatchPerLog == 0){
                 printf("epoch %d batch %d\n", epoch + 1, k + 1);
                 fflush(stdout);
+
+                if(epoch >= 3){
+                    double err = getValidError(data, batchSize);
+                    printf("validation error : %.5lf%%\n", err*100);
+                }
             }
 #endif
             int theBatchSize;
