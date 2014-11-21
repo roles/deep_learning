@@ -14,6 +14,6 @@ void testTrainMNIST(){
 }
 
 int main(){
-    printf("%.5lf\n", exp(1000.0));
+    testTrainMNIST();
     return 0;
 }

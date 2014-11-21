@@ -212,8 +212,16 @@ void ClassRBM::getHProb(double *x, double *y, double *ph, int size){
     cblas_dger(CblasRowMajor, size, numHid,
                1.0, I(), 1, c, 1, ph, numHid);
 
-    for(int i = 0; i < numHid * size; i++)
-        ph[i] = sigmoidc(ph[i]);
+    for(int i = 0; i < numHid * size; i++){
+	/*if(ph[i] > 30){
+	    ph[i] = 1.0 - 1e-10;
+	}else if(ph[i] < -30){
+	    ph[i] = 1e-13;
+	}else{
+	    ph[i] = sigmoid(ph[i]);
+	}*/
+	ph[i] = sigmoid(ph[i]);
+    }
 }
 
 void ClassRBM::getYProb(double *x, double *py, int size){
@@ -243,7 +251,9 @@ void ClassRBM::getYProb(double *x, double *py, int size){
                     1.0, softp, numHid);
 
         for(int j = 0; j < size * numHid; j++){
-            softp[j] = softplusc(softp[j]);
+	    if(softp[j] < 30){
+		softp[j] = softplus(softp[j]);
+	    } 
         }
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
@@ -252,12 +262,30 @@ void ClassRBM::getYProb(double *x, double *py, int size){
                     0, res, 1);
 
         for(int j = 0; j < size; j++){
-            py[j*numLabel+i] = expc(d[i] + res[j]);
+	    //py[j*numLabel+i] = exp(d[i] + res[j]);
+
+	    py[j*numLabel+i] = d[i] + res[j];
+
+	    if(isnan(py[j*numLabel+i]) || isinf(py[j*numLabel+i])){
+		printf("nan inf occur %.10lf\n", d[i]+res[j]);
+		exit(1);
+	    }
         }
 
         for(int j = 0; j < size; j++){  //reset label
             ty[j*numLabel+i] = 0;
         }
+    }
+
+    for(int i = 0; i < size; i++){
+	double maxval = -100.0;
+	for(int j = 0; j < numLabel; j++){
+	    if(py[i*numLabel+j] > maxval)
+		maxval = py[i*numLabel+j];
+	}
+	for(int j = 0; j < numLabel; j++){
+	    py[i*numLabel+j] = exp(py[i*numLabel+j] - maxval);
+	}
     }
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
