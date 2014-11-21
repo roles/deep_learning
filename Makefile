@@ -25,11 +25,11 @@ LDFLAGS:=$(LDFLAGS) $(MKLLDFLAGS_64)
 endif
 
 CFLAGS=-c -g -DDEBUG -pg -Iinclude -I../include -I/opt/intel/composer_xe_2013.5.192/mkl/include
-OBJECTS=MultiLayerRBM.o MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
+OBJECTS=MultiLayerRBM.o ClassRBM.o MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
 OBJECTS:=$(patsubst %.o, src/%.o, $(OBJECTS))
-MKLOBJECTS=Logistic.o MLPLayer.o RBM.o
+MKLOBJECTS=ClassRBM.o Logistic.o MLPLayer.o RBM.o
 MKLOBJECTS:=$(patsubst %, src/%, $(MKLOBJECTS))
-MODELS=LogisticModel MLPModel RBMModel DBN
+MODELS=LogisticModel MLPModel RBMModel DBN ClassRBMModel
 BLASLIB=./lib/libblas.a
 CBLASLIB=./lib/libcblas.a
 LOADER=gfortran

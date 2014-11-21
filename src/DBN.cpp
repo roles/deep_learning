@@ -4,14 +4,14 @@
 void testMNISTTraining(){
     MNISTDataset mnist;
     mnist.loadData();
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 1000, 1000};
 
-    MultiLayerRBM multirbm(1, rbmLayerSize);
+    MultiLayerRBM multirbm(3, rbmLayerSize);
     multirbm.setModelFile("result/MultiLayerRBM.dat");
     multirbm.setPersistent(false);
 
     MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&mnist, 0.1, 10, 20);
+    pretrainModel.train(&mnist, 0.01, 10, 20);
 
     MLP mlp;
     multirbm.toMLP(&mlp, mnist.getLabelNumber());
@@ -51,8 +51,8 @@ void testMNISTDBNSecondLayerTrain(){
 
 int main(){
     srand(1234);
-    //testMNISTTraining();
-    testMNISTLoading();
+    testMNISTTraining();
+    //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
     return 0;
 }

@@ -22,6 +22,10 @@ inline double sigmoid(double x){
     return 1.0 / (1.0 + exp(-x));
 }
 
+inline double softplus(double a){
+    return log(1.0 + exp(a));
+}
+
 inline double get_sigmoid_derivative(double y){
     return y * (1.0 - y);
 }
@@ -38,5 +42,6 @@ inline double tanh(double x){
 inline double get_tanh_derivative(double y){
     return 1.0 - y * y;
 }
+
 
 #endif
