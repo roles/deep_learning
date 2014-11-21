@@ -1,8 +1,9 @@
 #include "ClassRBM.h"
 #include "Dataset.h"
 #include "TrainModel.h"
+#include <cmath>
 
-int main(){
+void testTrainMNIST(){
     MNISTDataset mnist;
     mnist.loadData();
 
@@ -10,6 +11,9 @@ int main(){
 
     TrainModel ClassRBMModel(classrbm);
     ClassRBMModel.train(&mnist, 0.05, 20, 1000);
+}
 
+int main(){
+    printf("%.5lf\n", exp(1000.0));
     return 0;
 }

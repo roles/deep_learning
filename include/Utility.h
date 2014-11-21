@@ -9,6 +9,9 @@ void initializeWeightSigmoid(double *weight, int numIn, int numOut);
 void initializeWeightTanh(double *weight, int numIn, int numOut);
 void softmax(double *arr, int size);
 int maxElem(double *arr, int size);
+double expc(double x);
+double sigmoidc(double x);
+double softplusc(double x);
 
 inline int random_int(int low, int high){
     return rand() % (high - low + 1) + low;

@@ -213,7 +213,7 @@ void ClassRBM::getHProb(double *x, double *y, double *ph, int size){
                1.0, I(), 1, c, 1, ph, numHid);
 
     for(int i = 0; i < numHid * size; i++)
-        ph[i] = sigmoid(ph[i]);
+        ph[i] = sigmoidc(ph[i]);
 }
 
 void ClassRBM::getYProb(double *x, double *py, int size){
@@ -243,7 +243,7 @@ void ClassRBM::getYProb(double *x, double *py, int size){
                     1.0, softp, numHid);
 
         for(int j = 0; j < size * numHid; j++){
-            softp[j] = softplus(softp[j]);
+            softp[j] = softplusc(softp[j]);
         }
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
@@ -252,7 +252,7 @@ void ClassRBM::getYProb(double *x, double *py, int size){
                     0, res, 1);
 
         for(int j = 0; j < size; j++){
-            py[j*numLabel+i] = exp(d[i] + res[j]);
+            py[j*numLabel+i] = expc(d[i] + res[j]);
         }
 
         for(int j = 0; j < size; j++){  //reset label

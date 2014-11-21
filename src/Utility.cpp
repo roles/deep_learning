@@ -3,6 +3,8 @@
 
 static double _I[maxUnit*maxBatchSize];
 
+const double expThreshold = 30.0;
+
 double* I(){
     static bool hasVisit = false;
     if(!hasVisit){
@@ -53,4 +55,40 @@ int maxElem(double *arr, int size){
             maxe = i;
     }
     return maxe;
+}
+
+/*
+ * exp function with check to avoid `inf` and `nan`
+ */
+double expc(double x){
+    if(x > expThreshold){
+        return exp(expThreshold);
+    }else if(x < -expThreshold){
+        return exp(-expThreshold);
+    }
+    return exp(x);
+}
+
+/*
+ * sigmoid function with check to avoid `inf` and `nan`
+ */
+double sigmoidc(double x){
+    if(x > expThreshold){
+        return 1.0;
+    }else if(x < -expThreshold){
+        return 0.0000000001;
+    }
+    return sigmoid(x);
+}
+
+/*
+ * softplus function with check to avoid `inf` and `nan`
+ */
+double softplusc(double x){
+    if(x > expThreshold){
+        return softplus(expThreshold);
+    }else if(x < -expThreshold){
+        return softplus(-expThreshold);
+    }
+    return softplus(x);
 }
