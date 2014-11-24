@@ -28,8 +28,18 @@ void testMNISTDataLoading(){
     printf("validate error : %.8lf%%\n", 100.0 * logisticModel.getValidError(&mnist, 500));
 }
 
+void testTCGATraining(){
+    TCGADataset tcga;
+    tcga.loadData();
+
+    //MNISTDataset mnist;
+    //mnist.loadData();
+}
+
 int main(){
-    testMNISTTraining();
-    testMNISTDataLoading();
+    //testMNISTTraining();
+    //testMNISTDataLoading();
     //testICA();
+
+    testTCGATraining();
 }

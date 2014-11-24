@@ -1,6 +1,7 @@
 #include "Dataset.h"
 #include "TrainModel.h"
 #include "Utility.h"
+#include <cstring>
 
 Dataset::Dataset(){
     numFeature = 0;
@@ -265,3 +266,90 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 }
 
 TransmissionDataset::~TransmissionDataset(){ }
+
+void TCGADataset::loadData(const char tcgaTrainDataFile[],
+                           const char tcgaValidDataFile[])
+{
+    char line[10000];
+    char *saveptr, *saveptr2;
+
+    FILE* trainfd = fopen(tcgaTrainDataFile, "r");
+    fscanf(trainfd, "%d", &numTrain);
+    printf("number of training sample : %d\n", numTrain);
+
+    fscanf(trainfd, "%d", &numFeature);
+    printf("number of feature : %d\n", numFeature);
+
+    fscanf(trainfd, "%d", &numLabel);
+    printf("number of label : %d\n", numLabel);
+    getc(trainfd);
+
+    trainingData = new double[numTrain*numFeature];
+    trainingLabel = new double[numTrain*numLabel];
+    memset(trainingData, 0, sizeof(double)*numTrain*numFeature);
+    memset(trainingLabel, 0, sizeof(double)*numLabel*numTrain);
+
+    for(int i = 0; i < numTrain; i++){
+        fgets(line, 10000, trainfd); 
+        char *token = strtok_r(line, " ", &saveptr);
+
+        int label;
+        sscanf(token, "%d", &label);
+        //printf("%d\t", label);
+        label = label - 1;
+        trainingLabel[i*numLabel+label] = 1.0;
+
+        while((token = strtok_r(NULL, " ", &saveptr)) != NULL){
+            int x;
+            double val; 
+
+            sscanf(token, "%d:%lf", &x, &val);
+            x = x - 1;
+            trainingData[i*numFeature+x] = val;
+
+            //printf("%d:%lf\t", x, val);
+        }
+        //printf("\n");
+    }
+    fclose(trainfd);
+
+    FILE* validfd = fopen(tcgaValidDataFile, "r");
+    fscanf(validfd, "%d", &numValid);
+    printf("number of validate sample : %d\n", numValid);
+
+    fscanf(validfd, "%d", &numFeature);
+    printf("number of feature : %d\n", numFeature);
+
+    fscanf(validfd, "%d", &numLabel);
+    printf("number of label : %d\n", numLabel);
+    getc(validfd);
+
+    validateData = new double[numValid*numFeature];
+    validateLabel = new double[numValid*numLabel];
+    memset(validateData, 0, sizeof(double)*numValid*numFeature);
+    memset(validateLabel, 0, sizeof(double)*numLabel*numValid);
+
+    for(int i = 0; i < numValid; i++){
+        fgets(line, 10000, validfd); 
+        char *token = strtok_r(line, " ", &saveptr);
+
+        int label;
+        sscanf(token, "%d", &label);
+        //printf("%d\t", label);
+        label = label - 1;
+        validateLabel[i*numLabel+label] = 1.0;
+
+        while((token = strtok_r(NULL, " ", &saveptr)) != NULL){
+            int x;
+            double val; 
+
+            sscanf(token, "%d:%lf", &x, &val);
+            x = x - 1;
+            validateData[i*numFeature+x] = val;
+
+            //printf("%d:%lf\t", x, val);
+        }
+        //printf("\n");
+    }
+    fclose(validfd);
+}
