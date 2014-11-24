@@ -107,6 +107,7 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
             }
         }
     }
+    delete iter;
     return ((double)err) / data->getValidateNumber();
 }
 
