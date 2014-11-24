@@ -57,6 +57,7 @@ int maxElem(double *arr, int size){
     return maxe;
 }
 
+
 /*
  * exp function with check to avoid `inf` and `nan`
  */
@@ -92,3 +93,5 @@ double softplusc(double x){
     }
     return softplus(x);
 }
+
+

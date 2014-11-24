@@ -1,5 +1,6 @@
 #include "Dataset.h"
 #include "TrainModel.h"
+#include "Utility.h"
 
 Dataset::Dataset(){
     numFeature = 0;
@@ -16,6 +17,54 @@ Dataset::~Dataset(){
     delete[] trainingLabel;
     delete[] validateLabel;
     delete[] testLabel;
+}
+
+SubDataset Dataset::getTrainingSet(){
+    return SubDataset(numTrain, numFeature, numLabel, trainingData, trainingLabel);
+}
+
+SubDataset Dataset::getValidateSet(){
+    return SubDataset(numValid, numFeature, numLabel, validateData, validateLabel);
+}
+
+SubDataset Dataset::getTestSet(){
+    return SubDataset(numTest, numFeature, numLabel, testData, testLabel);
+}
+
+int SequentialBatchIterator::getRealBatchSize(){
+    if(cur == (size-1)){
+        return data->numSample - batchSize * cur;
+    }else{
+        return batchSize;
+    }
+}
+
+RandomBatchIterator::RandomBatchIterator(SubDataset *data, int batchSize) :
+    BatchIterator(data, batchSize)
+{
+    size = (data->numSample-1) / batchSize + 1;
+    randIndex = vector<int>(size);
+}
+
+void RandomBatchIterator::first(){
+    cur = 0;
+    for(int i = 0; i < size; i++){
+        randIndex[i] = i;
+    }
+    for(int i = 0; i < size; i++){
+        int x = random_int(i, size-1);
+        int tmp = randIndex[i];
+        randIndex[i] = randIndex[x];
+        randIndex[x] = tmp;
+    }
+}
+
+int RandomBatchIterator::getRealBatchSize(){
+    if(randIndex[cur] == (size-1)){
+        return data->numSample - batchSize * randIndex[cur];
+    }else{
+        return batchSize;
+    }
 }
 
 static int changeEndian(int a){

@@ -36,7 +36,7 @@ void testMNISTDumpSample(){
 
 int main(){
     srand(1234);
-    //testMNIST();
+    testMNIST();
     //testMNISTLoading();
-    testMNISTDumpSample();
+    //testMNISTDumpSample();
 }

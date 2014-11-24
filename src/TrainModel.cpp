@@ -16,35 +16,27 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
     double bestErr = 100;   // 用于记录early stopping
     int patience = 10000;   // 至少要运行的minibatch数量
 
+    SubDataset trainset = data->getTrainingSet();
+    BatchIterator *iter = new RandomBatchIterator(&trainset, batchSize);
+
     for(int epoch = 0; epoch < numEpoch && !stop; epoch++){
         time_t startTime = time(NULL);
         double cost = 0.0;
 
-        for(int k = 0; k < numBatch; k++){
+        for(iter->first(); !iter->isDone(); iter->next()){
+            int k = iter->CurrentIndex();
 #ifdef DEBUG
             if(numBatchPerLog != 0 && (k+1) % numBatchPerLog == 0){
                 printf("epoch %d batch %d\n", epoch + 1, k + 1);
                 fflush(stdout);
-
-                if(epoch >= 3){
-                    double err = getValidError(data, batchSize);
-                    printf("validation error : %.5lf%%\n", err*100);
-                }
             }
 #endif
-            int theBatchSize;
-
-            if(k == (numBatch-1)){
-                theBatchSize = data->getTrainingNumber() - batchSize * k;
-            }else{
-                theBatchSize = batchSize;
-            }
-
-            component.setInput(data->getTrainingData(k * batchSize));
+            int theBatchSize = iter->getRealBatchSize();
+            component.setInput(iter->CurrentDataBatch());
             if(component.getTrainType() == Supervise){
-                component.setLabel(data->getTrainingLabel(k * batchSize));
+                component.setLabel(iter->CurrentLabelBatch());
             }
-            
+
             component.trainBatch(theBatchSize);
 
             if(component.getTrainType() == Unsupervise){
@@ -81,28 +73,32 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
         }
 
         component.operationPerEpoch();
+
     }
     component.afterTraining(batchSize);
+    delete iter;
 }
 
 double TrainModel::getValidError(Dataset* data, int batchSize){
     int err = 0;
     int numBatch = (data->getValidateNumber()-1) / batchSize + 1;
     int numOut = data->getLabelNumber();
+    SubDataset validset = data->getValidateSet();
+    BatchIterator *iter = new SequentialBatchIterator(&validset, batchSize);
 
-    for(int k = 0; k < numBatch; k++){
+    for(iter->first(); !iter->isDone(); iter->next()){
+        int k = iter->CurrentIndex();
 
-        int theBatchSize;
-
-        if(k == (numBatch-1)){
-            theBatchSize = data->getValidateNumber() - batchSize * k;
-        }else{
-            theBatchSize = batchSize;
+        int theBatchSize = iter->getRealBatchSize();
+        component.setInput(iter->CurrentDataBatch());
+        if(component.getTrainType() == Supervise){
+            component.setLabel(iter->CurrentLabelBatch());
         }
 
-        component.setInput(data->getValidateData(k * batchSize));
-        component.setLabel(data->getValidateLabel(k * batchSize));
+        component.setInput(iter->CurrentDataBatch());
+        component.setLabel(iter->CurrentLabelBatch());
         component.runBatch(theBatchSize);
+
         for(int i = 0; i < theBatchSize; i++){
             double *out = component.getOutput();
             int l = maxElem(out+i*numOut, numOut);

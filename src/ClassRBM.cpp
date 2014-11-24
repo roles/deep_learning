@@ -74,7 +74,7 @@ void ClassRBM::forward(int size){
 
         for(int j = 0; j < size; j++){
             cblas_dscal(numHid, py[j*numLabel+i] , 
-                        &phk[i*size*numHid+j*numHid], 1);
+                    &phk[i*size*numHid+j*numHid], 1);
         }
 
         for(int j = 0; j < size; j++){  //reset label
@@ -88,17 +88,17 @@ void ClassRBM::updateW(int size){
            *delta = temp2;
 
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                numHid, numVis, size,
-                1.0, ph, numHid, x, numVis,
-                0, delta, numVis);
+            numHid, numVis, size,
+            1.0, ph, numHid, x, numVis,
+            0, delta, numVis);
 
     memset(deltaSum, 0, sizeof(double)*numVis*numHid);
 
     for(int i = 0; i < numLabel; i++){
         cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                    numHid, numVis, size,
-                    1.0, &phk[i*size*numHid], numHid, x, numVis,
-                    1.0, deltaSum, numVis);
+                numHid, numVis, size,
+                1.0, &phk[i*size*numHid], numHid, x, numVis,
+                1.0, deltaSum, numVis);
     }
 
     cblas_daxpy(numVis*numHid, -1.0, deltaSum, 1, delta, 1);
@@ -113,9 +113,9 @@ void ClassRBM::updateU(int size){
     memset(ty, 0, sizeof(double)*size*numLabel);
 
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                numHid, numLabel, size,
-                1.0, ph, numHid, y, numLabel,
-                0, delta, numLabel);
+            numHid, numLabel, size,
+            1.0, ph, numHid, y, numLabel,
+            0, delta, numLabel);
 
     memset(deltaSum, 0, sizeof(double)*numLabel*numHid);
 
@@ -126,9 +126,9 @@ void ClassRBM::updateU(int size){
         }
 
         cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                    numHid, numLabel, size,
-                    1.0, &phk[i*size*numHid], numHid, ty, numLabel,
-                    1.0, deltaSum, numLabel);
+                numHid, numLabel, size,
+                1.0, &phk[i*size*numHid], numHid, ty, numLabel,
+                1.0, deltaSum, numLabel);
 
         for(int j = 0; j < size; j++){  //reset label
             ty[j*numLabel+i] = 0;
@@ -145,17 +145,17 @@ void ClassRBM::updateHbias(int size){
            *delta = temp2;
 
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                numHid, 1, size,
-                1.0, ph, numHid, I(), 1,
-                0, delta, 1);
+            numHid, 1, size,
+            1.0, ph, numHid, I(), 1,
+            0, delta, 1);
 
     memset(deltaSum, 0, sizeof(double)*numVis*numHid);
 
     for(int i = 0; i < numLabel; i++){
         cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                    numHid, 1, size,
-                    1.0, &phk[i*size*numHid], numHid, I(), 1,
-                    1.0, deltaSum, 1);
+                numHid, 1, size,
+                1.0, &phk[i*size*numHid], numHid, I(), 1,
+                1.0, deltaSum, 1);
     }
 
     cblas_daxpy(numHid, -1.0, deltaSum, 1, delta, 1);
@@ -172,9 +172,9 @@ void ClassRBM::updateYBias(int size){
     cblas_daxpy(size*numLabel, -1.0, py, 1, deltaSum, 1);
 
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                numLabel, 1, size,
-                1.0, deltaSum, numLabel, I(), 1,
-                0, delta, 1);
+            numLabel, 1, size,
+            1.0, deltaSum, numLabel, I(), 1,
+            0, delta, 1);
 
     cblas_daxpy(numLabel, learningRate / size, delta, 1, d, 1);
 }
@@ -200,27 +200,20 @@ void ClassRBM::initBuffer(int size){
 void ClassRBM::getHProb(double *x, double *y, double *ph, int size){
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-                size, numHid, numVis,
-                1.0, x, numVis, W, numVis,
-                0, ph, numHid);
+            size, numHid, numVis,
+            1.0, x, numVis, W, numVis,
+            0, ph, numHid);
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-                size, numHid, numLabel,
-                1.0, y, numLabel, U, numLabel,
-                1.0, ph, numHid);
+            size, numHid, numLabel,
+            1.0, y, numLabel, U, numLabel,
+            1.0, ph, numHid);
 
     cblas_dger(CblasRowMajor, size, numHid,
-               1.0, I(), 1, c, 1, ph, numHid);
+            1.0, I(), 1, c, 1, ph, numHid);
 
     for(int i = 0; i < numHid * size; i++){
-	/*if(ph[i] > 30){
-	    ph[i] = 1.0 - 1e-10;
-	}else if(ph[i] < -30){
-	    ph[i] = 1e-13;
-	}else{
-	    ph[i] = sigmoid(ph[i]);
-	}*/
-	ph[i] = sigmoid(ph[i]);
+        ph[i] = sigmoid(ph[i]);
     }
 }
 
@@ -231,12 +224,12 @@ void ClassRBM::getYProb(double *x, double *py, int size){
     memset(ty, 0, sizeof(double)*size*numLabel);
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-                size, numHid, numVis,
-                1.0, x, numVis, W, numVis,
-                0, preAddU, numHid);
+            size, numHid, numVis,
+            1.0, x, numVis, W, numVis,
+            0, preAddU, numHid);
 
     cblas_dger(CblasRowMajor, size, numHid,
-               1.0, I(), 1, c, 1, preAddU, numHid);
+            1.0, I(), 1, c, 1, preAddU, numHid);
 
     for(int i = 0; i < numLabel; i++){
         for(int j = 0; j < size; j++){  //set label
@@ -246,30 +239,30 @@ void ClassRBM::getYProb(double *x, double *py, int size){
         cblas_dcopy(size * numHid, preAddU, 1, softp, 1);
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-                    size, numHid, numLabel,
-                    1.0, ty, numLabel, U, numLabel,
-                    1.0, softp, numHid);
+                size, numHid, numLabel,
+                1.0, ty, numLabel, U, numLabel,
+                1.0, softp, numHid);
 
         for(int j = 0; j < size * numHid; j++){
-	    if(softp[j] < 30){
-		softp[j] = softplus(softp[j]);
-	    } 
+            if(softp[j] < 30){
+                softp[j] = softplus(softp[j]);
+            } 
         }
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                    size, 1, numHid,
-                    1.0, softp, numHid, I(), 1,
-                    0, res, 1);
+                size, 1, numHid,
+                1.0, softp, numHid, I(), 1,
+                0, res, 1);
 
         for(int j = 0; j < size; j++){
-	    //py[j*numLabel+i] = exp(d[i] + res[j]);
+            //py[j*numLabel+i] = exp(d[i] + res[j]);
 
-	    py[j*numLabel+i] = d[i] + res[j];
+            py[j*numLabel+i] = d[i] + res[j];
 
-	    if(isnan(py[j*numLabel+i]) || isinf(py[j*numLabel+i])){
-		printf("nan inf occur %.10lf\n", d[i]+res[j]);
-		exit(1);
-	    }
+            if(isnan(py[j*numLabel+i]) || isinf(py[j*numLabel+i])){
+                printf("nan inf occur %.10lf\n", d[i]+res[j]);
+                exit(1);
+            }
         }
 
         for(int j = 0; j < size; j++){  //reset label
@@ -277,21 +270,22 @@ void ClassRBM::getYProb(double *x, double *py, int size){
         }
     }
 
+    // substract the maximum to avoid exp inf
     for(int i = 0; i < size; i++){
-	double maxval = -100.0;
-	for(int j = 0; j < numLabel; j++){
-	    if(py[i*numLabel+j] > maxval)
-		maxval = py[i*numLabel+j];
-	}
-	for(int j = 0; j < numLabel; j++){
-	    py[i*numLabel+j] = exp(py[i*numLabel+j] - maxval);
-	}
+        double maxval = -100.0;
+        for(int j = 0; j < numLabel; j++){
+            if(py[i*numLabel+j] > maxval)
+                maxval = py[i*numLabel+j];
+        }
+        for(int j = 0; j < numLabel; j++){
+            py[i*numLabel+j] = exp(py[i*numLabel+j] - maxval);
+        }
     }
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                size, 1, numLabel,
-                1.0, py, numLabel, I(), 1,
-                0, res, 1);
+            size, 1, numLabel,
+            1.0, py, numLabel, I(), 1,
+            0, res, 1);
 
     for(int i = 0; i < size; i++){
         for(int j = 0; j < numLabel; j++){
