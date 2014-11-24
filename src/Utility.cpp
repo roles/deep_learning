@@ -39,7 +39,7 @@ void initializeWeightTanh(double *weight, int numIn, int numOut){
 
 void softmax(double *arr, int size){
     double sum = 0.0;
-    double maxval = -1000;
+    double maxval = -DBL_MAX;
 
     for(int i = 0; i < size; i++){
         if(maxval < arr[i])

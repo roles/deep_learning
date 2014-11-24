@@ -272,7 +272,7 @@ void ClassRBM::getYProb(double *x, double *py, int size){
 
     // substract the maximum to avoid exp inf
     for(int i = 0; i < size; i++){
-        double maxval = -100.0;
+        double maxval = -DBL_MAX;
         for(int j = 0; j < numLabel; j++){
             if(py[i*numLabel+j] > maxval)
                 maxval = py[i*numLabel+j];
