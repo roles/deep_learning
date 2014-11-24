@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "mkl_cblas.h"
 #include <cstring>
+#include <cfloat>
 
 typedef double TempBuffer[maxUnit*maxUnit];
 static TempBuffer temp, temp2, temp3, temp4;

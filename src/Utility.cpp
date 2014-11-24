@@ -1,5 +1,6 @@
 #include "Config.h"
 #include "Utility.h"
+#include <cfloat>
 
 static double _I[maxUnit*maxBatchSize];
 
