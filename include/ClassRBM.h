@@ -30,15 +30,21 @@ class ClassRBM : public TrainComponent {
         double *ph, *py;
         double *phk;    // all possible ph
 
+        double *yGen, *xGen;
+
         double learningRate;
+        double alpha;   // hyrid rate
 
         void getHProb(double* x, double* y, double* ph, int size);
         void getYProb(double* x, double* py, int size);
+        void getYFromH(double* h, double *y, int size);
+        void getXFromH(double* h, double *x, int size);
         void update(int);
         void updateW(int);
         void updateU(int);
         void updateYBias(int);
         void updateHbias(int);
+        void updateXBias(int);
         void initBuffer(int);
         void forward(int);
 };

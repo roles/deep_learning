@@ -8,6 +8,8 @@ double* I();
 void initializeWeightSigmoid(double *weight, int numIn, int numOut);
 void initializeWeightTanh(double *weight, int numIn, int numOut);
 void softmax(double *arr, int size);
+void multiNormial(double *px, double *x, int size);
+void binomial(double *px, double *x, int size);
 int maxElem(double *arr, int size);
 double expc(double x);
 double sigmoidc(double x);

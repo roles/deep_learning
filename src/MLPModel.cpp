@@ -41,10 +41,25 @@ void testMNISTLoading(){
     printf("validate error : %.8lf%%\n", 100.0 * mlpModel.getValidError(&mnist, 20));
 }
 
+void testTCGATraining(){
+    TCGADataset data;
+    data.loadData();
+
+    MLP mlp; 
+    MLPLayer *firstLayer = new SigmoidLayer(data.getFeatureNumber(), 1000);
+    Logistic *secondLayer = new Logistic(1000, data.getLabelNumber());
+    mlp.addLayer(firstLayer);
+    mlp.addLayer(secondLayer);
+
+    TrainModel mlpModel(mlp);
+    mlpModel.train(&data, 0.1, 1, 1000);
+}
+
 int main(){
     //testWFICA();
-    testMNIST();
+    //testMNIST();
     //testMNISTLoading();
 
+    testTCGATraining();
     return 0;
 }

@@ -4,7 +4,7 @@
 
 static double _I[maxUnit*maxBatchSize];
 
-const double expThreshold = 30.0;
+const double expThreshold = 300.0;
 
 double* I(){
     static bool hasVisit = false;
@@ -65,7 +65,6 @@ int maxElem(double *arr, int size){
     return maxe;
 }
 
-
 /*
  * exp function with check to avoid `inf` and `nan`
  */
@@ -83,11 +82,11 @@ double expc(double x){
  */
 double sigmoidc(double x){
     if(x > expThreshold){
-        return 1.0;
+        return 1;
     }else if(x < -expThreshold){
-        return 0.0000000001;
+        return 0;
     }
-    return sigmoid(x);
+    return 1.0 / (1.0 + exp(-x));
 }
 
 /*
@@ -102,4 +101,28 @@ double softplusc(double x){
     return softplus(x);
 }
 
+void multiNormial(double *px, double *x, int size){
+    double p = random_double(0, 1);
+    double sum = 0.0;
+    int idx = 0;
+    for(int i = 0; i < size; i++){
+        sum += px[i];
+        if(sum >= p){
+            idx = i;
+            break;
+        }
+    }
+    memset(x, 0, sizeof(double)*size);
+    x[idx] = 1.0;
+}
 
+void binomial(double *px, double *x, int size){
+    for(int i = 0; i < size; i++){
+        double p = random_double(0, 1);
+        if(p < px[i]){
+            x[i] = 1.0;
+        }else{
+            x[i] = 0.0;
+        }
+    }
+}

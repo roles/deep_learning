@@ -157,7 +157,8 @@ void SigmoidLayer::computeNeuron(int size){
     double *out = getOutput();
     int numOut = getOutputNumber();
     for(int i = 0; i < size*numOut; i++){
-        out[i] = sigmoid(out[i]);
+        //out[i] = sigmoid(out[i]);
+        out[i] = sigmoidc(out[i]);
     }
 }
 
