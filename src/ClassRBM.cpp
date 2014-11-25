@@ -113,6 +113,7 @@ void ClassRBM::getXFromH(double *h, double *x, int size){
 void ClassRBM::getYFromH(double *h, double *y, int size){
     double *hU = temp;
     double *tpy = temp2;
+    double *ty = temp3;
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                 size, numLabel, numHid,

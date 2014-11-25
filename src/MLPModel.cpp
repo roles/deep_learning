@@ -57,9 +57,9 @@ void testTCGATraining(){
 
 int main(){
     //testWFICA();
-    //testMNIST();
+    testMNIST();
     //testMNISTLoading();
 
-    testTCGATraining();
+    //testTCGATraining();
     return 0;
 }
