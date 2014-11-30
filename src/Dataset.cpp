@@ -305,7 +305,8 @@ void TCGADataset::loadData(const char tcgaTrainDataFile[],
 
             sscanf(token, "%d:%lf", &x, &val);
             x = x - 1;
-            trainingData[i*numFeature+x] = val;
+            //trainingData[i*numFeature+x] = val;
+            trainingData[i*numFeature+x] = val >= 1.0 ? 1.0 : val;
 
             //printf("%d:%lf\t", x, val);
         }

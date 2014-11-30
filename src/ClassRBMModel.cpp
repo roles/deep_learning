@@ -13,7 +13,18 @@ void testTrainMNIST(){
     ClassRBMModel.train(&mnist, 0.05, 20, 1000);
 }
 
+void testTCGATraining(){
+    TCGADataset data;
+    data.loadData();
+
+    ClassRBM classrbm(data.getFeatureNumber(), 2000, data.getLabelNumber()); //500个隐藏结点
+
+    TrainModel ClassRBMModel(classrbm);
+    ClassRBMModel.train(&data, 0.05, 2, 1000);
+}
+
 int main(){
-    testTrainMNIST();
+    //testTrainMNIST();
+    testTCGATraining();
     return 0;
 }
