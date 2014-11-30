@@ -335,7 +335,6 @@ void TCGADataset::loadData(const char tcgaTrainDataFile[],
 
         int label;
         sscanf(token, "%d", &label);
-        //printf("%d\t", label);
         label = label - 1;
         validateLabel[i*numLabel+label] = 1.0;
 
@@ -345,11 +344,10 @@ void TCGADataset::loadData(const char tcgaTrainDataFile[],
 
             sscanf(token, "%d:%lf", &x, &val);
             x = x - 1;
-            validateData[i*numFeature+x] = val;
+            //validateData[i*numFeature+x] = val;
+            validateData[i*numFeature+x] = val >= 1.0 ? 1.0 : val;
 
-            //printf("%d:%lf\t", x, val);
         }
-        //printf("\n");
     }
     fclose(validfd);
 }

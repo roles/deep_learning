@@ -282,13 +282,39 @@ double RBM::getReconstructCost(double *v, double *pv, int size){
     double res;
 
     for(int i = 0; i < numVis * size; i++){
-        temp[i] = log(pv[i]);
+        temp[i] = v[i] >= 1.0 ? 1.0 : v[i];
+        temp2[i] = log(pv[i] + 1e-10);
+        /*
+        if(pv[i] == 0.0)
+            temp[i] = -200;
+        else
+            temp[i] = log(pv[i]);
+        if(isnan(temp[i])){
+            printf("nan occur : 290 %lf", pv[i]);
+            exit(1);
+        }else if(isinf(temp[i])){
+            printf("inf occur : 294 %lf", pv[i]);
+            exit(1);
+        }*/
     }
-    res = cblas_ddot(size * numVis, v, 1, temp, 1);
+    res = cblas_ddot(size * numVis, temp, 1, temp2, 1);
 
     for(int i = 0; i < numVis * size; i++){
-        temp[i] = 1.0 - v[i];
-        temp2[i] = log(1.0 - pv[i]);
+        temp[i] = 1.0 - v[i] >= 1.0 ? 1.0 : 1.0 - v[i];
+        temp2[i] = log(1.0 - pv[i] + 1e-10);
+        /*
+        if(1.0 - pv[i] <= 0.0)
+            temp2[i] = -200;
+        else
+            temp2[i] = log(1.0 - pv[i]);
+        if(isnan(temp2[i])){
+            printf("nan occur : 308 %lf", 1.0 - pv[i]);
+            exit(1);
+        }else if(isinf(temp[i])){
+            printf("inf occur : 311 %lf", 1.0 - pv[i]);
+            exit(1);
+        }
+        */
     }
 
     res += cblas_ddot(size * numVis, temp, 1, temp2, 1);

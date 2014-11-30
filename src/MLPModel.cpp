@@ -46,20 +46,20 @@ void testTCGATraining(){
     data.loadData();
 
     MLP mlp; 
-    MLPLayer *firstLayer = new SigmoidLayer(data.getFeatureNumber(), 1000);
-    Logistic *secondLayer = new Logistic(1000, data.getLabelNumber());
+    MLPLayer *firstLayer = new SigmoidLayer(data.getFeatureNumber(), 2000);
+    Logistic *secondLayer = new Logistic(2000, data.getLabelNumber());
     mlp.addLayer(firstLayer);
     mlp.addLayer(secondLayer);
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&data, 0.1, 1, 1000);
+    mlpModel.train(&data, 0.2, 1, 1000);
 }
 
 int main(){
     //testWFICA();
-    testMNIST();
+    //testMNIST();
     //testMNISTLoading();
 
-    //testTCGATraining();
+    testTCGATraining();
     return 0;
 }

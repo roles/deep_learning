@@ -4,9 +4,9 @@
 void testMNISTTraining(){
     MNISTDataset mnist;
     mnist.loadData();
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 1000, 1000};
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500, 500};
 
-    MultiLayerRBM multirbm(3, rbmLayerSize);
+    MultiLayerRBM multirbm(2, rbmLayerSize);
     multirbm.setModelFile("result/MultiLayerRBM.dat");
     multirbm.setPersistent(false);
 
@@ -49,10 +49,31 @@ void testMNISTDBNSecondLayerTrain(){
     dbn.train(&mnist, 0.01, 20, 50);
 }
 
+void testTCGATraining(){
+    TCGADataset data;
+    data.loadData();
+    int rbmLayerSize[] = { data.getFeatureNumber(), 2000};
+
+    MultiLayerRBM multirbm(1, rbmLayerSize);
+    multirbm.setModelFile("result/TCGAMultiLayerRBM_0.01_20epoch.dat");
+    multirbm.setPersistent(false);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&data, 0.01, 1, 20);
+
+    MLP mlp;
+    multirbm.toMLP(&mlp, data.getLabelNumber());
+    mlp.setModelFile("result/DBN_0.01.dat");
+
+    TrainModel supervisedModel(mlp);
+    supervisedModel.train(&data, 0.1, 1, 1000);
+}
+
 int main(){
     srand(1234);
-    testMNISTTraining();
+    //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
+    testTCGATraining();
     return 0;
 }
