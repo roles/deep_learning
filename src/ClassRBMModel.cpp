@@ -10,7 +10,7 @@ void testTrainMNIST(){
     ClassRBM classrbm(mnist.getFeatureNumber(), 500, mnist.getLabelNumber()); //500个隐藏结点
 
     TrainModel ClassRBMModel(classrbm);
-    ClassRBMModel.train(&mnist, 0.05, 20, 1000);
+    ClassRBMModel.train(&mnist, 0.05, 20, 1);
 }
 
 void testTCGATraining(){
@@ -24,7 +24,7 @@ void testTCGATraining(){
 }
 
 int main(){
-    //testTrainMNIST();
-    testTCGATraining();
+    testTrainMNIST();
+    //testTCGATraining();
     return 0;
 }

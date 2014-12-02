@@ -12,7 +12,9 @@ static TempBuffer temp, temp2, temp3, temp4;
 ClassRBM::ClassRBM(int numVis, int numHid, int numLabel) :
     TrainComponent(Supervise, "ClassRBM"),
     numVis(numVis), numHid(numHid), numLabel(numLabel),
-    h(NULL), ph(NULL), py(NULL), phk(NULL), alpha(0)
+    h(NULL), ph(NULL), py(NULL), phk(NULL), 
+    xGen(NULL), yGen(NULL),
+    alpha(0)
 {
     W = new double[numVis*numHid];
     U = new double[numLabel*numHid];

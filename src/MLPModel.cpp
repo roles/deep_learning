@@ -29,7 +29,7 @@ void testMNIST(){
     mlp.setModelFile("result/MLPModel.dat");
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&mnist, 0.01, 20, 3000);
+    mlpModel.train(&mnist, 0.01, 20, 1);
 }
 
 void testMNISTLoading(){
@@ -74,10 +74,10 @@ void testTCGATwoLayerTraining(){
 int main(){
     srand(4321);
     //testWFICA();
-    //testMNIST();
+    testMNIST();
     //testMNISTLoading();
 
     //testTCGATraining();
-    testTCGATwoLayerTraining();
+    //testTCGATwoLayerTraining();
     return 0;
 }
