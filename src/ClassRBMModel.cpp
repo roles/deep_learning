@@ -20,7 +20,7 @@ void testTCGATraining(){
     ClassRBM classrbm(data.getFeatureNumber(), 2000, data.getLabelNumber()); //500个隐藏结点
 
     TrainModel ClassRBMModel(classrbm);
-    ClassRBMModel.train(&data, 0.05, 2, 1000);
+    ClassRBMModel.train(&data, 0.01, 1, 1000, 20);
 }
 
 int main(){

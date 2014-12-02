@@ -52,14 +52,32 @@ void testTCGATraining(){
     mlp.addLayer(secondLayer);
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&data, 0.2, 1, 1000);
+    mlpModel.train(&data, 0.01, 1, 1000);
+}
+
+void testTCGATwoLayerTraining(){
+    TCGADataset data;
+    data.loadData();
+
+    MLP mlp; 
+    MLPLayer *firstLayer = new SigmoidLayer(data.getFeatureNumber(), 2000);
+    MLPLayer *secondLayer = new SigmoidLayer(2000, 2000);
+    Logistic *thirdLayer = new Logistic(2000, data.getLabelNumber());
+    mlp.addLayer(firstLayer);
+    mlp.addLayer(secondLayer);
+    mlp.addLayer(thirdLayer);
+
+    TrainModel mlpModel(mlp);
+    mlpModel.train(&data, 0.01, 1, 1000);
 }
 
 int main(){
+    srand(4321);
     //testWFICA();
     //testMNIST();
     //testMNISTLoading();
 
-    testTCGATraining();
+    //testTCGATraining();
+    testTCGATwoLayerTraining();
     return 0;
 }

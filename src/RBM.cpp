@@ -104,10 +104,8 @@ void RBM::trainBatch(int size){
  * @param size
  */
 void RBM::runBatch(int size){
-    if(ph1 == NULL){
-        ph1 = new double[size*numHid];
-    }
-    getHProb(v1, ph1, size);
+    allocateBuffer(size);
+    runChain(size, 1);
 }
 
 void RBM::runChain(int size, int step){

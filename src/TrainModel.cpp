@@ -5,7 +5,7 @@
 
 TrainModel::TrainModel(TrainComponent& comp) : component(comp) {}
 
-void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch){
+void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch, int leastEpoch){
 
     component.beforeTraining(batchSize);
 
@@ -63,12 +63,15 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
                 }
                 bestErr = err;
             }
-            if(iterCount > patience){
+            if(iterCount > patience && epoch >= leastEpoch){
                 stop = true;
             }
         }else { // unsupervise model
             time_t endTime = time(NULL);
-            printf("epoch %d cost: %.8lf\ttime: %.2lf min\n", epoch+1, cost / numBatch, (double)(endTime - startTime) / 60);
+            double validCost = getValidError(data, batchSize);
+            printf("epoch %d training cost: %.8lf\tvalidate cost : %.8lf\ttime: %.2lf min\n", 
+                   epoch+1, cost / numBatch, validCost,
+                   (double)(endTime - startTime) / 60);
             fflush(stdout);
         }
 
@@ -81,6 +84,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
 
 double TrainModel::getValidError(Dataset* data, int batchSize){
     int err = 0;
+    double cost = 0.0;
     int numBatch = (data->getValidateNumber()-1) / batchSize + 1;
     int numOut = data->getLabelNumber();
     SubDataset validset = data->getValidateSet();
@@ -94,21 +98,26 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
         if(component.getTrainType() == Supervise){
             component.setLabel(iter->CurrentLabelBatch());
         }
-
-        component.setInput(iter->CurrentDataBatch());
-        component.setLabel(iter->CurrentLabelBatch());
         component.runBatch(theBatchSize);
 
-        for(int i = 0; i < theBatchSize; i++){
-            double *out = component.getOutput();
-            int l = maxElem(out+i*numOut, numOut);
-            if(*(component.getLabel() + i*numOut+l) != 1.0){
-                err++;
+        if(component.getTrainType() == Supervise){
+            for(int i = 0; i < theBatchSize; i++){
+                double *out = component.getOutput();
+                int l = maxElem(out+i*numOut, numOut);
+                if(*(component.getLabel() + i*numOut+l) != 1.0){
+                    err++;
+                }
             }
+        }else if(component.getTrainType() == Unsupervise){
+            cost += component.getTrainingCost(theBatchSize, numBatch);
         }
     }
     delete iter;
-    return ((double)err) / data->getValidateNumber();
+    if(component.getTrainType() == Supervise){
+        return ((double)err) / data->getValidateNumber();
+    }else if(component.getTrainType() == Unsupervise){
+        return cost / numBatch;
+    }
 }
 
 void MultiLayerTrainModel::train(Dataset* data, 
