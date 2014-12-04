@@ -12,6 +12,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         ~MultiLayerRBM();
         TrainComponent& getLayer(int);
         int getLayerNumber() { return numLayer; }
+        void addLayer(int);
         void saveModel(FILE*);
         void setPersistent(bool);
         void toMLP(MLP*, int);

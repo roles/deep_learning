@@ -8,9 +8,9 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layersSize[i], layersSize[i+1]); 
 
-        sprintf(weightFile, "result/DBN_Layer%d_weight.txt", i+1);
+        //sprintf(weightFile, "result/DBN_Layer%d_weight.txt", i+1);
         sprintf(modelFile, "result/DBN_Layer%d.dat", i+1);
-        layers[i]->setWeightFile(weightFile);
+        //layers[i]->setWeightFile(weightFile);
         layers[i]->setModelFile(modelFile);
     }
 }
@@ -77,4 +77,13 @@ void MultiLayerRBM::toMLP(MLP* mlp, int lastNumOut){
 void MultiLayerRBM::loadLayer(int i, const char* file){
     delete layers[i];
     layers[i] = new RBM(file);
+}
+
+void MultiLayerRBM::addLayer(int numLayerHid){
+    char modelFile[100];
+    layers[numLayer] = new RBM(layers[numLayer-1]->numHid, numLayerHid);
+    sprintf(modelFile, "result/DBN_Layer%d.dat", numLayer+1);
+    layers[numLayer]->setModelFile(modelFile);
+    layersToTrain.push_back(true);
+    numLayer++;
 }
