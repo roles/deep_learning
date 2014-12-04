@@ -21,15 +21,15 @@ void testMNIST(){
     MLP mlp; 
 
     SigmoidLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
-    SigmoidLayer *secondLayer = new SigmoidLayer(500, 500);
+    //SigmoidLayer *secondLayer = new SigmoidLayer(500, 500);
     Logistic *thirdLayer = new Logistic(500, mnist.getLabelNumber());
     mlp.addLayer(firstLayer);
-    mlp.addLayer(secondLayer);
+    //mlp.addLayer(secondLayer);
     mlp.addLayer(thirdLayer);
     mlp.setModelFile("result/MLPModel.dat");
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&mnist, 0.01, 20, 3000);
+    mlpModel.train(&mnist, 0.01, 20, 1000);
 }
 
 void testMNISTLoading(){
@@ -74,10 +74,10 @@ void testTCGATwoLayerTraining(){
 int main(){
     srand(4321);
     //testWFICA();
-    //testMNIST();
+    testMNIST();
     //testMNISTLoading();
 
     //testTCGATraining();
-    testTCGATwoLayerTraining();
+    //testTCGATwoLayerTraining();
     return 0;
 }
