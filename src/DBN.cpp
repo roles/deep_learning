@@ -105,7 +105,7 @@ void testMNISTAM(){
     double avgNorm = squareNorm(mnist.getTrainingData(0), mnist.getFeatureNumber(), 100);
 
     MultiLayerRBM multirbm("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
-    multirbm.activationMaxization(2, 6, avgNorm, 1000);
+    multirbm.activationMaxization(2, 400, avgNorm, 1000);
 }
 
 int main(){

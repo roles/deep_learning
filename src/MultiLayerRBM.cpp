@@ -93,10 +93,12 @@ void MultiLayerRBM::addLayer(int numLayerHid){
     numLayer++;
 }
 
-void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch){
+void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch,
+        char amSampleFile[])
+{
     int topHiddenNum = layers[layerIdx]->numHid;
     int bottomVisibleNum = layers[0]->numVis;
-    FILE* fd = fopen("result/AM.txt", "w+");
+    FILE* fd = fopen(amSampleFile, "w+");
 
     if(AMSample == NULL){
         AMSample = new double[topHiddenNum*bottomVisibleNum];
@@ -106,14 +108,19 @@ void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNo
     }
     for(int i = 0; i < unitNum; i++){
         double *unitSample = AMSample + i*bottomVisibleNum;
-        maximizeUnit(layerIdx, i, unitSample, avgNorm, nepoch);
+        time_t startTime = time(NULL);
+        double maxval = maximizeUnit(layerIdx, i, unitSample, avgNorm, nepoch);
+        time_t endTime = time(NULL);
+
+        printf("layer %d unit %d maximum : %.8lf\t time : %.2lfmin\n",
+                layerIdx+1, i+1, maxval , (double)(endTime - startTime) / 60);
     }
 
     layers[0]->dumpSample(fd, AMSample, unitNum);
     fclose(fd);
 }
 
-void MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx, 
+double MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx, 
         double* unitSample, double avgNorm, int nepoch)
 {
     int topHiddenNum = layers[layerIdx]->numHid;
@@ -123,6 +130,8 @@ void MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx,
     // average norm
     double curNorm = squareNorm(unitSample, bottomVisibleNum, 1);
     cblas_dscal(bottomVisibleNum, avgNorm / curNorm, unitSample, 1);
+
+    double curval;
 
     while(k++ < nepoch){
         
@@ -135,10 +144,8 @@ void MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx,
             }
             layers[i]->runBatch(1);
         }
-        double curval = layers[layerIdx]->getOutput()[unitIdx];
-        if(k % 200 == 0){
-            printf("unit index %d epoch %d current maximal : %.8lf\n", unitIdx+1, k, curval);
-        }
+        curval = layers[layerIdx]->getOutput()[unitIdx];
+        printf("unit index %d epoch %d current maximal : %.8lf\n", unitIdx+1, k, curval);
 
         // back-propagate
         for(int i = layerIdx; i >= 0; i--){
@@ -162,4 +169,5 @@ void MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx,
         curNorm = squareNorm(unitSample, bottomVisibleNum, 1);
         cblas_dscal(bottomVisibleNum, avgNorm / curNorm, unitSample, 1);
     }
+    return curval;
 }

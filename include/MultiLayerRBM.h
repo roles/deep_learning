@@ -19,10 +19,11 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         void loadLayer(int, const char*);
         void setLayerToTrain(int i, bool b) { layersToTrain[i] = b; }
         bool getLayerToTrain(int i) { return layersToTrain[i]; }
-        void activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch = 1000);
+        void activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch = 1000, 
+                char amSampleFile[] = "result/AM.txt");
         void activationMaxizationOneUnit(int layerIdx, int unitIdx, double avgNorm, int nepoch = 1000);
     private:
-        void maximizeUnit(int layersIdx, int unitIdx, double*, double avgNorm, int nepoch);
+        double maximizeUnit(int layersIdx, int unitIdx, double*, double avgNorm, int nepoch);
         RBM* layers[maxLayer];
         int numLayer;
         vector<bool> layersToTrain;

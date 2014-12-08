@@ -16,7 +16,7 @@ void testMNISTTraining(){
     Logistic logi(mnist.getFeatureNumber(), mnist.getLabelNumber());
     logi.setModelFile("result/LogisticModel.dat");
     TrainModel logisticModel(logi);
-    logisticModel.train(&mnist, 0.13, 500, 1);
+    logisticModel.train(&mnist, 0.13, 500, 100);
 }
 
 void testMNISTDataLoading(){
@@ -40,9 +40,9 @@ void testTCGATraining(){
 }
 
 int main(){
-    //testMNISTTraining();
+    testMNISTTraining();
     //testMNISTDataLoading();
     //testICA();
 
-    testTCGATraining();
+    //testTCGATraining();
 }
