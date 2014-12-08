@@ -155,7 +155,13 @@ class MNISTDataset : public Dataset {
         ~MNISTDataset();
 };
 
-class TCGADataset : public Dataset {
+class SVMDataset : public Dataset {
+    public:
+        virtual void loadData(const char [], const char []);
+        ~SVMDataset(){ }
+};
+
+class TCGADataset : public SVMDataset {
     public:
         void loadData(const char tcgaTrainDataFile[] = "../data/TCGA/TCGA-gene-top5000-train.txt", 
                       const char tcgaValidDataFile[] = "../data/TCGA/TCGA-gene-top5000-valid.txt");

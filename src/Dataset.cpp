@@ -267,13 +267,13 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 
 TransmissionDataset::~TransmissionDataset(){ }
 
-void TCGADataset::loadData(const char tcgaTrainDataFile[],
-                           const char tcgaValidDataFile[])
+void SVMDataset::loadData(const char trainDataFile[],
+                           const char validDataFile[])
 {
     char line[10000];
     char *saveptr, *saveptr2;
 
-    FILE* trainfd = fopen(tcgaTrainDataFile, "r");
+    FILE* trainfd = fopen(trainDataFile, "r");
     fscanf(trainfd, "%d", &numTrain);
     printf("number of training sample : %d\n", numTrain);
 
@@ -311,7 +311,7 @@ void TCGADataset::loadData(const char tcgaTrainDataFile[],
     }
     fclose(trainfd);
 
-    FILE* validfd = fopen(tcgaValidDataFile, "r");
+    FILE* validfd = fopen(validDataFile, "r");
     fscanf(validfd, "%d", &numValid);
     printf("number of validate sample : %d\n", numValid);
 
@@ -348,4 +348,10 @@ void TCGADataset::loadData(const char tcgaTrainDataFile[],
         }
     }
     fclose(validfd);
+}
+
+void TCGADataset::loadData(const char tcgaTrainDataFile[],
+                           const char tcgaValidDataFile[])
+{
+    SVMDataset::loadData(tcgaTrainDataFile, tcgaValidDataFile);
 }

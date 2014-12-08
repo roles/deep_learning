@@ -23,8 +23,19 @@ void testTCGATraining(){
     ClassRBMModel.train(&data, 0.01, 1, 1000, 20);
 }
 
+void test20NewsGroup(){
+    SVMDataset data;
+    data.loadData("../data/20newsgroup_train.txt", "../data/20newsgroup_valid.txt");
+
+    ClassRBM classrbm(data.getFeatureNumber(), 2000, data.getLabelNumber()); //500个隐藏结点
+
+    TrainModel ClassRBMModel(classrbm);
+    ClassRBMModel.train(&data, 0.01, 3, 1000, 20);
+}
+
 int main(){
-    testTrainMNIST();
+    //testTrainMNIST();
     //testTCGATraining();
+    test20NewsGroup();
     return 0;
 }
