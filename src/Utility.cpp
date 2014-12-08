@@ -5,7 +5,7 @@
 
 static double _I[maxUnit*maxBatchSize];
 
-const double expThreshold = 300.0;
+const double expThreshold = 50.0;
 
 double* I(){
     static bool hasVisit = false;
@@ -126,4 +126,16 @@ void binomial(double *px, double *x, int size){
             x[i] = 0.0;
         }
     }
+}
+
+double squareNorm(double *arr, int n, int size){
+    double res = 0;
+    for(int i = 0; i < size; i++){
+        double curNorm = 0;
+        for(int j = 0; j < n; j++){
+            curNorm += arr[i*n+j] * arr[i*n+j];
+        }
+        res += sqrt(curNorm);
+    }
+    return res / size;
 }

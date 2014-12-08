@@ -14,6 +14,7 @@ int maxElem(double *arr, int size);
 double expc(double x);
 double sigmoidc(double x);
 double softplusc(double x);
+double squareNorm(double *arr, int n, int size);
 
 inline int random_int(int low, int high){
     return rand() % (high - low + 1) + low;

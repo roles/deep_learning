@@ -6,7 +6,7 @@ static double temp[maxUnit*maxUnit], temp2[maxUnit*maxUnit];
 RBM::RBM(int numVis, int numHid)
     : numVis(numVis), numHid(numHid), chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
-      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
+      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
       weightFile(NULL), UnsuperviseTrainComponent("RBM")
 {
     weight = new double[numVis*numHid];
@@ -35,7 +35,7 @@ void RBM::loadModel(FILE* fd)
 
 RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
-      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
+      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
     weightFile(NULL), UnsuperviseTrainComponent("RBM")
 {
     FILE* fd = fopen(modelFile, "rb");
@@ -50,8 +50,8 @@ RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
 
 RBM::RBM(FILE* fd) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
-      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL),
-    weightFile(NULL), UnsuperviseTrainComponent("RBM")
+      h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
+      weightFile(NULL), UnsuperviseTrainComponent("RBM")
 {
     loadModel(fd);
 }
@@ -62,6 +62,8 @@ RBM::~RBM(){
     delete[] hbias;
     delete[] weightFile;
     freeBuffer();
+
+    delete[] AMdelta;
 }
 
 void RBM::allocateBuffer(int size){
@@ -71,6 +73,7 @@ void RBM::allocateBuffer(int size){
     if(pv == NULL) pv = new double[size*numVis];
     if(ph1 == NULL) ph1 = new double[size*numHid];
     if(ph2 == NULL) ph2 = new double[size*numHid];
+    if(AMdelta == NULL) AMdelta = new double[numVis];
 }
 
 void RBM::freeBuffer(){
@@ -128,10 +131,6 @@ void RBM::setLearningRate(double lr){
     learningRate = lr;
 }
 
-void RBM::setInput(double *input){
-    v1 = input;
-}
-
 void RBM::setWeightFile(const char *weightFile){
     this->weightFile = new char[strlen(weightFile)+1];
     strcpy(this->weightFile, weightFile);
@@ -164,7 +163,12 @@ void RBM::getHProb(const double *v, double *ph, const int size){
                1.0, I(), 1, hbias, 1, ph, numHid);
 
     for(i = 0; i < size * numHid; i++){
+        double val = ph[i];
         ph[i] = sigmoid(ph[i]);
+        if(isnan(ph[i]) || isinf(ph[i])){
+            printf("nan occur %lf\n", val);
+            exit(1);
+        }
     }
 }
 
@@ -282,37 +286,12 @@ double RBM::getReconstructCost(double *v, double *pv, int size){
     for(int i = 0; i < numVis * size; i++){
         temp[i] = v[i] >= 1.0 ? 1.0 : v[i];
         temp2[i] = log(pv[i] + 1e-10);
-        /*
-        if(pv[i] == 0.0)
-            temp[i] = -200;
-        else
-            temp[i] = log(pv[i]);
-        if(isnan(temp[i])){
-            printf("nan occur : 290 %lf", pv[i]);
-            exit(1);
-        }else if(isinf(temp[i])){
-            printf("inf occur : 294 %lf", pv[i]);
-            exit(1);
-        }*/
     }
     res = cblas_ddot(size * numVis, temp, 1, temp2, 1);
 
     for(int i = 0; i < numVis * size; i++){
         temp[i] = 1.0 - v[i] >= 1.0 ? 1.0 : 1.0 - v[i];
         temp2[i] = log(1.0 - pv[i] + 1e-10);
-        /*
-        if(1.0 - pv[i] <= 0.0)
-            temp2[i] = -200;
-        else
-            temp2[i] = log(1.0 - pv[i]);
-        if(isnan(temp2[i])){
-            printf("nan occur : 308 %lf", 1.0 - pv[i]);
-            exit(1);
-        }else if(isinf(temp[i])){
-            printf("inf occur : 311 %lf", 1.0 - pv[i]);
-            exit(1);
-        }
-        */
     }
 
     res += cblas_ddot(size * numVis, temp, 1, temp2, 1);
@@ -412,4 +391,32 @@ void RBM::getWeightTrans(double *transWeight){
     for(int i = 0; i < numHid; i++)
         for(int j = 0; j < numVis; j++)
             transWeight[j*numHid+i] = weight[i*numVis+j];
+}
+
+/**
+ * @brief  计算最大化激励
+ *
+ * @param unitIdx 如果lastAMdelta为NULL，则表示最大化该层的第unitIdx个隐藏结点
+ *                否则unitIdx为-1
+ * @param lastAMdelta 上层计算的梯度
+ */
+void RBM::getAMDelta(int unitIdx, double *lastAMdelta){
+    if(unitIdx == -1){
+        for(int i = 0; i < numHid; i++){
+            temp[i] = get_sigmoid_derivative(ph1[i]) * lastAMdelta[i];
+        }
+    }else{
+        for(int i = 0; i < numHid; i++){
+            if(i == unitIdx){
+                temp[i] = get_sigmoid_derivative(ph1[i]);
+            }else{
+                temp[i] = 0;
+            }
+        }
+    }
+    
+    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                numVis, 1, numHid,
+                1, weight, numVis, temp, 1,
+                0, AMdelta, 1);
 }

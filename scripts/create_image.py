@@ -56,6 +56,21 @@ def print_sample_image_from_file(filename):
             img_data.append(arr)
     create_image(numpy.array(img_data), n_sample, n_node, "../result/sample.png", False)
 
+def print_AM_image(filename="../result/AM.txt"):
+    f = open(filename)
+    img_H = 28
+    nrow = 1
+    ncol = 6
+    img_data = []
+    for i in range(nrow):
+        for k in range(ncol):
+            arr = []
+            for j in range(img_H):
+                line = f.readline()
+                arr.append([float(x) for x in line.split()])
+            img_data.append(arr)
+    create_image(numpy.array(img_data), nrow, ncol, "../result/AM.png")
+
 def print_da_weight_from_file(filename="da_weight.txt"):
     f = open(filename)
     img_H = 28
@@ -72,5 +87,6 @@ def print_da_weight_from_file(filename="da_weight.txt"):
 if __name__ == "__main__":
     #print_da_weight_from_file("da_weight_corrupt.txt")
     #print_W_image_from_file("../result/mnist_rbm_weight.txt")
-    print_sample_image_from_file("../result/rbm_sample.txt")
+    #print_sample_image_from_file("../result/rbm_sample.txt")
     #create_image(sys.argv[1], 28, 28)
+    print_AM_image()

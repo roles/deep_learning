@@ -1,8 +1,12 @@
 #include "MultiLayerRBM.h"
+#include "mkl_cblas.h"
+#include "Utility.h"
+#include <cfloat>
+#include <cstdio>
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
     MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), 
-    layersToTrain(numLayer, true), persistent(true)
+    layersToTrain(numLayer, true), persistent(true), AMSample(NULL)
 {
     char weightFile[100], modelFile[100];
     for(int i = 0; i < numLayer; i++){
@@ -17,7 +21,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
 
 MultiLayerRBM::MultiLayerRBM(int numLayer, const vector<const char*> &layerModelFiles) :
     MultiLayerTrainComponent("MultiLayerRBM"), numLayer(numLayer), 
-    layersToTrain(numLayer, true), persistent(true)
+    layersToTrain(numLayer, true), persistent(true), AMSample(NULL)
 {
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layerModelFiles[i]);
@@ -26,7 +30,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const vector<const char*> &layerModel
 
 MultiLayerRBM::MultiLayerRBM(const char* file) :
     MultiLayerTrainComponent("MultiLayerRBM"), 
-    persistent(true)
+    persistent(true), AMSample(NULL)
 {
     FILE* fd = fopen(file, "rb");
     if(fd == NULL){
@@ -52,6 +56,7 @@ MultiLayerRBM::~MultiLayerRBM(){
     for(int i = 0; i < numLayer; i++){
         delete layers[i];
     }
+    delete[] AMSample;
 }
 
 void MultiLayerRBM::setPersistent(bool p){
@@ -86,4 +91,75 @@ void MultiLayerRBM::addLayer(int numLayerHid){
     layers[numLayer]->setModelFile(modelFile);
     layersToTrain.push_back(true);
     numLayer++;
+}
+
+void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch){
+    int topHiddenNum = layers[layerIdx]->numHid;
+    int bottomVisibleNum = layers[0]->numVis;
+    FILE* fd = fopen("result/AM.txt", "w+");
+
+    if(AMSample == NULL){
+        AMSample = new double[topHiddenNum*bottomVisibleNum];
+    }
+    for(int i = 0; i < topHiddenNum*bottomVisibleNum; i++){
+        AMSample[i] = random_double(0, 1);
+    }
+    for(int i = 0; i < unitNum; i++){
+        double *unitSample = AMSample + i*bottomVisibleNum;
+        maximizeUnit(layerIdx, i, unitSample, avgNorm, nepoch);
+    }
+
+    layers[0]->dumpSample(fd, AMSample, unitNum);
+    fclose(fd);
+}
+
+void MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx, 
+        double* unitSample, double avgNorm, int nepoch)
+{
+    int topHiddenNum = layers[layerIdx]->numHid;
+    int bottomVisibleNum = layers[0]->numVis;
+    int k = 0;
+
+    // average norm
+    double curNorm = squareNorm(unitSample, bottomVisibleNum, 1);
+    cblas_dscal(bottomVisibleNum, avgNorm / curNorm, unitSample, 1);
+
+    while(k++ < nepoch){
+        
+        // forward
+        for(int i = 0; i <= layerIdx; i++){
+            if(i == 0){
+                layers[i]->setInput(unitSample);
+            }else{
+                layers[i]->setInput(layers[i-1]->getOutput());
+            }
+            layers[i]->runBatch(1);
+        }
+        double curval = layers[layerIdx]->getOutput()[unitIdx];
+        if(k % 200 == 0){
+            printf("unit index %d epoch %d current maximal : %.8lf\n", unitIdx+1, k, curval);
+        }
+
+        // back-propagate
+        for(int i = layerIdx; i >= 0; i--){
+            if(i == layerIdx){
+                layers[i]->getAMDelta(unitIdx, NULL);
+            }else{
+                layers[i]->getAMDelta(-1, layers[i+1]->AMdelta);
+            }
+        }
+
+        // 自适应learning rate
+        double lr = 0.01 * cblas_dasum(bottomVisibleNum, unitSample, 1) /
+                    cblas_dasum(bottomVisibleNum, layers[0]->AMdelta, 1);
+
+        // update sample
+        cblas_daxpy(bottomVisibleNum, lr, 
+                    layers[0]->AMdelta, 1, 
+                    unitSample, 1);
+
+        // average norm
+        curNorm = squareNorm(unitSample, bottomVisibleNum, 1);
+        cblas_dscal(bottomVisibleNum, avgNorm / curNorm, unitSample, 1);
+    }
 }

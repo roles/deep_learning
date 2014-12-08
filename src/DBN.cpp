@@ -1,5 +1,6 @@
 #include "TrainModel.h"
 #include "MultiLayerRBM.h"
+#include "Utility.h"
 
 void testMNISTTraining(){
     MNISTDataset mnist;
@@ -98,13 +99,24 @@ void testTCGAUpperLayerTraining(){
     dbn.train(&data, 0.01, 1, 3);
 }
 
+void testMNISTAM(){
+    MNISTDataset mnist;
+    mnist.loadData();
+    double avgNorm = squareNorm(mnist.getTrainingData(0), mnist.getFeatureNumber(), 100);
+
+    MultiLayerRBM multirbm("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
+    multirbm.activationMaxization(2, 6, avgNorm, 1000);
+}
+
 int main(){
     srand(4321);
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
     //testTCGATraining();
-    testTCGAUpperLayerTraining();
+    //testTCGAUpperLayerTraining();
     //testTCGALoading();
+
+    testMNISTAM();
     return 0;
 }

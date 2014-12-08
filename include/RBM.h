@@ -27,16 +27,17 @@ class RBM : public UnsuperviseTrainComponent {
         void runBatch(int);
         void setLearningRate(double lr);
         void setPersistent(bool p) { persistent = p; };
-        void setInput(double *input);
         double* getOutput() { return ph1; }
         int getOutputNumber() { return numHid; }
         double getTrainingCost(int, int);
         void operationPerEpoch();
+        void setInput(double* in) { v1 = in; }
 
         void saveModel(FILE* modelFileFd);
         void getWeightTrans(double *weight);
 
         void generateSample(const char*, double*, int);
+        void dumpSample(FILE*, double*, int);
     private:
         void getHProb(const double *v, double *ph, const int size);
         void getHSample(const double *ph, double *h, const int size);
@@ -47,7 +48,6 @@ class RBM : public UnsuperviseTrainComponent {
         void getFE(const double *v, double *FE, const int size);
         double getPL(double *v, const int size);
         double getReconstructCost(double *v, double *pv, int size);
-        void dumpSample(FILE*, double*, int);
 
         void runChain(int, int);
         void updateWeight(int);
@@ -56,6 +56,8 @@ class RBM : public UnsuperviseTrainComponent {
         void loadModel(FILE*);
         void allocateBuffer(int);
         void freeBuffer();
+        void getAMDelta(int, double*);
+        void updateAMSample(int, double);
 
         int numVis, numHid;
         double *weight;
@@ -63,6 +65,8 @@ class RBM : public UnsuperviseTrainComponent {
         double *v1, *v2, *h1, *h2;
         double *ph1, *ph2, *pv;
         double *chainStart;
+        double *AMdelta;    //activation maximization
+        double *AMSample;
 
         double learningRate;
         bool persistent;
