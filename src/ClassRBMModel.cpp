@@ -30,12 +30,12 @@ void test20NewsGroup(){
     ClassRBM classrbm(data.getFeatureNumber(), 2000, data.getLabelNumber()); //500个隐藏结点
 
     TrainModel ClassRBMModel(classrbm);
-    ClassRBMModel.train(&data, 0.01, 10, 1, 20);
+    ClassRBMModel.train(&data, 0.01, 10, 60, 20);
 }
 
 int main(){
-    testTrainMNIST();
+    //testTrainMNIST();
     //testTCGATraining();
-    //test20NewsGroup();
+    test20NewsGroup();
     return 0;
 }

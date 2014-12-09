@@ -114,6 +114,7 @@ void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNo
 
         printf("layer %d unit %d maximum : %.8lf\t time : %.2lfmin\n",
                 layerIdx+1, i+1, maxval , (double)(endTime - startTime) / 60);
+        fflush(stdout);
     }
 
     layers[0]->dumpSample(fd, AMSample, unitNum);
@@ -145,7 +146,7 @@ double MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx,
             layers[i]->runBatch(1);
         }
         curval = layers[layerIdx]->getOutput()[unitIdx];
-        printf("unit index %d epoch %d current maximal : %.8lf\n", unitIdx+1, k, curval);
+        //printf("unit index %d epoch %d current maximal : %.8lf\n", unitIdx+1, k, curval);
 
         // back-propagate
         for(int i = layerIdx; i >= 0; i--){
