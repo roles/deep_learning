@@ -33,7 +33,7 @@ inline double softplus(double a){
 }
 
 inline double get_sigmoid_derivative(double y){
-    return y * (1.0 - y);
+    return (y + 1e-10) * (1.0 - y + 1e-10);
 }
 
 inline double square(double x){

@@ -159,16 +159,12 @@ void RBM::getHProb(const double *v, double *ph, const int size){
                 1, v, numVis, weight, numVis,
                 0, ph, numHid);
 
+
     cblas_dger(CblasRowMajor, size, numHid,
                1.0, I(), 1, hbias, 1, ph, numHid);
 
     for(i = 0; i < size * numHid; i++){
-        double val = ph[i];
         ph[i] = sigmoid(ph[i]);
-        if(isnan(ph[i]) || isinf(ph[i])){
-            printf("nan occur %lf\n", val);
-            exit(1);
-        }
     }
 }
 

@@ -59,8 +59,8 @@ def print_sample_image_from_file(filename):
 def print_AM_image(filename="../result/AM.txt"):
     f = open(filename)
     img_H = 28
-    nrow = 1
-    ncol = 6
+    nrow = 2
+    ncol = 10
     img_data = []
     for i in range(nrow):
         for k in range(ncol):
