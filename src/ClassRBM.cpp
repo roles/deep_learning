@@ -8,7 +8,6 @@
 typedef double TempBuffer[maxUnit*maxUnit];
 static TempBuffer temp, temp2, temp3, temp4;
 
-
 ClassRBM::ClassRBM(int numVis, int numHid, int numLabel) :
     TrainComponent(Supervise, "ClassRBM"),
     numVis(numVis), numHid(numHid), numLabel(numLabel),
@@ -47,10 +46,6 @@ ClassRBM::~ClassRBM(){
 
 void ClassRBM::beforeTraining(int size){
     initBuffer(size);
-}
-
-void ClassRBM::afterTraining(int size){
-
 }
 
 void ClassRBM::trainBatch(int size){

@@ -9,7 +9,6 @@
 class ClassRBM : public TrainComponent {
     public:
         void beforeTraining(int);
-        void afterTraining(int);
         void trainBatch(int);
         void runBatch(int);
         void setLearningRate(double lr) { learningRate = lr; }
