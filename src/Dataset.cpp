@@ -272,6 +272,7 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
         component.runBatch(theBatchSize);
         memcpy(trainingData+k*batchSize*numFeature, 
                 component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
+        printf("batch %d\n", k+1);
     }
     delete iter;
 
@@ -291,6 +292,7 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
         component.runBatch(theBatchSize);
         memcpy(validateData+k*batchSize*numFeature, 
                 component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
+        printf("batch %d\n", k+1);
     }
     delete iter;
 }
