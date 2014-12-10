@@ -61,7 +61,7 @@ void testDeepClassRBMTraining(){
     multirbm->setLayerToTrain(1, false);
     multirbm->setLayerToTrain(2, false);
 
-    ClassRBM* classrbm = new ClassRBM(multirbm->getBottomInputNumber(), 500, multirbm->getTopOutputNumber());
+    ClassRBM* classrbm = new ClassRBM(multirbm->getTopOutputNumber(), 500, data.getLabelNumber());
     DeepClassRBM deepClassrbm(multirbm, classrbm);
 
     MultiLayerTrainModel model(deepClassrbm);
