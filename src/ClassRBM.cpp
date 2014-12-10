@@ -285,12 +285,10 @@ void ClassRBM::initBuffer(int size){
         py = new double[size*numLabel];
     if(phk == NULL)
         phk = new double[size*numHid*numLabel];
-    if(alpha != 0){
-        if(yGen == NULL)
-            yGen = new double[size*numLabel];
-        if(xGen == NULL)
-            xGen = new double[size*numVis];
-    }
+    if(yGen == NULL)
+        yGen = new double[size*numLabel];
+    if(xGen == NULL)
+        xGen = new double[size*numVis];
 }
 
 void ClassRBM::getHProb(double *x, double *y, double *ph, int size){
