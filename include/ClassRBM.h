@@ -44,6 +44,8 @@ class ClassRBM : public TrainComponent {
         void getYProb(double* x, double* py, int size);
         void getYFromH(double* h, double *y, int size);
         void getXFromH(double* h, double *x, int size);
+        void getYProbFromH(double* h, double *py, int size);
+        void getXProbFromH(double* h, double *px, int size);
         void update(int);
         void updateW(int);
         void updateU(int);

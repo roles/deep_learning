@@ -106,7 +106,7 @@ void ClassRBM::forward(int size){
     }
 }
 
-void ClassRBM::getXFromH(double *h, double *x, int size){
+void ClassRBM::getXProbFromH(double *h, double *x, int size){
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                 size, numVis, numHid,
                 1.0, h, numHid, W, numVis,
@@ -120,10 +120,9 @@ void ClassRBM::getXFromH(double *h, double *x, int size){
     for(int i = 0; i < size*numVis; i++)
         x[i] = sigmoid(x[i]);
 
-    binomial(x, x, size*numVis);
 }
 
-void ClassRBM::getYFromH(double *h, double *y, int size){
+void ClassRBM::getYProbFromH(double *h, double *y, int size){
     double *hU = temp;
     double *tpy = temp2;
     double *ty = temp3;
@@ -162,9 +161,17 @@ void ClassRBM::getYFromH(double *h, double *y, int size){
         softmax(y+i*numLabel, numLabel);
     }
 
+}
+
+void ClassRBM::getYFromH(double* h, double *y, int size){
+    getYProbFromH(h, y, size);
     for(int i = 0; i < size; i++){
         multiNormial(y+i*numLabel, y+i*numLabel, numLabel);
     }
+}
+void ClassRBM::getXProbFromH(double* h, double *x, int size){
+    getXProbFromH(h, x, size);
+    binomial(x, x, size*numVis);
 }
 
 void ClassRBM::updateW(int size){
@@ -446,8 +453,8 @@ void ClassRBM::resampleFromH(const char resampleFile[]){
 }
 
 void ClassRBM::resampleUnitFromH(FILE* fd, double* h){
-    getXFromH(h, xGen, 1);
-    getYFromH(h, yGen, 1);
+    getXProbFromH(h, xGen, 1);
+    getYProbFromH(h, yGen, 1);
     fwrite(xGen, sizeof(double), numVis, fd);
     fwrite(yGen, sizeof(double), numLabel, fd);
 }
