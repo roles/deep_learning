@@ -29,8 +29,10 @@ class TrainComponent : public IModel {
         virtual void setLearningRate(double lr) = 0;
         virtual void setInput(double *input) = 0;
         virtual void setLabel(double *label) = 0;
-        virtual double* getOutput() = 0;
+        virtual double* getOutput() = 0;    // 用于验证的输出
+        virtual double* getTransOutput() { return getOutput(); }    // 用于传递到上一层的输出，一般情况下与getOutput一致
         virtual int getOutputNumber() = 0;
+        virtual int getTransOutputNumber() { return getOutputNumber(); }
         virtual double* getLabel() = 0;
         virtual double getTrainingCost(int, int) { return 0.0; }
         virtual void operationPerEpoch() { }

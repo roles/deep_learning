@@ -11,6 +11,28 @@ Dataset::Dataset(){
     trainingLabel = validateLabel = testLabel = NULL;
 }
 
+void Dataset::dumpTrainingData(const char savefile[]){
+    dumpData(savefile, numTrain, trainingData, trainingLabel); 
+}
+
+void Dataset::dumpData(const char savefile[], int numData, double* data, double *label){
+    FILE* fd = fopen(savefile, "wb+");
+    if(fd == NULL){
+        printf("file doesn't exist : %s\n", savefile);
+        exit(1);
+    }
+
+    fwrite(&numData, sizeof(int), 1, fd);
+    fwrite(&numFeature, sizeof(int), 1, fd);
+    if(label != NULL){
+        fwrite(&numLabel, sizeof(int), 1, fd);
+    }
+    fwrite(data, sizeof(double), numData*numFeature, fd);
+    fwrite(label, sizeof(double), numData*numLabel, fd);
+
+    fclose(fd);
+}
+
 Dataset::~Dataset(){
     delete[] trainingData;
     delete[] validateData;
@@ -222,7 +244,7 @@ void TrivialDataset::loadData(const char *trainingDataFile, const char *training
 TrivialDataset::~TrivialDataset(){}
 
 TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& component){
-    numFeature = component.getOutputNumber();
+    numFeature = component.getTransOutputNumber();
     numLabel = originData.getLabelNumber();
     numTrain = originData.getTrainingNumber();
     numValid = originData.getValidateNumber();
@@ -245,7 +267,7 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
         component.setInput(originData.getTrainingData(k * batchSize));
         component.runBatch(theBatchSize);
         memcpy(trainingData+k*batchSize*numFeature, 
-                component.getOutput(), theBatchSize*numFeature*sizeof(double));
+                component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
     }
 
     // get validate data
@@ -261,7 +283,7 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
         component.setInput(originData.getValidateData(k * batchSize));
         component.runBatch(theBatchSize);
         memcpy(validateData+k*batchSize*numFeature, 
-                component.getOutput(), theBatchSize*numFeature*sizeof(double));
+                component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
     }
 }
 

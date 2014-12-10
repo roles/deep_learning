@@ -123,8 +123,10 @@ class Dataset {
         SubDataset getTrainingSet();
         SubDataset getValidateSet();
         SubDataset getTestSet();
+        void dumpTrainingData(const char[]);
 
     protected:
+        void dumpData(const char[], int numData, double* data, double *label);
         int numFeature, numLabel;
         int numTrain, numValid, numTest;
 

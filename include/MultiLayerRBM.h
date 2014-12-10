@@ -20,7 +20,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         void setLayerToTrain(int i, bool b) { layersToTrain[i] = b; }
         bool getLayerToTrain(int i) { return layersToTrain[i]; }
         void activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch = 1000, 
-                char amSampleFile[] = "result/AM.txt");
+                const char amSampleFile[] = "result/AM.txt");
         void activationMaxizationOneUnit(int layerIdx, int unitIdx, double avgNorm, int nepoch = 1000);
     private:
         double maximizeUnit(int layersIdx, int unitIdx, double*, double avgNorm, int nepoch);

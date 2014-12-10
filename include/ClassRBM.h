@@ -8,6 +8,7 @@
  */
 class ClassRBM : public TrainComponent {
     public:
+        using IModel::saveModel;    // 名称遮掩，查看effective c++相关章节
         void beforeTraining(int);
         void trainBatch(int);
         void runBatch(int);
@@ -16,11 +17,14 @@ class ClassRBM : public TrainComponent {
         void setLabel(double *label) { y = label; }
         double* getOutput() { return py; }
         int getOutputNumber() { return numLabel; }
+        double* getTransOutput() { return ph; }
+        int getTransOutputNumber() { return numHid; }
         double* getLabel() { return y; }
 
         void saveModel(FILE* fd);
 
         ClassRBM(int, int, int);
+        ClassRBM(const char*);
         ~ClassRBM();
     private:
         int numVis, numHid, numLabel;
@@ -46,6 +50,7 @@ class ClassRBM : public TrainComponent {
         void updateXBias(int);
         void initBuffer(int);
         void forward(int);
+        void loadModel(FILE*);
 };
 
 #endif

@@ -28,6 +28,21 @@ ClassRBM::ClassRBM(int numVis, int numHid, int numLabel) :
     memset(d, 0, numLabel*sizeof(double));
 }
 
+ClassRBM::ClassRBM(const char* file) :
+    TrainComponent(Supervise, "ClassRBM"),
+    h(NULL), ph(NULL), py(NULL), phk(NULL), 
+    xGen(NULL), yGen(NULL),
+    alpha(0)
+{
+    FILE* fd = fopen(file, "rb");
+    if(fd == NULL){
+        printf("file doesn't exist : %s\n", file);
+        exit(1);
+    }
+    loadModel(fd);
+    fclose(fd);
+}
+
 ClassRBM::~ClassRBM(){
     delete[] W;
     delete[] U;
@@ -54,6 +69,7 @@ void ClassRBM::trainBatch(int size){
 }
 
 void ClassRBM::runBatch(int size){
+    getHProb(x, y, ph, size);
     getYProb(x, py, size);
 }
 
@@ -386,5 +402,30 @@ void ClassRBM::saveModel(FILE* fd){
     fwrite(b, sizeof(double), numVis, fd);
     fwrite(c, sizeof(double), numHid, fd);
     fwrite(d, sizeof(double), numLabel, fd);
+}
+
+void ClassRBM::loadModel(FILE* fd){
+    printf("loading ClassRBM...\n");
+
+    fread(&numVis, sizeof(int), 1, fd);
+    printf("numVis : %d\n", numVis);
+
+    fread(&numHid, sizeof(int), 1, fd);
+    printf("numHid : %d\n", numHid);
+
+    fread(&numLabel, sizeof(int), 1, fd);
+    printf("numLabel : %d\n", numLabel);
+
+    W = new double[numVis*numHid];
+    U = new double[numLabel*numHid];
+    b = new double[numVis];
+    c = new double[numHid];
+    d = new double[numLabel];
+
+    fread(W, sizeof(double), numVis*numHid, fd);
+    fread(U, sizeof(double), numLabel*numHid, fd);
+    fread(b, sizeof(double), numVis, fd);
+    fread(c, sizeof(double), numHid, fd);
+    fread(d, sizeof(double), numLabel, fd);
 }
 
