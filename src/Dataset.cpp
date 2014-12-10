@@ -254,15 +254,16 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 
     int batchSize = 100;
 
-    component.beforeTraining();
+    component.beforeTraining(batchSize);
 
     // get training data
     
-    SubDataset dataset = originData->getTrainingSet();
+    SubDataset dataset = originData.getTrainingSet();
     BatchIterator *iter = new SequentialBatchIterator(&dataset, batchSize);
 
     for(iter->first(); !iter->isDone(); iter->next()){
         int theBatchSize = iter->getRealBatchSize();
+        int k = iter->CurrentIndex();
 
         component.setInput(iter->CurrentDataBatch());
         if(component.getTrainType() == Supervise){
@@ -276,11 +277,12 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 
     // get validate data
 
-    dataset = originData->getValidateSet();
+    dataset = originData.getValidateSet();
     iter = new SequentialBatchIterator(&dataset, batchSize);
 
     for(iter->first(); !iter->isDone(); iter->next()){
         int theBatchSize = iter->getRealBatchSize();
+        int k = iter->CurrentIndex();
 
         component.setInput(iter->CurrentDataBatch());
         if(component.getTrainType() == Supervise){
