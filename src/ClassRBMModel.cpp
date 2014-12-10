@@ -51,11 +51,17 @@ void testDumpHiddenLayer(){
     hiddenOutput.dumpTrainingData("result/20NewsGroup_ClassRBMModel_Hidden.bin");
 }
 
+void testDumpResampleH(){
+    ClassRBM classrbm("result/20NewsGroup_ClassRBMModel.dat");
+    classrbm.resampleFromH();
+}
+
 int main(){
     //testTrainMNIST();
     //testTCGATraining();
     //test20NewsGroup();
     //testDumpModel();
-    testDumpHiddenLayer();
+    //testDumpHiddenLayer();
+    testDumpResampleH();
     return 0;
 }
