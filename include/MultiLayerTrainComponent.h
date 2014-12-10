@@ -6,10 +6,12 @@
 class MultiLayerTrainComponent : public IModel {
     public:
         MultiLayerTrainComponent(const char*);
-        ~MultiLayerTrainComponent();
+        virtual ~MultiLayerTrainComponent();
         virtual TrainComponent& getLayer(int) = 0;
         virtual int getLayerNumber() = 0;
         virtual bool getLayerToTrain(int){ return true; }
+        int getBottomInputNumber();
+        int getTopOutputNumber();
 };
 
 #endif

@@ -4,6 +4,9 @@
 
 using namespace std;
 
+#ifndef _MULTIRBM_H
+#define _MULTIRBM_H
+
 class MultiLayerRBM : public MultiLayerTrainComponent {
     public:
         MultiLayerRBM(int, const int[]);
@@ -30,3 +33,5 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         bool persistent;
         double *AMSample;
 };
+
+#endif

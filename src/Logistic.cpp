@@ -36,6 +36,10 @@ int Logistic::getOutputNumber() {
     return SoftmaxLayer::getOutputNumber(); 
 }
 
+int Logistic::getInputNumber() { 
+    return SoftmaxLayer::getInputNumber(); 
+}
+
 void Logistic::setLabel(double *label){
     this->label = label;
 }

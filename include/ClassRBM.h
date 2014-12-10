@@ -16,6 +16,7 @@ class ClassRBM : public TrainComponent {
         void setInput(double *input) { x = input; }
         void setLabel(double *label) { y = label; }
         double* getOutput() { return py; }
+        int getInputNumber() { return numVis; }
         int getOutputNumber() { return numLabel; }
         double* getTransOutput() { return ph; }
         int getTransOutputNumber() { return numHid; }

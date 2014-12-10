@@ -12,9 +12,7 @@ MultiLayerRBM::MultiLayerRBM(int numLayer, const int layersSize[]) :
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(layersSize[i], layersSize[i+1]); 
 
-        //sprintf(weightFile, "result/DBN_Layer%d_weight.txt", i+1);
         sprintf(modelFile, "result/DBN_Layer%d.dat", i+1);
-        //layers[i]->setWeightFile(weightFile);
         layers[i]->setModelFile(modelFile);
     }
 }

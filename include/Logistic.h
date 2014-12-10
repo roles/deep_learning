@@ -21,6 +21,7 @@ class Logistic : public SoftmaxLayer , public TrainComponent
         void setInput(double *input);
         void setLabel(double *label);
         double* getOutput();
+        int getInputNumber();
         int getOutputNumber();
         double* getLabel();
         void saveModel(FILE* modelFileFd);

@@ -58,6 +58,10 @@ int MLP::getOutputNumber(){
     return layers[numLayer-1]->getOutputNumber();
 }
 
+int MLP::getInputNumber(){
+    return layers[0]->getInputNumber();
+}
+
 void MLP::setLabel(double *label){
     layers[numLayer-1]->setLabel(label);
 }

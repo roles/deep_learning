@@ -29,6 +29,7 @@ class RBM : public UnsuperviseTrainComponent {
         void setPersistent(bool p) { persistent = p; };
         double* getOutput() { return ph1; }
         int getOutputNumber() { return numHid; }
+        int getInputNumber() { return numVis; }
         double getTrainingCost(int, int);
         void operationPerEpoch();
         void setInput(double* in) { v1 = in; }

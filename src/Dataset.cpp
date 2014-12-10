@@ -253,6 +253,16 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 
     trainingData = new double[numTrain*numFeature];
     validateData = new double[numValid*numFeature];
+    if(originData.getLabelNumber() != 0){
+
+        trainingLabel = new double[numTrain*numLabel];
+        memcpy(trainingLabel, originData.getTrainingLabel(0), 
+               sizeof(double) * numTrain * numLabel);
+
+        validateLabel = new double[numValid*numLabel];
+        memcpy(validateLabel, originData.getValidateLabel(0), 
+               sizeof(double) * numValid * numLabel);
+    }
 
     int batchSize = 100;
 
