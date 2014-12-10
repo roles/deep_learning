@@ -254,37 +254,43 @@ TransmissionDataset::TransmissionDataset(Dataset& originData, TrainComponent& co
 
     int batchSize = 100;
 
-    // get training data
-    int numBatch = (numTrain-1) / batchSize + 1;
-    for(int k = 0; k < numBatch; k++){
-        int theBatchSize;
+    component.beforeTraining();
 
-        if(k == (numBatch-1)){
-            theBatchSize = numTrain - batchSize * k;
-        }else{
-            theBatchSize = batchSize;
+    // get training data
+    
+    SubDataset dataset = originData->getTrainingSet();
+    BatchIterator *iter = new SequentialBatchIterator(&dataset, batchSize);
+
+    for(iter->first(); !iter->isDone(); iter->next()){
+        int theBatchSize = iter->getRealBatchSize();
+
+        component.setInput(iter->CurrentDataBatch());
+        if(component.getTrainType() == Supervise){
+            component.setLabel(iter->CurrentLabelBatch());
         }
-        component.setInput(originData.getTrainingData(k * batchSize));
         component.runBatch(theBatchSize);
         memcpy(trainingData+k*batchSize*numFeature, 
                 component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
     }
+    delete iter;
 
     // get validate data
-    numBatch = (numValid-1) / batchSize + 1;
-    for(int k = 0; k < numBatch; k++){
-        int theBatchSize;
 
-        if(k == (numBatch-1)){
-            theBatchSize = numValid - batchSize * k;
-        }else{
-            theBatchSize = batchSize;
+    dataset = originData->getValidateSet();
+    iter = new SequentialBatchIterator(&dataset, batchSize);
+
+    for(iter->first(); !iter->isDone(); iter->next()){
+        int theBatchSize = iter->getRealBatchSize();
+
+        component.setInput(iter->CurrentDataBatch());
+        if(component.getTrainType() == Supervise){
+            component.setLabel(iter->CurrentLabelBatch());
         }
-        component.setInput(originData.getValidateData(k * batchSize));
         component.runBatch(theBatchSize);
         memcpy(validateData+k*batchSize*numFeature, 
                 component.getTransOutput(), theBatchSize*numFeature*sizeof(double));
     }
+    delete iter;
 }
 
 TransmissionDataset::~TransmissionDataset(){ }
