@@ -429,3 +429,27 @@ void ClassRBM::loadModel(FILE* fd){
     fread(d, sizeof(double), numLabel, fd);
 }
 
+void ClassRBM::resampleFromH(const char resampleFile[]){
+    initBuffer(1);
+
+    FILE* fd = fopen(resampleFile, "wb+");
+
+    fwrite(&numVis, sizeof(int), 1, fd);
+    fwrite(&numHid, sizeof(int), 1, fd);
+    fwrite(&numLabel, sizeof(int), 1, fd);
+
+    for(int i = 0; i < numHid; i++){
+        memset(h, 0, sizeof(double)*numHid);
+        h[i] = 1.0;
+
+        resampleUnitFromH(fd, h);
+    }
+    fclose(fd);
+}
+
+void ClassRBM::resampleUnitFromH(FILE* fd, double* h){
+    getXFromH(h, xGen, 1);
+    getYFromH(h, yGen, 1);
+    fwrite(xGen, sizeof(double), numVis, fd);
+    fwrite(yGen, sizeof(double), numLabel, fd);
+}

@@ -23,6 +23,8 @@ class ClassRBM : public TrainComponent {
 
         void saveModel(FILE* fd);
 
+        void resampleFromH(const char resampleFile[] = "result/resample.bin");
+
         ClassRBM(int, int, int);
         ClassRBM(const char*);
         ~ClassRBM();
@@ -51,6 +53,7 @@ class ClassRBM : public TrainComponent {
         void initBuffer(int);
         void forward(int);
         void loadModel(FILE*);
+        void resampleUnitFromH(FILE* fd, double* h);
 };
 
 #endif
