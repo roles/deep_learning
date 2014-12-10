@@ -169,7 +169,7 @@ void ClassRBM::getYFromH(double* h, double *y, int size){
         multiNormial(y+i*numLabel, y+i*numLabel, numLabel);
     }
 }
-void ClassRBM::getXProbFromH(double* h, double *x, int size){
+void ClassRBM::getXFromH(double* h, double *x, int size){
     getXProbFromH(h, x, size);
     binomial(x, x, size*numVis);
 }
