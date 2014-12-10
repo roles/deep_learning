@@ -28,7 +28,9 @@ void Dataset::dumpData(const char savefile[], int numData, double* data, double 
         fwrite(&numLabel, sizeof(int), 1, fd);
     }
     fwrite(data, sizeof(double), numData*numFeature, fd);
-    fwrite(label, sizeof(double), numData*numLabel, fd);
+    if(label != NULL){
+        fwrite(label, sizeof(double), numData*numLabel, fd);
+    }
 
     fclose(fd);
 }
