@@ -22,6 +22,26 @@ void testMNISTTraining(){
     supervisedModel.train(&mnist, 0.1, 10, 1000);
 }
 
+void test20NewsgroupTraining(){
+    SVMDataset data;
+    data.loadData("../data/20newsgroup_train.txt", "../data/20newsgroup_valid.txt");
+    int rbmLayerSize[] = { data.getFeatureNumber(), 2000, 1000, 500};
+
+    MultiLayerRBM multirbm(3, rbmLayerSize);
+    multirbm.setModelFile("result/20NewsgroupMultiLayerRBM_2000_1000_500_0.01.dat");
+    multirbm.setPersistent(true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&data, 0.01, 10, 100);
+
+    MLP mlp;
+    multirbm.toMLP(&mlp, data.getLabelNumber());
+    mlp.setModelFile("result/20NewsgroupDBN_2000_1000_500_0.1.dat");
+
+    TrainModel supervisedModel(mlp);
+    supervisedModel.train(&data, 0.1, 10, 1000);
+}
+
 void testMNISTLoading(){
     MNISTDataset mnist;
     mnist.loadData();
@@ -111,12 +131,13 @@ void testMNISTAM(){
 int main(){
     srand(4321);
     //testMNISTTraining();
+    test20NewsgroupTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
     //testTCGATraining();
     //testTCGAUpperLayerTraining();
     //testTCGALoading();
 
-    testMNISTAM();
+    //testMNISTAM();
     return 0;
 }
