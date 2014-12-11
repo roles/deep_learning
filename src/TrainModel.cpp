@@ -119,9 +119,20 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
         return cost / numBatch;
     }
 }
-
 void MultiLayerTrainModel::train(Dataset* data, 
         double learningRate, int batchSize, int numEpoch)
+{
+    int numLayer = component.getLayerNumber();
+    int* numEpochs = new int[numLayer];
+    for(int i = 0; i < numLayer; i++)
+        numEpochs[i] = numEpoch;
+    train(data, learningRate, batchSize, numEpochs);
+
+    delete[] numEpochs;
+}
+
+void MultiLayerTrainModel::train(Dataset* data, 
+        double learningRate, int batchSize, int numEpochs[])
 {
     int numLayer = component.getLayerNumber();
     Dataset* curData = data;
@@ -136,7 +147,7 @@ void MultiLayerTrainModel::train(Dataset* data,
         printf("Training layer %d ********\n", i+1);
         fflush(stdout);
         if(component.getLayerToTrain(i)){
-            model.train(curData, learningRate, batchSize, numEpoch);
+            model.train(curData, learningRate, batchSize, numEpochs[i]);
         }
     }
     if(curData != data)
