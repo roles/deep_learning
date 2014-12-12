@@ -92,7 +92,7 @@ void MultiLayerRBM::addLayer(int numLayerHid){
 }
 
 void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch,
-        const char amSampleFile[])
+        const char amSampleFile[], bool dumpBinary)
 {
     int topHiddenNum = layers[layerIdx]->numHid;
     int bottomVisibleNum = layers[0]->numVis;
@@ -113,7 +113,11 @@ void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNo
         printf("layer %d unit %d maximum : %.8lf\t time : %.2lfmin\n",
                 layerIdx+1, i+1, maxval , (double)(endTime - startTime) / 60);
         fflush(stdout);
-        layers[0]->dumpSample(fd, unitSample, 1);
+        if(dumpBinary){
+            layers[0]->dumpSampleBinary(fd, unitSample, 1);
+        }else{
+            layers[0]->dumpSample(fd, unitSample, 1);
+        }
         fflush(fd);
     }
 

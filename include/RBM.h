@@ -40,6 +40,7 @@ class RBM : public UnsuperviseTrainComponent {
 
         void generateSample(const char*, double*, int);
         void dumpSample(FILE*, double*, int);
+        void dumpSampleBinary(FILE*, double*, int);
     private:
         void getHProb(const double *v, double *ph, const int size);
         void getHSample(const double *ph, double *h, const int size);

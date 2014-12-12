@@ -383,6 +383,10 @@ void RBM::dumpSample(FILE* fd, double *v, int count){
     }
 }
 
+void RBM::dumpSampleBinary(FILE* fd, double *v, int count){
+    fwrite(v, sizeof(double), count*numVis, fd); 
+}
+
 void RBM::getWeightTrans(double *transWeight){
     for(int i = 0; i < numHid; i++)
         for(int j = 0; j < numVis; j++)
