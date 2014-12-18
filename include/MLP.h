@@ -21,6 +21,8 @@ class MLP : public TrainComponent{
         int getOutputNumber();
         double* getLabel();
         void saveModel(FILE*);
+        int getLayerNumber() { return numLayer; }
+        MLPLayer* getLayer(int i) { return layers[i]; }
 
         void setLayerNumber(int n) { numLayer = n; }
 

@@ -140,6 +140,12 @@ void MLPLayer::saveModel(FILE *fd){
     }
 }
 
+void MLPLayer::getWeightTrans(double* transWeight){
+    for(int i = 0; i < numIn; i++)
+        for(int j = 0; j < numOut; j++)
+            transWeight[j*numIn+i] = weight[i*numOut+j];
+}
+
 SigmoidLayer::SigmoidLayer(int numIn, int numOut) :
     MLPLayer(numIn, numOut, "Sigmoid")
 {

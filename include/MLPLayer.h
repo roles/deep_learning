@@ -36,6 +36,7 @@ class MLPLayer {
         virtual void saveModel(FILE* modelFileFd);
 
         const char* getLayerName() { return layerName; }
+        void getWeightTrans(double*);
     protected:
         void initializeWeight(){ }  //构造函数中不能调用虚函数
         void initializeBias(){ memset(bias, 0, numOut*sizeof(double)); }

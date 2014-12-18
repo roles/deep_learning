@@ -2,7 +2,7 @@
 #define _CONFIG_H
 
 const int maxLayer = 5;
-const int maxUnit = 5005;
+const int maxUnit = 2005;
 const int maxBatchSize = 10;
 
 const int numBatchPerLog = 0;

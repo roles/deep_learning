@@ -12,6 +12,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         MultiLayerRBM(int, const int[]);
         MultiLayerRBM(int, const vector<const char*> &);   //从多个单层模型文件读取
         MultiLayerRBM(const char*);
+        MultiLayerRBM(MLP&);
         ~MultiLayerRBM();
         TrainComponent& getLayer(int);
         int getLayerNumber() { return numLayer; }

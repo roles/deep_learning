@@ -43,6 +43,21 @@ MultiLayerRBM::MultiLayerRBM(const char* file) :
     layersToTrain = vector<bool>(numLayer, true);
 }
 
+MultiLayerRBM::MultiLayerRBM(MLP& mlp) : 
+    MultiLayerTrainComponent("MultiLayerRBM"), 
+    persistent(true), AMSample(NULL)
+{
+    numLayer = mlp.getLayerNumber();
+    layersToTrain = vector<bool>(numLayer, true);
+    for(int i = 0; i < numLayer; i++){
+        layers[i] = new RBM(mlp.getLayer(i)->getInputNumber(),
+                            mlp.getLayer(i)->getOutputNumber());
+        mlp.getLayer(i)->getWeightTrans(layers[i]->weight);
+        memcpy(layers[i]->hbias, mlp.getLayer(i)->getBias(), 
+               sizeof(double) * layers[i]->numHid);
+    }
+}
+
 void MultiLayerRBM::saveModel(FILE* fd){
     fwrite(&numLayer, sizeof(int), 1, fd);
     for(int i = 0; i < numLayer; i++){
