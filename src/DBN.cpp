@@ -25,19 +25,23 @@ void testMNISTTraining(){
 void test20NewsgroupTraining(){
     SVMDataset data;
     data.loadData("../data/20newsgroup_train.txt", "../data/20newsgroup_valid.txt");
-    int rbmLayerSize[] = { data.getFeatureNumber(), 2000, 1000, 500};
-
+    
+    int rbmLayerSize[] = { data.getFeatureNumber(), 2000, 2000, 1000};
     MultiLayerRBM multirbm(3, rbmLayerSize);
-    multirbm.setModelFile("result/20NewsgroupMultiLayerRBM_2000_1000_500_0.01.dat");
-    multirbm.setPersistent(true);
+    /*
+    MultiLayerRBM multirbm("result/20NewsgroupMultiLayerRBM_2000_1000_500_0.01.dat");
+    multirbm.resetLayer(1, 2000, 2000);
+    multirbm.resetLayer(2, 2000, 1000);
+    */
 
+    multirbm.setModelFile("result/20NewsgroupMultiLayerRBM_2000_2000_1000_0.01.dat");
     MultiLayerTrainModel pretrainModel(multirbm);
-    int numEpochs[] = {25, 50, 50};
+    int numEpochs[] = {100, 100, 100};
     pretrainModel.train(&data, 0.01, 10, numEpochs);
 
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/20NewsgroupDBN_2000_1000_500_0.1.dat");
+    mlp.setModelFile("result/20NewsgroupDBN_2000_2000_1000_0.1.dat");
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&data, 0.1, 10, 1000);
@@ -49,20 +53,36 @@ void testDump20Newsgroup(){
 
     MultiLayerRBM multirbm("result/20NewsgroupMultiLayerRBM_2000_1000_500_0.01.dat");
     TrainComponent& firstLayer = multirbm.getLayer(0);
+    TrainComponent& secondLayer = multirbm.getLayer(1);
+    TrainComponent& thirdLayer = multirbm.getLayer(2);
 
-    /*
     // dump first layer weight
-    firstLayer.setModelFile("result/20NewsgroupDBN_FirstLayer.dat");
-    firstLayer.saveModel();
+    //firstLayer.setModelFile("result/20NewsgroupDBN_FirstLayer.dat");
+    //firstLayer.saveModel();
 
     // dump first layer hidden layer output
-    TransmissionDataset dataset(data, firstLayer);
-    dataset.dumpTrainingData("result/20NewsgroupDBN_FirstLayer_Hidden.bin");
-    */
+    TransmissionDataset h1out(data, firstLayer);
+    //h1out.dumpTrainingData("result/20NewsgroupDBN_FirstLayer_HiddenProb.bin");
+
+    // dump second layer hidden layer output
+    TransmissionDataset h2out(h1out, secondLayer);
+    //h2out.dumpTrainingData("result/20NewsgroupDBN_SecondLayer_HiddenProb.bin");
+
+    TransmissionDataset h3out(h2out, thirdLayer);
+    h3out.dumpTrainingData("result/20NewsgroupDBN_ThirdLayer_HiddenProb.bin");
 
     // dump first layer AM weight
-    double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
-    multirbm.activationMaxization(0, 2000, avgNorm, 500, "result/20NewsgroupDBN_FirstLayer_AM.bin", true);
+    //double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
+    //multirbm.activationMaxization(0, 2000, avgNorm, 500, "result/20NewsgroupDBN_FirstLayer_AM.bin", true);
+
+    // dump second layer AM weight
+    //double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
+    //multirbm.activationMaxization(1, 1000, avgNorm, 500, "result/20NewsgroupDBN_SecondLayer_AM.bin", true);
+
+    // dump third layer AM weight
+    //double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
+    //multirbm.activationMaxization(2, 500, avgNorm, 500, "result/20NewsgroupDBN_ThirdLayer_AM.bin", true);
+
 }
 
 void testMNISTLoading(){
@@ -162,7 +182,7 @@ int main(){
 
     //testMNISTAM();
 
-    //test20NewsgroupTraining();
-    testDump20Newsgroup();
+    test20NewsgroupTraining();
+    //testDump20Newsgroup();
     return 0;
 }

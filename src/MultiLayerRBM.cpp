@@ -91,6 +91,11 @@ void MultiLayerRBM::addLayer(int numLayerHid){
     numLayer++;
 }
 
+void MultiLayerRBM::resetLayer(int layerIdx, int numVis, int numHid){
+    delete layers[layerIdx];
+    layers[layerIdx] = new RBM(numVis, numHid);
+}
+
 void MultiLayerRBM::activationMaxization(int layerIdx, int unitNum, double avgNorm, int nepoch,
         const char amSampleFile[], bool dumpBinary)
 {
