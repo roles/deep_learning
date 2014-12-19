@@ -62,30 +62,28 @@ void testDump20Newsgroup(){
     //firstLayer.setModelFile("result/20NewsgroupDBN_FirstLayer.dat");
     //firstLayer.saveModel();
 
-    /*
     // dump first layer hidden layer output
     TransmissionDataset h1out(data, firstLayer);
-    //h1out.dumpTrainingData("result/20NewsgroupDBN_FirstLayer_HiddenProb.bin");
+    h1out.dumpTrainingData("result/20NewsgroupDBN_FirstLayer_Hidden.bin");
 
     // dump second layer hidden layer output
     TransmissionDataset h2out(h1out, secondLayer);
-    //h2out.dumpTrainingData("result/20NewsgroupDBN_SecondLayer_HiddenProb.bin");
+    h2out.dumpTrainingData("result/20NewsgroupDBN_SecondLayer_Hidden.bin");
 
     TransmissionDataset h3out(h2out, thirdLayer);
-    h3out.dumpTrainingData("result/20NewsgroupDBN_ThirdLayer_HiddenProb.bin");
-    */
+    h3out.dumpTrainingData("result/20NewsgroupDBN_ThirdLayer_Hidden.bin");
 
-    // dump first layer AM weight
+    /*
     double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 9000);
+    // dump first layer AM weight
     multirbm.activationMaxization(0, 2000, avgNorm, 500, "result/20NewsgroupDBN_FirstLayer_AM.bin", true);
 
     // dump second layer AM weight
-    //double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
     multirbm.activationMaxization(1, 1000, avgNorm, 500, "result/20NewsgroupDBN_SecondLayer_AM.bin", true);
 
     // dump third layer AM weight
-    //double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 1000);
     multirbm.activationMaxization(2, 500, avgNorm, 500, "result/20NewsgroupDBN_ThirdLayer_AM.bin", true);
+    */
 
 }
 
