@@ -34,6 +34,14 @@ class RBM : public UnsuperviseTrainComponent {
         double getTrainingCost(int, int);
         void operationPerEpoch();
         void setInput(double* in) { v1 = in; }
+        void setSparsity(bool b, double p = 0.0, double numda = 0.9, double slr = 0.01) 
+        { 
+            this->sparsity = b;
+            this->p = p; 
+            this->numda = numda; 
+            this->q = 1.0;
+            this->slr = slr;
+        }
 
         void saveModel(FILE* modelFileFd);
         void getWeightTrans(double *weight);
@@ -76,6 +84,9 @@ class RBM : public UnsuperviseTrainComponent {
 
         char *weightFile;
         friend class MultiLayerRBM;
+
+        double p, q, numda, slr;
+        bool sparsity;
 };
 
 #endif

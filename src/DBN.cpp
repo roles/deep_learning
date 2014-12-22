@@ -10,6 +10,7 @@ void testMNISTTraining(){
     MultiLayerRBM multirbm(3, rbmLayerSize);
     multirbm.setModelFile("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
     multirbm.setPersistent(true);
+    multirbm.setSparsity(true, 0.001, 0.9, 0.1);
 
     MultiLayerTrainModel pretrainModel(multirbm);
     pretrainModel.train(&mnist, 0.01, 10, 100);
@@ -186,7 +187,7 @@ void testMNISTDBNAM(){
 
 int main(){
     srand(4321);
-    //testMNISTTraining();
+    testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
     //testTCGATraining();
@@ -197,6 +198,6 @@ int main(){
     //testMNISTDBNAM();
 
     //test20NewsgroupTraining();
-    testDump20Newsgroup();
+    //testDump20Newsgroup();
     return 0;
 }

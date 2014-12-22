@@ -7,7 +7,7 @@ RBM::RBM(int numVis, int numHid)
     : numVis(numVis), numHid(numHid), chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
-      weightFile(NULL), UnsuperviseTrainComponent("RBM")
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
 {
     weight = new double[numVis*numHid];
     initializeWeightSigmoid(weight, numVis, numHid);
@@ -36,7 +36,7 @@ void RBM::loadModel(FILE* fd)
 RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
-    weightFile(NULL), UnsuperviseTrainComponent("RBM")
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
 {
     FILE* fd = fopen(modelFile, "rb");
 
@@ -51,7 +51,7 @@ RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
 RBM::RBM(FILE* fd) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL),
-      weightFile(NULL), UnsuperviseTrainComponent("RBM")
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
 {
     loadModel(fd);
 }
@@ -124,6 +124,11 @@ void RBM::runChain(int size, int step){
         //chainStart = h2;
     }else{
         gibbsSampleHVH(h1, h2, ph2, v2, pv, step, size);
+    }
+
+    if(sparsity){
+        double cq = cblas_dasum(numHid * size, ph1, 1) / (numHid * size);
+        q = numda * q + (1 - numda) * cq;
     }
 }
 
@@ -309,6 +314,24 @@ void RBM::updateWeight(int size){
 
     cblas_daxpy(numHid*numVis, learningRate / size,
             temp, 1, weight, 1);
+
+    if(sparsity){
+        double* hderiv = temp;
+        double* delta = temp2;
+        for(int i = 0; i < size * numHid; i++){
+            hderiv[i] = get_sigmoid_derivative(ph1[i]);
+        }
+
+        cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                numHid, numVis, size,
+                1.0, hderiv, numHid, v1, numVis,
+                0, delta, numVis);
+
+        double param = slr * (q - p) / 
+                       ( (1-q+1e-10) * (q+1e-10) * numHid * size);
+        cblas_daxpy(numHid*numVis, param,
+                delta, 1, weight, 1);
+    }
 }
 
 void RBM::updateBias(int size){
@@ -335,6 +358,23 @@ void RBM::updateBias(int size){
 
     cblas_daxpy(numHid, learningRate / size,
             temp, 1, hbias, 1);
+
+    if(sparsity){
+        double* hderiv = temp;
+        double* delta = temp2;
+        for(int i = 0; i < size * numHid; i++){
+            hderiv[i] = get_sigmoid_derivative(ph1[i]);
+        }
+
+        cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                numHid, 1, size,
+                1.0, hderiv, numHid, I(), 1,
+                0, delta, 1);
+
+        double param = slr * (q - p) / 
+                       ( (1-q+1e-10) * (q+1e-10) * numHid * size);
+        cblas_daxpy(numHid, param, delta, 1, hbias, 1);
+    }
 }
 
 double RBM::getTrainingCost(int size, int numBatch){
@@ -346,7 +386,9 @@ double RBM::getTrainingCost(int size, int numBatch){
 }
 
 void RBM::operationPerEpoch(){
-    dumpWeight(100, 28);
+    //dumpWeight(100, 28);
+    if(sparsity)
+        printf("\t===> sparsity : %.8lf\n", q);
 }
 
 void RBM::saveModel(FILE *fd){

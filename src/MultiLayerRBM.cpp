@@ -47,7 +47,7 @@ MultiLayerRBM::MultiLayerRBM(MLP& mlp) :
     MultiLayerTrainComponent("MultiLayerRBM"), 
     persistent(true), AMSample(NULL)
 {
-    numLayer = mlp.getLayerNumber();
+    numLayer = mlp.getLayerNumber() - 1;
     layersToTrain = vector<bool>(numLayer, true);
     for(int i = 0; i < numLayer; i++){
         layers[i] = new RBM(mlp.getLayer(i)->getInputNumber(),
@@ -194,4 +194,10 @@ double MultiLayerRBM::maximizeUnit(int layerIdx, int unitIdx,
         cblas_dscal(bottomVisibleNum, avgNorm / curNorm, unitSample, 1);
     }
     return curval;
+}
+
+void MultiLayerRBM::setSparsity(bool sparsity, double p, double numda, double slr){
+    for(int i = 0; i < numLayer; i++){
+        layers[i]->setSparsity(sparsity, p, numda, slr);
+    }
 }
