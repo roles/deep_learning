@@ -87,6 +87,7 @@ class RBM : public UnsuperviseTrainComponent {
 
         double p, q, numda, slr;
         bool sparsity;
+        double *hderiv;
 };
 
 #endif
