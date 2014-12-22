@@ -74,7 +74,7 @@ void RBM::allocateBuffer(int size){
     if(ph1 == NULL) ph1 = new double[size*numHid];
     if(ph2 == NULL) ph2 = new double[size*numHid];
     if(AMdelta == NULL) AMdelta = new double[numVis];
-    if(sparsity && hderiv == NULL) hderiv = new double[size*numHid];
+    if(hderiv == NULL) hderiv = new double[size*numHid];
 }
 
 void RBM::freeBuffer(){
@@ -84,8 +84,9 @@ void RBM::freeBuffer(){
     delete[] pv;
     delete[] ph1;
     delete[] ph2;
-    v2 = h1 = h2 = pv = ph1 = ph2 = NULL;
     delete[] hderiv;
+    v2 = h1 = h2 = pv = ph1 = ph2 = NULL;
+    hderiv = NULL;
 }
 
 void RBM::beforeTraining(int size){
