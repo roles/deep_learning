@@ -10,7 +10,7 @@ void testMNISTTraining(){
     MultiLayerRBM multirbm(3, rbmLayerSize);
     multirbm.setModelFile("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
     multirbm.setPersistent(true);
-    multirbm.setSparsity(true, 0.001, 0.9, 0.1);
+    multirbm.setSparsity(true, 0.001, 0.99, 0.1);
 
     MultiLayerTrainModel pretrainModel(multirbm);
     pretrainModel.train(&mnist, 0.01, 10, 100);
@@ -88,6 +88,46 @@ void testDump20Newsgroup(){
 
 }
 
+void testDumpTCGA(){
+    TCGADataset data;
+    data.loadData();
+
+    MLP* mlp = new MLP("result/TCGADBN_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
+    MultiLayerRBM multirbm(*mlp);
+    delete mlp;
+    TrainComponent& firstLayer = multirbm.getLayer(0);
+    TrainComponent& secondLayer = multirbm.getLayer(1);
+    TrainComponent& thirdLayer = multirbm.getLayer(2);
+
+    // dump first layer weight
+    //firstLayer.setModelFile("result/20NewsgroupDBN_FirstLayer.dat");
+    //firstLayer.saveModel();
+
+    /*
+    // dump first layer hidden layer output
+    TransmissionDataset h1out(data, firstLayer);
+    h1out.dumpTrainingData("result/20NewsgroupDBN_FirstLayer_Hidden.bin");
+
+    // dump second layer hidden layer output
+    TransmissionDataset h2out(h1out, secondLayer);
+    h2out.dumpTrainingData("result/20NewsgroupDBN_SecondLayer_Hidden.bin");
+
+    TransmissionDataset h3out(h2out, thirdLayer);
+    h3out.dumpTrainingData("result/20NewsgroupDBN_ThirdLayer_Hidden.bin");
+    */
+
+    double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 2000);
+    // dump first layer AM weight
+    multirbm.activationMaxization(0, 2000, avgNorm, 500, "result/TCGADBN_FirstLayer_AM.bin", true);
+
+    // dump second layer AM weight
+    multirbm.activationMaxization(1, 2000, avgNorm, 500, "result/TCGADBN_SecondLayer_AM.bin", true);
+
+    // dump third layer AM weight
+    multirbm.activationMaxization(2, 2000, avgNorm, 500, "result/TCGADBN_ThirdLayer_AM.bin", true);
+
+}
+
 void testMNISTLoading(){
     MNISTDataset mnist;
     mnist.loadData();
@@ -141,14 +181,16 @@ void testTCGALoading(){
     data.loadData();
 
     //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_0.01_13epoch.dat");
-    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch.dat");
+    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch.dat");
+
+    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
     multirbm.setPersistent(false);
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/TCGADBN_0.01.dat");
+    mlp.setModelFile("result/TCGADBN_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
 
     TrainModel dbn(mlp);
-    dbn.train(&data, 0.01, 1, 1000, 30);
+    dbn.train(&data, 0.01, 1, 29);
 }
 
 void testTCGAUpperLayerTraining(){
@@ -171,7 +213,12 @@ void testMNISTAM(){
     double avgNorm = squareNorm(mnist.getTrainingData(0), mnist.getFeatureNumber(), 100);
 
     MultiLayerRBM multirbm("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
-    multirbm.activationMaxization(0, 400, avgNorm, 1000);
+
+    multirbm.activationMaxization(0, 400, avgNorm, 1000, "result/MNISTDBN_FirstLayer_AM.txt");
+
+    multirbm.activationMaxization(1, 400, avgNorm, 1000, "result/MNISTDBN_SecondLayer_AM.txt");
+
+    multirbm.activationMaxization(2, 400, avgNorm, 1000, "result/MNISTDBN_ThirdLayer_AM.txt");
 }
 
 void testMNISTDBNAM(){
@@ -187,12 +234,13 @@ void testMNISTDBNAM(){
 
 int main(){
     srand(4321);
-    testMNISTTraining();
+    //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
     //testTCGATraining();
     //testTCGAUpperLayerTraining();
     //testTCGALoading();
+    testDumpTCGA();
 
     //testMNISTAM();
     //testMNISTDBNAM();
