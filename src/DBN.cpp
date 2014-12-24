@@ -8,7 +8,7 @@ void testMNISTTraining(){
     int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 1000, 1000};
 
     MultiLayerRBM multirbm(3, rbmLayerSize);
-    multirbm.setModelFile("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
+    multirbm.setModelFile("result/MNISTMultiLayerRBM_1000_1000_1000_0.01_sparsity.dat");
     multirbm.setPersistent(true);
     multirbm.setSparsity(true, 0.001, 0.99, 0.1);
 
@@ -17,7 +17,7 @@ void testMNISTTraining(){
 
     MLP mlp;
     multirbm.toMLP(&mlp, mnist.getLabelNumber());
-    mlp.setModelFile("result/MNISTDBN_1000_1000_1000_0.1.dat");
+    mlp.setModelFile("result/MNISTDBN_1000_1000_1000_0.1_sparsity.dat");
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&mnist, 0.1, 10, 1000);
