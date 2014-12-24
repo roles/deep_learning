@@ -59,7 +59,7 @@ def print_sample_image_from_file(filename):
 def print_AM_image(filename="../result/AM.txt"):
     f = open(filename)
     img_H = 28
-    nrow = 1
+    nrow = 20
     ncol = 20
     img_data = []
     for i in range(nrow):
@@ -89,4 +89,4 @@ if __name__ == "__main__":
     #print_W_image_from_file("../result/mnist_rbm_weight.txt")
     #print_sample_image_from_file("../result/rbm_sample.txt")
     #create_image(sys.argv[1], 28, 28)
-    print_AM_image()
+    print_AM_image("../result/MNISTDBN_ThirdLayer_AM.txt")

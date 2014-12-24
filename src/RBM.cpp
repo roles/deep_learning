@@ -387,6 +387,7 @@ void RBM::operationPerEpoch(){
     //dumpWeight(100, 28);
     if(sparsity){
         printf("\t===> sparsity : %.8lf\n", q);
+        slr = slr * 1.1;
         fflush(stdout);
     }
 }
