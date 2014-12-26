@@ -40,9 +40,9 @@ void testTCGATraining(){
 }
 
 int main(){
-    testMNISTTraining();
+    //testMNISTTraining();
     //testMNISTDataLoading();
     //testICA();
 
-    //testTCGATraining();
+    testTCGATraining();
 }

@@ -114,7 +114,6 @@ void testDumpTCGA(){
     TransmissionDataset h3out(h2out, thirdLayer);
     h3out.dumpTrainingData("result/TCGADBN_ThirdLayer_Hidden.bin");
 
-    /*
     double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 2000);
     // dump first layer AM weight
     multirbm.activationMaxization(0, 2000, avgNorm, 500, "result/TCGADBN_FirstLayer_AM.bin", true);
@@ -124,7 +123,6 @@ void testDumpTCGA(){
 
     // dump third layer AM weight
     multirbm.activationMaxization(2, 2000, avgNorm, 500, "result/TCGADBN_ThirdLayer_AM.bin", true);
-    */
 }
 
 void testMNISTLoading(){
@@ -161,15 +159,15 @@ void testTCGATraining(){
     int rbmLayerSize[] = { data.getFeatureNumber(), 2000};
 
     MultiLayerRBM multirbm(1, rbmLayerSize);
-    multirbm.setModelFile("result/TCGAMultiLayerRBM_0.01_13epoch.dat");
+    multirbm.setModelFile("result/TCGAMultiLayerRBM_FirstLayer_2000_0.01.dat");
     multirbm.setPersistent(false);
 
     MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&data, 0.01, 1, 13);
+    pretrainModel.train(&data, 0.01, 1, 100);
 
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/TCGADBN_0.01.dat");
+    mlp.setModelFile("result/TCGADBN_OneLayer_2000_0.01.dat");
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&data, 0.01, 1, 1000);
@@ -236,15 +234,16 @@ int main(){
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
-    //testTCGATraining();
+    testTCGATraining();
     //testTCGAUpperLayerTraining();
     //testTCGALoading();
-    testDumpTCGA();
+    //testDumpTCGA();
 
     //testMNISTAM();
     //testMNISTDBNAM();
 
     //test20NewsgroupTraining();
     //testDump20Newsgroup();
+
     return 0;
 }

@@ -74,10 +74,10 @@ void testTCGATwoLayerTraining(){
 int main(){
     srand(4321);
     //testWFICA();
-    testMNIST();
+    //testMNIST();
     //testMNISTLoading();
 
-    //testTCGATraining();
+    testTCGATraining();
     //testTCGATwoLayerTraining();
     return 0;
 }

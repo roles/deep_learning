@@ -312,7 +312,7 @@ TransmissionDataset::~TransmissionDataset(){ }
 void SVMDataset::loadData(const char trainDataFile[],
                            const char validDataFile[])
 {
-    char line[10000];
+    char line[40000];
     char *saveptr, *saveptr2;
 
     FILE* trainfd = fopen(trainDataFile, "r");
@@ -332,7 +332,7 @@ void SVMDataset::loadData(const char trainDataFile[],
     memset(trainingLabel, 0, sizeof(double)*numLabel*numTrain);
 
     for(int i = 0; i < numTrain; i++){
-        fgets(line, 10000, trainfd); 
+        fgets(line, 40000, trainfd); 
         char *token = strtok_r(line, " ", &saveptr);
 
         int label;
@@ -370,7 +370,7 @@ void SVMDataset::loadData(const char trainDataFile[],
     memset(validateLabel, 0, sizeof(double)*numLabel*numValid);
 
     for(int i = 0; i < numValid; i++){
-        fgets(line, 10000, validfd); 
+        fgets(line, 40000, validfd); 
         char *token = strtok_r(line, " ", &saveptr);
 
         int label;
