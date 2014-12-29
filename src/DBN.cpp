@@ -156,6 +156,7 @@ void testMNISTDBNSecondLayerTrain(){
 void testTCGATraining(){
     TCGADataset data;
     data.loadData();
+
     int rbmLayerSize[] = { data.getFeatureNumber(), 2000};
 
     MultiLayerRBM multirbm(1, rbmLayerSize);
