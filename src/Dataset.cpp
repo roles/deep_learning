@@ -312,7 +312,7 @@ TransmissionDataset::~TransmissionDataset(){ }
 void SVMDataset::loadData(const char trainDataFile[],
                            const char validDataFile[])
 {
-    char line[40000];
+    char line[41000];
     char *saveptr, *saveptr2;
 
     FILE* trainfd = fopen(trainDataFile, "r");
