@@ -104,6 +104,14 @@ void RBM::trainBatch(int size){
     updateBias(size);
 }
 
+void RBM::setInput(double *in){
+    if(gaussian){
+
+    }else{
+        v1 = in;
+    }
+}
+
 /**
  * @brief  这个函数执行完之后可以通过getOutput获取结果
  *

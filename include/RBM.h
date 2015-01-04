@@ -33,7 +33,7 @@ class RBM : public UnsuperviseTrainComponent {
         int getInputNumber() { return numVis; }
         double getTrainingCost(int, int);
         void operationPerEpoch();
-        void setInput(double* in) { v1 = in; }
+        void setInput(double* in);
         void setSparsity(bool b, double p = 0.0, double numda = 0.9, double slr = 0.01) 
         { 
             this->sparsity = b;
@@ -88,6 +88,9 @@ class RBM : public UnsuperviseTrainComponent {
         double p, q, numda, slr;
         bool sparsity;
         double *hderiv;
+
+        bool gaussian;
+
 };
 
 #endif
