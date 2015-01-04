@@ -156,20 +156,19 @@ void testMNISTDBNSecondLayerTrain(){
 void testTCGATraining(){
     TCGADataset data;
     data.loadData();
-    int rbmLayerSize[] = { data.getFeatureNumber(), 2000};
+    int rbmLayerSize[] = { data.getFeatureNumber(), 3000};
 
-    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_FirstLayer_2000_0.01.dat");
+    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_FirstLayer_3000_0.01.dat");
+    MultiLayerRBM multirbm(1, rbmLayerSize);
     multirbm.setPersistent(false);
-    multirbm.setLayerToTrain(0, false);
+    //multirbm.setLayerToTrain(0, false);
 
-    /*
     MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&data, 0.01, 1, 13, 40);
-    */
+    pretrainModel.train(&data, 0.01, 1, 12);
 
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/TCGADBN_OneLayer_2000_0.01.dat");
+    mlp.setModelFile("result/TCGADBN_OneLayer_3000_0.01.dat");
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&data, 0.005, 1, 1000, 40);
@@ -182,28 +181,28 @@ void testTCGALoading(){
     //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_0.01_13epoch.dat");
     //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch.dat");
 
-    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
+    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_SecondLayer_2000_0.01.dat");
     multirbm.setPersistent(false);
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/TCGADBN_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
+    mlp.setModelFile("result/TCGADBN_TwoLayer_2000_2000_0.01.dat");
 
     TrainModel dbn(mlp);
-    dbn.train(&data, 0.01, 1, 29);
+    dbn.train(&data, 0.005, 1, 100, 40);
 }
 
 void testTCGAUpperLayerTraining(){
     TCGADataset data;
     data.loadData();
 
-    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_FirstLayer_2000_0.01.dat");
-    multirbm.setModelFile("result/TCGAMultiLayerRBM_SecondLayer_2000_0.01.dat");
+    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_SecondLayer_2000_0.01.dat");
+    multirbm.setModelFile("result/TCGAMultiLayerRBM_ThirdLayer_2000_0.01.dat");
     multirbm.addLayer(2000);
     multirbm.setLayerToTrain(0, false);
-    //multirbm.setLayerToTrain(1, false);
+    multirbm.setLayerToTrain(1, false);
 
     MultiLayerTrainModel dbn(multirbm);
-    dbn.train(&data, 0.01, 1, 30);
+    dbn.train(&data, 0.01, 1, 12);
 }
 
 void testMNISTAM(){
@@ -236,8 +235,8 @@ int main(){
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
-    //testTCGATraining();
-    testTCGAUpperLayerTraining();
+    testTCGATraining();
+    //testTCGAUpperLayerTraining();
     //testTCGALoading();
     //testDumpTCGA();
 
