@@ -32,6 +32,25 @@ void testMNIST(){
     mlpModel.train(&mnist, 0.01, 20, 1000);
 }
 
+void testMNISTGaussian(){
+    MNISTDataset mnist;
+    mnist.loadData();
+    //mnist.rowNormalize();
+    MLP mlp; 
+
+    SigmoidLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
+    //SigmoidLayer *secondLayer = new SigmoidLayer(500, 500);
+    Logistic *thirdLayer = new Logistic(500, mnist.getLabelNumber());
+    mlp.addLayer(firstLayer);
+    //mlp.addLayer(secondLayer);
+    mlp.addLayer(thirdLayer);
+    //mlp.setGaussian(true);
+    mlp.setModelFile("result/MLPModel.dat");
+
+    TrainModel mlpModel(mlp);
+    mlpModel.train(&mnist, 0.01, 20, 1000);
+}
+
 void testMNISTLoading(){
     MNISTDataset mnist;
     mnist.loadData();
@@ -77,7 +96,8 @@ int main(){
     //testMNIST();
     //testMNISTLoading();
 
-    testTCGATraining();
+    testMNISTGaussian();
+    //testTCGATraining();
     //testTCGATwoLayerTraining();
     return 0;
 }

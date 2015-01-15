@@ -139,3 +139,35 @@ double squareNorm(double *arr, int n, int size){
     }
     return res / size;
 }
+
+double normalize(double *arr, int n, int size){
+    for(int i = 0; i < size; i++){
+        double mean = 0;
+        for(int j = 0; j < n; j++){
+            mean += arr[i*n+j];
+        }
+        mean /= n;
+        for(int j = 0; j < n; j++){
+            arr[i*n+j] -= mean;
+        }
+        double square = 0;
+        for(int j = 0; j < n; j++){
+            square += arr[i*n+j] * arr[i*n+j];
+        }
+        square /= n - 1;
+        square = sqrt(square);
+        for(int j = 0; j < n; j++){
+            arr[i*n+j] /= square;
+        }
+    }
+}
+
+double corrupt(const double* x, double* nx, int n, double level){
+    for(int i = 0; i < n; i++){
+        if(random_double(0, 1) < level){
+            nx[i] = 0;
+        }else{
+            nx[i] = x[i];
+        }
+    }
+}

@@ -49,6 +49,10 @@ class RBM : public UnsuperviseTrainComponent {
         void generateSample(const char*, double*, int);
         void dumpSample(FILE*, double*, int);
         void dumpSampleBinary(FILE*, double*, int);
+
+        void setGaussian(bool b) {
+            this->gaussian = b;
+        }
     private:
         void getHProb(const double *v, double *ph, const int size);
         void getHSample(const double *ph, double *h, const int size);
@@ -59,6 +63,7 @@ class RBM : public UnsuperviseTrainComponent {
         void getFE(const double *v, double *FE, const int size);
         double getPL(double *v, const int size);
         double getReconstructCost(double *v, double *pv, int size);
+        double getSquareReconstructCost(double *v1, double *v2, int size);
 
         void runChain(int, int);
         void updateWeight(int);
@@ -90,7 +95,6 @@ class RBM : public UnsuperviseTrainComponent {
         double *hderiv;
 
         bool gaussian;
-
 };
 
 #endif

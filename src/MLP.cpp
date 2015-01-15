@@ -3,9 +3,11 @@
 
 using namespace std;
 
-MLP::MLP() : TrainComponent(Supervise, "MLP"), numLayer(0) {}
+MLP::MLP() : TrainComponent(Supervise, "MLP"), numLayer(0), gaussian(false) {}
 
-MLP::MLP(const char *file) : TrainComponent(Supervise, "MLP"), numLayer(0){
+MLP::MLP(const char *file) : TrainComponent(Supervise, "MLP"), 
+    numLayer(0), gaussian(false)
+{
     FILE* fd = fopen(file, "rb");
     loadModel(fd);
     fclose(fd);

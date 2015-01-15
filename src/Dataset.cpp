@@ -15,6 +15,11 @@ void Dataset::dumpTrainingData(const char savefile[]){
     dumpData(savefile, numTrain, trainingData, trainingLabel); 
 }
 
+void Dataset::rowNormalize(){
+    normalize(trainingData, numFeature, numTrain);
+    normalize(validateData, numFeature, numValid);
+}
+
 void Dataset::dumpData(const char savefile[], int numData, double* data, double *label){
     FILE* fd = fopen(savefile, "wb+");
     if(fd == NULL){

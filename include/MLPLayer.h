@@ -28,6 +28,7 @@ class MLPLayer {
         inline double* getWeight() { return weight; }
         inline double* getBias() { return bias; }
         double* getOutput();
+        double* getInput() { return in; }
         inline void setUnitType(UnitType t) { unitType = t; }
 
         virtual void setLabel(double* label) { }    //用于最后一层有监督训练

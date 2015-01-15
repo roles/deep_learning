@@ -15,6 +15,8 @@ double expc(double x);
 double sigmoidc(double x);
 double softplusc(double x);
 double squareNorm(double *arr, int n, int size);
+double normalize(double *arr, int n, int size);
+double corrupt(const double* x, double* nx, int n, double level);
 
 inline int random_int(int low, int high){
     return rand() % (high - low + 1) + low;

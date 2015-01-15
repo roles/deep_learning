@@ -7,7 +7,7 @@ RBM::RBM(int numVis, int numHid)
     : numVis(numVis), numHid(numHid), chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL), hderiv(NULL),
-      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false), gaussian(false)
 {
     weight = new double[numVis*numHid];
     initializeWeightSigmoid(weight, numVis, numHid);
@@ -36,7 +36,7 @@ void RBM::loadModel(FILE* fd)
 RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL), hderiv(NULL),
-      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false), gaussian(false)
 {
     FILE* fd = fopen(modelFile, "rb");
 
@@ -51,7 +51,7 @@ RBM::RBM(const char *modelFile) : chainStart(NULL), persistent(true),
 RBM::RBM(FILE* fd) : chainStart(NULL), persistent(true),
       v1(NULL), v2(NULL), pv(NULL),
       h1(NULL), h2(NULL), ph1(NULL), ph2(NULL), AMdelta(NULL), hderiv(NULL),
-      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false)
+      weightFile(NULL), UnsuperviseTrainComponent("RBM"), sparsity(false), gaussian(false)
 {
     loadModel(fd);
 }
@@ -105,11 +105,7 @@ void RBM::trainBatch(int size){
 }
 
 void RBM::setInput(double *in){
-    if(gaussian){
-
-    }else{
-        v1 = in;
-    }
+    v1 = in;
 }
 
 /**
@@ -205,8 +201,10 @@ void RBM::getVProb(const double *h, double *pv, const int size){
     cblas_dger(CblasRowMajor, size, numVis,
                1.0, I(), 1, vbias, 1, pv, numVis);
 
-    for(int i = 0; i < size * numVis; i++){
-        pv[i] = sigmoid(pv[i]);
+    if(!gaussian){
+        for(int i = 0; i < size * numVis; i++){
+            pv[i] = sigmoid(pv[i]);
+        }
     }
 }
 
@@ -224,8 +222,12 @@ void RBM::gibbsSampleHVH(double *hStart, double *h, double *ph,
         cblas_dcopy(size * numHid, hStart, 1, h, 1);
 
     for(int i = 0; i < step; i++){
-        getVProb(h, pv, size);
-        getVSample(pv, v, size);
+        if(gaussian){
+            getVProb(h, v, size);
+        }else{
+            getVProb(h, pv, size);
+            getVSample(pv, v, size);
+        }
         getHProb(v, ph, size);
         getHSample(ph, h, size);
     }
@@ -383,7 +385,26 @@ void RBM::updateBias(int size){
     }
 }
 
+double RBM::getSquareReconstructCost(double *v1, double *v2, int size){
+    double cost = 0;
+    for(int i = 0; i < size; i++){
+        double sampleCost = 0;
+        for(int j = 0; j < numVis; j++){
+            double diff = v1[i*numVis+j] - v2[i*numVis+j];
+            sampleCost += diff * diff;
+        }
+        sampleCost = sqrt(sampleCost);
+        cost += sampleCost;
+    }
+    return cost / size;
+}
+
 double RBM::getTrainingCost(int size, int numBatch){
+    if(gaussian){
+        double res = getSquareReconstructCost(v1, v2, size);
+        //printf("%lf\n", res);
+        return res;
+    }
     if(persistent){
         return getPL(v1, size);
     }else{

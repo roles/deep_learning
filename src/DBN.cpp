@@ -23,6 +23,64 @@ void testMNISTTraining(){
     supervisedModel.train(&mnist, 0.1, 10, 1000);
 }
 
+void testMNISTGuassian(){
+    MNISTDataset mnist;
+    mnist.loadData();
+    mnist.rowNormalize();
+
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
+    MultiLayerRBM multirbm(1, rbmLayerSize);
+    multirbm.setModelFile("result/MNISTMultiLayerRBM_gaussian.dat");
+    multirbm.setPersistent(false);
+    multirbm.setGaussian(true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&mnist, 0.01, 10, 20);
+
+    MLP mlp;
+    multirbm.toMLP(&mlp, mnist.getLabelNumber());
+    mlp.setModelFile("result/MNISTDBN_gaussian.dat");
+    //mlp.setGaussian(true);
+
+    TrainModel supervisedModel(mlp);
+    supervisedModel.train(&mnist, 0.01, 10, 1000);
+}
+
+void testGPCRGuassian(){
+    TrivialDataset data;
+    data.loadData("../data/GPCR/GPCR_Binary.data", "../data/GPCR/GPCR_Binary.label");
+    data.rowNormalize();
+
+    /*
+    int rbmLayerSize[] = { data.getFeatureNumber(), 500};
+    MultiLayerRBM multirbm(1, rbmLayerSize);
+    multirbm.setModelFile("result/GPCRMultiLayerRBM_gaussian.dat");
+    multirbm.setPersistent(false);
+    multirbm.setGaussian(true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&data, 0.01, 5, 20);
+    */
+
+    MultiLayerRBM multirbm("result/GPCRMultiLayerRBM_gaussian.dat");
+    multirbm.addLayer(500);
+    multirbm.setLayerToTrain(0, false);
+    multirbm.setModelFile("result/GPCRMultiLayerRBM_SecondLayer_gaussian.dat");
+    multirbm.setPersistent(false);
+    multirbm.setGaussian(true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&data, 0.01, 5, 20);
+
+    MLP mlp;
+    multirbm.toMLP(&mlp, data.getLabelNumber());
+    mlp.setModelFile("result/GPCRDBN_gaussian.dat");
+    //mlp.setGaussian(true);
+
+    TrainModel supervisedModel(mlp);
+    supervisedModel.train(&data, 0.01, 1, 1000, 40);
+}
+
 void test20NewsgroupTraining(){
     SVMDataset data;
     data.loadData("../data/20newsgroup_train.txt", "../data/20newsgroup_valid.txt");
@@ -235,7 +293,7 @@ int main(){
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
-    testTCGATraining();
+    //testTCGATraining();
     //testTCGAUpperLayerTraining();
     //testTCGALoading();
     //testDumpTCGA();
@@ -246,5 +304,7 @@ int main(){
     //test20NewsgroupTraining();
     //testDump20Newsgroup();
 
+    //testMNISTGuassian();
+    testGPCRGuassian();
     return 0;
 }

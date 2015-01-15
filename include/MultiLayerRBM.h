@@ -28,6 +28,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
                 const char amSampleFile[] = "result/AM.txt", bool dumpBinary = false);
         void activationMaxizationOneUnit(int layerIdx, int unitIdx, double avgNorm, int nepoch = 1000);
         void setSparsity(bool, double p = 0.0, double numda = 0.9, double slr = 0.01);
+        void setGaussian(bool b) { layers[0]->setGaussian(b); }
     private:
         double maximizeUnit(int layersIdx, int unitIdx, double*, double avgNorm, int nepoch);
         RBM* layers[maxLayer];

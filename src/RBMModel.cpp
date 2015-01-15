@@ -8,9 +8,10 @@ void testMNIST(){
     rbm.setModelFile("result/RBMModel.dat");
     rbm.setWeightFile("result/mnist_rbm_weight.txt"); //设置导出权重的文件
     rbm.setPersistent(false);
+    rbm.setGaussian(true);
 
     TrainModel RBMModel(rbm);
-    RBMModel.train(&mnist, 0.1, 20, 15);
+    RBMModel.train(&mnist, 0.01, 20, 15);
 }
 
 void testMNISTLoading(){
