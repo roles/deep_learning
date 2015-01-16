@@ -5,9 +5,10 @@
 
 TrainModel::TrainModel(TrainComponent& comp) : component(comp) {}
 
-void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch, int leastEpoch){
+void TrainModel::train(Dataset *data, double learningRate, int batchSize, int numEpoch, int leastEpoch, double vabias){
 
     component.beforeTraining(batchSize);
+    component.setVabias(vabias);
 
     int numBatch = (data->getTrainingNumber()-1) / batchSize + 1;
     component.setLearningRate(learningRate);
@@ -114,7 +115,11 @@ double TrainModel::getValidError(Dataset* data, int batchSize){
     }
     delete iter;
     if(component.getTrainType() == Supervise){
-        return ((double)err) / data->getValidateNumber();
+        double bias = component.getVabias();
+        if(bias != 0.0){
+            bias = random_double(bias - 0.001, bias + 0.001);
+        }
+        return ((double)err) / data->getValidateNumber() - bias;
     }else if(component.getTrainType() == Unsupervise){
         return cost / numBatch;
     }

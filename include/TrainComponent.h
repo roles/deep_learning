@@ -14,9 +14,12 @@ class IModel {
         virtual void saveModel();
         inline const char* getModelFile() { return modelFile; }
         const char* getModelName() { return modelName; }
+        void setVabias(double b = 0.0) { vabias = b; }
+        double getVabias() { return vabias; }
     private:
         char *modelFile;
         char modelName[20];
+        double vabias;
 };
 
 class TrainComponent : public IModel {

@@ -9,7 +9,7 @@
 class TrainModel {
     public:
         TrainModel(TrainComponent&);
-        void train(Dataset *, double, int, int, int leastEpoch = 1);
+        void train(Dataset *, double, int, int, int leastEpoch = 1, double vabias = 0.0);
         double getValidError(Dataset *, int);
     private:
         TrainComponent& component;

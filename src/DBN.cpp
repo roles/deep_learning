@@ -92,7 +92,7 @@ void testDumpTCGA(){
     TCGADataset data;
     data.loadData();
 
-    MLP* mlp = new MLP("result/TCGADBN_2000_0.01_13epoch_2000_0.01_3epoch_2000_0.01_16epoch.dat");
+    MLP* mlp = new MLP("result/TCGADBN_ThreeLayer_2000_0.01.dat");
     MultiLayerRBM multirbm(*mlp);
     delete mlp;
     TrainComponent& firstLayer = multirbm.getLayer(0);
@@ -158,37 +158,39 @@ void testTCGATraining(){
     data.loadData();
     int rbmLayerSize[] = { data.getFeatureNumber(), 3000};
 
-    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_FirstLayer_3000_0.01.dat");
-    MultiLayerRBM multirbm(1, rbmLayerSize);
+    MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_FirstLayer_2000_0.01.dat");
+    //MultiLayerRBM multirbm(1, rbmLayerSize);
     multirbm.setPersistent(false);
-    //multirbm.setLayerToTrain(0, false);
+    multirbm.setModelFile("result/TCGAMultiLayerRBM_FirstLayer_2000.dat");
+    multirbm.setLayerToTrain(0, false);
 
+    /*
     MultiLayerTrainModel pretrainModel(multirbm);
     pretrainModel.train(&data, 0.01, 1, 12);
+    */
 
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
     mlp.setModelFile("result/TCGADBN_OneLayer_3000_0.01.dat");
 
     TrainModel supervisedModel(mlp);
-    supervisedModel.train(&data, 0.005, 1, 1000, 40);
+    supervisedModel.train(&data, 0.005, 1, 1000, 40, 0.001);
 }
 
 void testTCGALoading(){
+    srand(1111);
     TCGADataset data;
     data.loadData();
 
-    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_0.01_13epoch.dat");
-    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_2000_0.01_13epoch_2000_0.01_3epoch.dat");
-
     MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_SecondLayer_2000_0.01.dat");
-    multirbm.setPersistent(false);
+    //MultiLayerRBM multirbm("result/TCGAMultiLayerRBM_ThirdLayer_2000_0.01.dat");
+
     MLP mlp;
     multirbm.toMLP(&mlp, data.getLabelNumber());
-    mlp.setModelFile("result/TCGADBN_TwoLayer_2000_2000_0.01.dat");
+    mlp.setModelFile("result/TCGADBN_TwoLayer_2000_0.01.dat");
 
     TrainModel dbn(mlp);
-    dbn.train(&data, 0.005, 1, 100, 40);
+    dbn.train(&data, 0.01, 1, 41, 41);
 }
 
 void testTCGAUpperLayerTraining(){
@@ -235,9 +237,9 @@ int main(){
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();
-    testTCGATraining();
+    //testTCGATraining();
     //testTCGAUpperLayerTraining();
-    //testTCGALoading();
+    testTCGALoading();
     //testDumpTCGA();
 
     //testMNISTAM();

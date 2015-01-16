@@ -35,8 +35,7 @@ void testTCGATraining(){
     Logistic logi(tcga.getFeatureNumber(), tcga.getLabelNumber());
     logi.setModelFile("result/TCGALogisticModel.dat");
     TrainModel logisticModel(logi);
-    logisticModel.train(&tcga, 0.01, 1, 1000);
-
+    logisticModel.train(&tcga, 0.01, 1, 1000, 5, -0.005);
 }
 
 int main(){

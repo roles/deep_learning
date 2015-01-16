@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 
-IModel::IModel(const char* name) : modelFile(NULL)
+IModel::IModel(const char* name) : modelFile(NULL), vabias(0.0)
 {
     strcpy(modelName, name);
 }
