@@ -1,7 +1,5 @@
-#include "TrainComponent.h"
+#include "DeepAutoEncoder.h"
 #include <cstring>
-#include "Dataset.h"
-#include "TrainModel.h"
 #include "Config.h"
 #include "mkl_cblas.h"
 #include "Utility.h"
@@ -9,36 +7,9 @@
 static double temp[maxUnit*maxUnit];
 static double temp2[maxUnit*maxUnit];
 
-class DeepAutoEncoder;
-class EncoderLayer;
-
-class EncoderLayer {
-    public:
-        EncoderLayer(int, int);
-        ~EncoderLayer();
-        void setInput(double *input) { x = input; }
-        void allocate(int);
-    private:
-        int numIn, numOut;
-        double *x, *y, *h;
-        double *w, *b, *c;
-        double *dw;
-        double *dy, *dh;
-        double lr;
-
-        void getHFromX(double*, double*, int);
-        void getYFromH(double*, double*, int);
-        void getYDeriv(EncoderLayer* prev, int);
-        void getHDeriv(EncoderLayer* prev, int);
-        void getDeltaFromYDeriv(double*, int size);
-        void getDeltaFromHDeriv(int size);
-
-        friend class DeepAutoEncoder;
-};
-
 EncoderLayer::EncoderLayer(int numIn, int numOut) :
     numIn(numIn), numOut(numOut), y(NULL), h(NULL),
-    dy(NULL), dh(NULL)
+    dy(NULL), dh(NULL), binIn(true), binOut(true)
 {
     w = new double[numIn*numOut];
     dw = new double[numIn*numOut];
@@ -76,8 +47,10 @@ void EncoderLayer::getHFromX(double *x, double *h, int size){
     cblas_dger(CblasRowMajor, size, numOut,
                1.0, I(), 1, b, 1, h, numOut);
 
-    for(int i = 0; i < size * numOut; i++){
-        h[i] = sigmoid(h[i]);
+    if(binOut){
+        for(int i = 0; i < size * numOut; i++){
+            h[i] = sigmoid(h[i]);
+        }
     }
 }
 
@@ -90,15 +63,23 @@ void EncoderLayer::getYFromH(double *h, double *y, int size){
     cblas_dger(CblasRowMajor, size, numIn,
                1.0, I(), 1, c, 1, y, numIn);
 
-    for(int i = 0; i < size * numIn; i++){
-        y[i] = sigmoid(y[i]);
+    if(binIn){
+        for(int i = 0; i < size * numIn; i++){
+            y[i] = sigmoid(y[i]);
+        }
     }
 }
 
 void EncoderLayer::getYDeriv(EncoderLayer* prev, int size){
     if(prev == NULL){
-        for(int i = 0; i < size * numIn; i++){
-            dy[i] = y[i] - x[i];
+        if(binIn){
+            for(int i = 0; i < size * numIn; i++){
+                dy[i] = y[i] - x[i];
+            }
+        }else{
+            for(int i = 0; i < size * numIn; i++){
+                dy[i] = (y[i] - x[i]) / ((1.0 - y[i] + 1e-10) * (y[i] + 1e-10));
+            }
         }
     }else{
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
@@ -106,8 +87,10 @@ void EncoderLayer::getYDeriv(EncoderLayer* prev, int size){
                     1, prev->dy, prev->numIn, prev->w, prev->numOut, 
                     0, dy, prev->numOut);
 
-        for(int i = 0; i < size * numIn; i++){
-            dy[i] = get_sigmoid_derivative(y[i]) * dy[i];
+        if(binIn){
+            for(int i = 0; i < size * numIn; i++){
+                dy[i] = get_sigmoid_derivative(y[i]) * dy[i];
+            }
         }
     }
 }
@@ -119,8 +102,10 @@ void EncoderLayer::getHDeriv(EncoderLayer* prev, int size){
                     1, dy, numIn, w, numOut, 
                     0, dh, numOut);
 
-        for(int i = 0; i < size * numOut; i++){
-            dh[i] = get_sigmoid_derivative(h[i]) * dh[i];
+        if(binOut){
+            for(int i = 0; i < size * numOut; i++){
+                dh[i] = get_sigmoid_derivative(h[i]) * dh[i];
+            }
         }
     }else{
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -128,8 +113,10 @@ void EncoderLayer::getHDeriv(EncoderLayer* prev, int size){
                     1, prev->dh, prev->numOut, prev->w, prev->numOut, 
                     0, dh, prev->numIn);
 
-        for(int i = 0; i < size * numOut; i++){
-            dh[i] = get_sigmoid_derivative(h[i]) * dh[i];
+        if(binOut){
+            for(int i = 0; i < size * numOut; i++){
+                dh[i] = get_sigmoid_derivative(h[i]) * dh[i];
+            }
         }
     }
 }
@@ -165,33 +152,6 @@ void EncoderLayer::getDeltaFromHDeriv(int size){
     cblas_daxpy(numIn*numOut, 1, dw, 1, w, 1);
 }
 
-class DeepAutoEncoder : public UnsuperviseTrainComponent{
-    public:
-        DeepAutoEncoder();
-        DeepAutoEncoder(int, int*);
-        ~DeepAutoEncoder();
-        void beforeTraining(int size);
-        void trainBatch(int);
-        void runBatch(int);
-        void setLearningRate(double lr);
-        void setInput(double *input);
-        void setLabel(double *label);
-        int getInputNumber();
-        double* getOutput();
-        int getOutputNumber();
-        double* getLabel();
-        double getTrainingCost(int, int);
-        void saveModel(FILE*);
-        void operationPerEpoch();
-
-        void addLayer(int, int);
-        void forward(int);
-        void backpropagate(int);
-    private:
-        double getReconstructCost(double *x, double *y, int n, int size);
-        int numLayer;
-        EncoderLayer* layers[maxLayer];
-};
 
 DeepAutoEncoder::DeepAutoEncoder() : UnsuperviseTrainComponent("DeepAutoEncoder")
 {
@@ -204,6 +164,7 @@ DeepAutoEncoder::DeepAutoEncoder(int n, int* sizes) :
     for(int i = 0; i < n; i++){
         layers[i] = new EncoderLayer(sizes[i], sizes[i+1]);
     }
+    layers[n-1]->binOut = false;
 }
 
 DeepAutoEncoder::~DeepAutoEncoder(){
@@ -319,14 +280,4 @@ void DeepAutoEncoder::backpropagate(int size){
     }
 }
 
-int main(){
-    MNISTDataset data;
-    data.loadData();
-
-    int sizes[] = {data.getFeatureNumber(), 500, 500};
-
-    DeepAutoEncoder dad(2, sizes);
-    TrainModel model(dad);
-    model.train(&data, 0.1, 20, 15);
-}
 

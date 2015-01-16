@@ -32,7 +32,7 @@ void testMNISTGuassian(){
     MultiLayerRBM multirbm(1, rbmLayerSize);
     multirbm.setModelFile("result/MNISTMultiLayerRBM_gaussian.dat");
     multirbm.setPersistent(false);
-    multirbm.setGaussian(true);
+    //multirbm.setGaussian(true);
 
     MultiLayerTrainModel pretrainModel(multirbm);
     pretrainModel.train(&mnist, 0.01, 10, 20);
@@ -44,6 +44,24 @@ void testMNISTGuassian(){
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&mnist, 0.01, 10, 1000);
+}
+
+void testMNISTPretrain(){
+    MNISTDataset mnist;
+    mnist.loadData();
+
+    /*
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 500, 250, 2};
+    MultiLayerRBM multirbm(4, rbmLayerSize);
+    */
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
+    MultiLayerRBM multirbm(1, rbmLayerSize);
+    multirbm.setModelFile("result/MNISTMultiLayerRBM_pretrain.dat");
+    multirbm.setPersistent(false);
+    multirbm.setGaussianHidden(0, true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&mnist, 0.001, 10, 100);
 }
 
 void testGPCRGuassian(){
@@ -67,7 +85,7 @@ void testGPCRGuassian(){
     multirbm.setLayerToTrain(0, false);
     multirbm.setModelFile("result/GPCRMultiLayerRBM_SecondLayer_gaussian.dat");
     multirbm.setPersistent(false);
-    multirbm.setGaussian(true);
+    multirbm.setGaussianVisible(0, true);
 
     MultiLayerTrainModel pretrainModel(multirbm);
     pretrainModel.train(&data, 0.01, 5, 20);
@@ -305,6 +323,7 @@ int main(){
     //testDump20Newsgroup();
 
     //testMNISTGuassian();
-    testGPCRGuassian();
+    //testGPCRGuassian();
+    testMNISTPretrain();
     return 0;
 }

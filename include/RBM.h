@@ -50,8 +50,11 @@ class RBM : public UnsuperviseTrainComponent {
         void dumpSample(FILE*, double*, int);
         void dumpSampleBinary(FILE*, double*, int);
 
-        void setGaussian(bool b) {
-            this->gaussian = b;
+        void setGaussianVisible(bool b) {
+            this->binVis = !b;
+        }
+        void setGaussianHidden(bool b) {
+            this->binHid = !b;
         }
     private:
         void getHProb(const double *v, double *ph, const int size);
@@ -95,6 +98,7 @@ class RBM : public UnsuperviseTrainComponent {
         double *hderiv;
 
         bool gaussian;
+        bool binVis, binHid;    //whether is binary visible unit and hidden unit
 };
 
 #endif
