@@ -171,3 +171,11 @@ double corrupt(const double* x, double* nx, int n, double level){
         }
     }
 }
+
+void transMatrix(double* ori, double* trans, int nrow, int ncol){
+    for(int i = 0; i < nrow; i++){
+        for(int j = 0; j < ncol; j++){
+            trans[j*nrow+i] = ori[i*ncol+j];
+        }
+    }
+}

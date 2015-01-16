@@ -1,5 +1,6 @@
 #include "TrainComponent.h"
 #include "Config.h"
+#include "MultiLayerRBM.h"
 
 #ifndef _DEEPAUTOENCODER_H
 #define _DEEPAUTOENCODER_H
@@ -10,6 +11,7 @@ class EncoderLayer;
 class EncoderLayer {
     public:
         EncoderLayer(int, int);
+        EncoderLayer(int numIn, int numOut, double *w, double *b, double *c);
         ~EncoderLayer();
         void setInput(double *input) { x = input; }
         void allocate(int);
@@ -37,6 +39,7 @@ class DeepAutoEncoder : public UnsuperviseTrainComponent{
     public:
         DeepAutoEncoder();
         DeepAutoEncoder(int, int*);
+        DeepAutoEncoder(MultiLayerRBM&);
         ~DeepAutoEncoder();
         void beforeTraining(int size);
         void trainBatch(int);
