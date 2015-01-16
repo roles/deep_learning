@@ -124,6 +124,7 @@ class Dataset {
         SubDataset getValidateSet();
         SubDataset getTestSet();
         void dumpTrainingData(const char[]);
+        void rowNormalize();
 
     protected:
         void dumpData(const char[], int numData, double* data, double *label);

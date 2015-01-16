@@ -28,6 +28,8 @@ class MLP : public TrainComponent{
 
         inline void addLayer(MLPLayer* l) { layers[numLayer++] = l; }
         inline void setLayer(int i, MLPLayer* l) { layers[i] = l; }
+
+        void setGaussian(bool b) { gaussian = b; }
     private:
         MLPLayer* layers[maxLayer];
         int numLayer;
@@ -35,6 +37,8 @@ class MLP : public TrainComponent{
 
         double learningRate;
         double *label;
+
+        bool gaussian;
 };
 
 #endif

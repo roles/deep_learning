@@ -33,7 +33,7 @@ class RBM : public UnsuperviseTrainComponent {
         int getInputNumber() { return numVis; }
         double getTrainingCost(int, int);
         void operationPerEpoch();
-        void setInput(double* in) { v1 = in; }
+        void setInput(double* in);
         void setSparsity(bool b, double p = 0.0, double numda = 0.9, double slr = 0.01) 
         { 
             this->sparsity = b;
@@ -49,6 +49,13 @@ class RBM : public UnsuperviseTrainComponent {
         void generateSample(const char*, double*, int);
         void dumpSample(FILE*, double*, int);
         void dumpSampleBinary(FILE*, double*, int);
+
+        void setGaussianVisible(bool b) {
+            this->binVis = !b;
+        }
+        void setGaussianHidden(bool b) {
+            this->binHid = !b;
+        }
     private:
         void getHProb(const double *v, double *ph, const int size);
         void getHSample(const double *ph, double *h, const int size);
@@ -59,6 +66,7 @@ class RBM : public UnsuperviseTrainComponent {
         void getFE(const double *v, double *FE, const int size);
         double getPL(double *v, const int size);
         double getReconstructCost(double *v, double *pv, int size);
+        double getSquareReconstructCost(double *v1, double *v2, int size);
 
         void runChain(int, int);
         void updateWeight(int);
@@ -88,6 +96,9 @@ class RBM : public UnsuperviseTrainComponent {
         double p, q, numda, slr;
         bool sparsity;
         double *hderiv;
+
+        bool gaussian;
+        bool binVis, binHid;    //whether is binary visible unit and hidden unit
 };
 
 #endif

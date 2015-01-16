@@ -16,6 +16,17 @@ void testMNISTTraining(){
     Logistic logi(mnist.getFeatureNumber(), mnist.getLabelNumber());
     logi.setModelFile("result/LogisticModel.dat");
     TrainModel logisticModel(logi);
+    logisticModel.train(&mnist, 0.13, 600, 100);
+}
+
+void testMNISTGuassianTraining(){
+    MNISTDataset mnist;
+    mnist.loadData();
+    mnist.rowNormalize();
+
+    Logistic logi(mnist.getFeatureNumber(), mnist.getLabelNumber());
+    logi.setModelFile("result/LogisticModel.dat");
+    TrainModel logisticModel(logi);
     logisticModel.train(&mnist, 0.13, 500, 100);
 }
 
@@ -38,10 +49,22 @@ void testTCGATraining(){
     logisticModel.train(&tcga, 0.01, 1, 1000, 5, -0.005);
 }
 
+void testGPCRTraining(){
+    TrivialDataset data;
+    data.loadData("../data/GPCR/GPCR_Binary.data", "../data/GPCR/GPCR_Binary.label");
+    data.rowNormalize();
+
+    Logistic logi(data.getFeatureNumber(), data.getLabelNumber());
+    TrainModel logisticModel(logi);
+    logisticModel.train(&data, 0.01, 1, 1000, 30);
+}
+
 int main(){
-    //testMNISTTraining();
+    testMNISTTraining();
     //testMNISTDataLoading();
     //testICA();
 
-    testTCGATraining();
+    //testMNISTGuassianTraining();
+    //testTCGATraining();
+    //testGPCRTraining();
 }

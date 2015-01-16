@@ -86,7 +86,7 @@ def print_da_weight_from_file(filename="da_weight.txt"):
 
 if __name__ == "__main__":
     #print_da_weight_from_file("da_weight_corrupt.txt")
-    #print_W_image_from_file("../result/mnist_rbm_weight.txt")
+    print_W_image_from_file("../result/da_weight.txt")
     #print_sample_image_from_file("../result/rbm_sample.txt")
     #create_image(sys.argv[1], 28, 28)
-    print_AM_image("../result/MNISTDBN_ThirdLayer_AM.txt")
+    #print_AM_image("../result/MNISTDBN_ThirdLayer_AM.txt")
