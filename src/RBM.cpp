@@ -425,7 +425,7 @@ double RBM::getTrainingCost(int size, int numBatch){
         return getPL(v1, size);
     }else{
         double res = getReconstructCost(v1, pv, size);
-        printf("%lf\n", res);
+        //printf("%lf\n", res);
         return res;
     }
 }
