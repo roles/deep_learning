@@ -20,6 +20,19 @@ EncoderLayer::EncoderLayer(int numIn, int numOut) :
     initializeWeightSigmoid(w, numIn, numOut);
 }
 
+EncoderLayer::EncoderLayer(int numIn, int numOut, double *w, double *b, double *c) :
+    numIn(numIn), numOut(numOut), y(NULL), h(NULL),
+    dy(NULL), dh(NULL), binIn(true), binOut(true)
+{
+    this->w = new double[numIn*numOut];
+    this->dw = new double[numIn*numOut];
+    this->b = new double[numOut];
+    this->c = new double[numIn];
+    cblas_dcopy(numIn*numOut, w, 1, this->w, 1);
+    cblas_dcopy(numIn, c, 1, this->c, 1);
+    cblas_dcopy(numOut, b, 1, this->b, 1);
+}
+
 EncoderLayer::~EncoderLayer(){
     delete[] w;
     delete[] dw;
@@ -165,6 +178,21 @@ DeepAutoEncoder::DeepAutoEncoder(int n, int* sizes) :
         layers[i] = new EncoderLayer(sizes[i], sizes[i+1]);
     }
     layers[n-1]->binOut = false;
+}
+
+DeepAutoEncoder::DeepAutoEncoder(MultiLayerRBM& multirbm):
+    UnsuperviseTrainComponent("DeepAutoEncoder")
+{
+    numLayer = multirbm.getLayerNumber();
+    for(int i = 0; i < numLayer; i++){
+        int nIn = multirbm[i]->getInputNumber();
+        int nOut = multirbm[i]->getOutputNumber();
+        double* trans = new double[nIn*nOut];
+        multirbm[i]->getWeightTrans(trans);
+        layers[i] = new EncoderLayer(nIn, nOut, trans, 
+                multirbm[i]->getHBias(), multirbm[i]->getVBias());
+        delete[] trans;
+    }
 }
 
 DeepAutoEncoder::~DeepAutoEncoder(){

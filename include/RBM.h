@@ -31,6 +31,8 @@ class RBM : public UnsuperviseTrainComponent {
         double* getTransOutput() { return h1; }
         int getOutputNumber() { return numHid; }
         int getInputNumber() { return numVis; }
+        double* getHBias() { return hbias; }
+        double* getVBias() { return vbias; }
         double getTrainingCost(int, int);
         void operationPerEpoch();
         void setInput(double* in);
