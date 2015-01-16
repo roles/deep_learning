@@ -129,15 +129,44 @@ void MultiLayerTrainModel::train(Dataset* data,
 {
     int numLayer = component.getLayerNumber();
     int* numEpochs = new int[numLayer];
+    double* learningRates = new double[numLayer];
+    for(int i = 0; i < numLayer; i++){
+        numEpochs[i] = numEpoch;
+        learningRates[i] = learningRate;
+    }
+    train(data, learningRates, batchSize, numEpochs);
+
+    delete[] numEpochs;
+    delete[] learningRates;
+}
+
+void MultiLayerTrainModel::train(Dataset* data, 
+        double learningRate, int batchSize, int numEpochs[])
+{
+    int numLayer = component.getLayerNumber();
+    double* learningRates = new double[numLayer];
+    for(int i = 0; i < numLayer; i++){
+        learningRates[i] = learningRate;
+    }
+    train(data, learningRates, batchSize, numEpochs);
+
+    delete[] learningRates;
+}
+
+void MultiLayerTrainModel::train(Dataset* data, 
+        double learningRates[], int batchSize, int numEpoch)
+{
+    int numLayer = component.getLayerNumber();
+    int* numEpochs = new int[numLayer];
     for(int i = 0; i < numLayer; i++)
         numEpochs[i] = numEpoch;
-    train(data, learningRate, batchSize, numEpochs);
+    train(data, learningRates, batchSize, numEpochs);
 
     delete[] numEpochs;
 }
 
 void MultiLayerTrainModel::train(Dataset* data, 
-        double learningRate, int batchSize, int numEpochs[])
+        double learningRate[], int batchSize, int numEpochs[])
 {
     int numLayer = component.getLayerNumber();
     Dataset* curData = data;
@@ -152,7 +181,7 @@ void MultiLayerTrainModel::train(Dataset* data,
         printf("Training layer %d ********\n", i+1);
         fflush(stdout);
         if(component.getLayerToTrain(i)){
-            model.train(curData, learningRate, batchSize, numEpochs[i]);
+            model.train(curData, learningRate[i], batchSize, numEpochs[i]);
         }
     }
     if(curData != data)

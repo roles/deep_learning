@@ -21,6 +21,8 @@ class MultiLayerTrainModel {
             component(comp){ }
         void train(Dataset *, double, int, int);
         void train(Dataset *, double, int, int[]);
+        void train(Dataset *, double[], int, int);
+        void train(Dataset *, double[], int, int[]);
 
     private:
         void trainOneLayer();

@@ -50,18 +50,19 @@ void testMNISTPretrain(){
     MNISTDataset mnist;
     mnist.loadData();
 
-    /*
+    double lr[] = { 0.01, 0.01, 0.01, 0.001 };
     int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 500, 250, 2};
     MultiLayerRBM multirbm(4, rbmLayerSize);
-    */
+    /*
     int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
     MultiLayerRBM multirbm(1, rbmLayerSize);
+    */
     multirbm.setModelFile("result/MNISTMultiLayerRBM_pretrain.dat");
     multirbm.setPersistent(false);
-    multirbm.setGaussianHidden(0, true);
+    multirbm.setGaussianHidden(3, true);
 
     MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&mnist, 0.001, 10, 100);
+    pretrainModel.train(&mnist, lr, 10, 50);
 }
 
 void testGPCRGuassian(){
@@ -315,7 +316,7 @@ int main(){
     //testMNISTDBNSecondLayerTrain();
     //testTCGATraining();
     //testTCGAUpperLayerTraining();
-    testTCGALoading();
+    //testTCGALoading();
     //testDumpTCGA();
 
     //testMNISTAM();
