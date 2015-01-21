@@ -3,7 +3,7 @@
 #include <cfloat>
 #include <cstring>
 
-static double _I[maxUnit*maxBatchSize];
+static double _I[maxUnit * maxBatchSize];
 
 const double expThreshold = 50.0;
 

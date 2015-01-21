@@ -40,6 +40,7 @@ class DeepAutoEncoder : public UnsuperviseTrainComponent{
         DeepAutoEncoder();
         DeepAutoEncoder(int, int*);
         DeepAutoEncoder(MultiLayerRBM&);
+        DeepAutoEncoder(const char*);
         ~DeepAutoEncoder();
         void beforeTraining(int size);
         void trainBatch(int);

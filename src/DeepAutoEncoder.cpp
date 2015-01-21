@@ -193,6 +193,26 @@ DeepAutoEncoder::DeepAutoEncoder(MultiLayerRBM& multirbm):
                 multirbm[i]->getHBias(), multirbm[i]->getVBias());
         delete[] trans;
     }
+    layers[numLayer-1]->binOut = false;
+}
+
+DeepAutoEncoder::DeepAutoEncoder(const char* modelFile) :
+    UnsuperviseTrainComponent("DeepAutoEncoder")
+{
+    FILE* fd = fopen(modelFile, "rb");
+    
+    fread(&numLayer, sizeof(int), 1, fd);
+    for(int i = 0; i < numLayer; i++){
+        int numIn, numOut;
+        fread(&numIn, sizeof(int), 1, fd);
+        fread(&numOut, sizeof(int), 1, fd);
+        layers[i] = new EncoderLayer(numIn, numOut);
+        fread(layers[i]->w, sizeof(double), layers[i]->numIn*layers[i]->numOut, fd);
+        fread(layers[i]->c, sizeof(double), layers[i]->numIn, fd);
+        fread(layers[i]->b, sizeof(double), layers[i]->numOut, fd);
+    }
+    layers[numLayer-1]->binOut = false;
+    fclose(fd);
 }
 
 DeepAutoEncoder::~DeepAutoEncoder(){
@@ -219,6 +239,7 @@ void DeepAutoEncoder::setLearningRate(double lr){
     for(int i = 0; i < numLayer; i++){
         layers[i]->lr = lr;
     }
+    layers[numLayer-1]->lr = lr * 0.01;
 }
 
 void DeepAutoEncoder::setInput(double *input){
@@ -263,7 +284,16 @@ double DeepAutoEncoder::getTrainingCost(int size, int numBatch){
     return getReconstructCost(layers[0]->x, layers[0]->y, layers[0]->numIn, size);
 }
 
-void DeepAutoEncoder::saveModel(FILE*){};
+void DeepAutoEncoder::saveModel(FILE* fd){
+    fwrite(&numLayer, sizeof(int), 1, fd);
+    for(int i = 0; i < numLayer; i++){
+        fwrite(&layers[i]->numIn, sizeof(int), 1, fd);
+        fwrite(&layers[i]->numOut, sizeof(int), 1, fd);
+        fwrite(layers[i]->w, sizeof(double), layers[i]->numIn*layers[i]->numOut, fd);
+        fwrite(layers[i]->c, sizeof(double), layers[i]->numIn, fd);
+        fwrite(layers[i]->b, sizeof(double), layers[i]->numOut, fd);
+    }
+};
 void DeepAutoEncoder::operationPerEpoch(){}
 
 void DeepAutoEncoder::forward(int size){

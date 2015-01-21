@@ -50,19 +50,34 @@ void testMNISTPretrain(){
     MNISTDataset mnist;
     mnist.loadData();
 
-    double lr[] = { 0.01, 0.01, 0.01, 0.001 };
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 500, 250, 2};
-    MultiLayerRBM multirbm(4, rbmLayerSize);
-    /*
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
-    MultiLayerRBM multirbm(1, rbmLayerSize);
-    */
-    multirbm.setModelFile("result/MNISTMultiLayerRBM_pretrain.dat");
-    multirbm.setPersistent(false);
-    multirbm.setGaussianHidden(3, true);
+    if(true){
+        double lr[] = { 0.01, 0.01, 0.01, 0.005 };
+        int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 500, 250, 2};
+        MultiLayerRBM multirbm(4, rbmLayerSize);
+        /*
+        int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
+        MultiLayerRBM multirbm(1, rbmLayerSize);
+        */
+        multirbm.setModelFile("result/MNISTMultiLayerRBM_pretrain2.dat");
+        multirbm.setPersistent(false);
+        multirbm.setGaussianHidden(3, true);
 
-    MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&mnist, lr, 10, 50);
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&mnist, lr, 10, 100);
+    }
+
+    if(false){
+        double lr[] = { 0.001 };
+        int rbmLayerSize[] = { mnist.getFeatureNumber(), 500};
+        MultiLayerRBM multirbm(1, rbmLayerSize);
+
+        multirbm.setModelFile("result/MNISTMultiLayerRBM_pretrain_small.dat");
+        multirbm.setPersistent(false);
+        multirbm.setGaussianHidden(0, true);
+
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&mnist, lr, 10, 50);
+    }
 }
 
 void testGPCRGuassian(){
@@ -254,6 +269,7 @@ void testTCGATraining(){
     supervisedModel.train(&data, 0.005, 1, 1000, 40, 0.001);
 }
 
+
 void testTCGALoading(){
     srand(1111);
     TCGADataset data;
@@ -309,6 +325,21 @@ void testMNISTDBNAM(){
     multirbm.activationMaxization(2, 20, avgNorm, 1000);
 }
 
+void testTCGAPretrain(){
+    TCGADataset data;
+    data.loadData("../data/TCGA/TCGA-gene-top2000-all.txt", "../data/TCGA/TCGA-gene-top2000-valid.txt");
+    double lr[] = { 0.01, 0.01, 0.01, 0.005 };
+    int rbmLayerSize[] = { data.getFeatureNumber(), 1000, 500, 200, 2};
+
+    MultiLayerRBM multirbm(4, rbmLayerSize);
+    multirbm.setModelFile("result/TCGAMultiLayerRBM_2000gene_4layer_2000_1000_5000_200_2.dat");
+    multirbm.setPersistent(false);
+    multirbm.setGaussianHidden(3, true);
+
+    MultiLayerTrainModel pretrainModel(multirbm);
+    pretrainModel.train(&data, lr, 1, 100);
+}
+
 int main(){
     srand(4321);
     //testMNISTTraining();
@@ -327,6 +358,8 @@ int main(){
 
     //testMNISTGuassian();
     //testGPCRGuassian();
-    testMNISTPretrain();
+    //testMNISTPretrain();
+    
+    testTCGAPretrain();
     return 0;
 }
