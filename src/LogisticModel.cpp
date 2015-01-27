@@ -59,12 +59,22 @@ void testGPCRTraining(){
     logisticModel.train(&data, 0.01, 1, 1000, 30);
 }
 
+void testPancanTraining(){
+    SVMDataset data;
+    data.loadData("../data/TCGA/Pancan-GAM-train.txt", "../data/TCGA/Pancan-GAM-valid.txt");
+
+    Logistic logi(data.getFeatureNumber(), data.getLabelNumber());
+    TrainModel logisticModel(logi);
+    logisticModel.train(&data, 0.01, 5, 1000, 30);
+}
+
 int main(){
-    testMNISTTraining();
+    //testMNISTTraining();
     //testMNISTDataLoading();
     //testICA();
 
     //testMNISTGuassianTraining();
     //testTCGATraining();
     //testGPCRTraining();
+    testPancanTraining();
 }

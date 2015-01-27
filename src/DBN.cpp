@@ -340,6 +340,29 @@ void testTCGAPretrain(){
     pretrainModel.train(&data, lr, 1, 100);
 }
 
+void testPancanTraing(){
+    SVMDataset data;
+    data.loadData("../data/TCGA/Pancan-GAM-train.txt", "../data/TCGA/Pancan-GAM-valid.txt");
+
+    //one layer
+    if(true){
+        int rbmLayerSize[] = { data.getFeatureNumber(), 200};
+        MultiLayerRBM multirbm(1, rbmLayerSize);
+        multirbm.setPersistent(false);
+        multirbm.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&data, 0.01, 5, 100);
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+    }
+}
+
 int main(){
     srand(4321);
     //testMNISTTraining();
@@ -360,6 +383,8 @@ int main(){
     //testGPCRGuassian();
     //testMNISTPretrain();
     
-    testTCGAPretrain();
+    //testTCGAPretrain();
+
+    
     return 0;
 }

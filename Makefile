@@ -24,7 +24,7 @@ ifeq ("$(BITS)", "64")
 LDFLAGS:=$(LDFLAGS) $(MKLLDFLAGS_64)
 endif
 
-CFLAGS=-c -g -DDEBUG -pg -Iinclude -I../include -I/opt/intel/composer_xe_2013.5.192/mkl/include -mcmodel=small
+CFLAGS=-c -g -DDEBUG -pg -Iinclude -I../include -I/opt/intel/composer_xe_2013.5.192/mkl/include
 OBJECTS=DeepAutoEncoder.o AutoEncoder.o DeepClassRBM.o MultiLayerRBM.o ClassRBM.o MLP.o RBM.o Logistic.o MLPLayer.o TrainModel.o MultiLayerTrainComponent.o TrainComponent.o Dataset.o Utility.o
 OBJECTS:=$(patsubst %.o, src/%.o, $(OBJECTS))
 MKLOBJECTS=MultiLayerRBM.o ClassRBM.o Logistic.o MLPLayer.o RBM.o DeepAutoEncoder.o AutoEncoder.o
