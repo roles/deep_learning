@@ -340,7 +340,7 @@ void testTCGAPretrain(){
     pretrainModel.train(&data, lr, 1, 100);
 }
 
-void testPancanTraing(){
+void testPancanTraining(){
     SVMDataset data;
     data.loadData("../data/TCGA/Pancan-GAM-train.txt", "../data/TCGA/Pancan-GAM-valid.txt");
 
@@ -385,6 +385,6 @@ int main(){
     
     //testTCGAPretrain();
 
-    
+    testPancanTraining();    
     return 0;
 }
