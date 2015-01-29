@@ -356,10 +356,10 @@ void testPancanTraing(){
 
         MLP mlp;
         multirbm.toMLP(&mlp, data.getLabelNumber());
-        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
 
         TrainModel supervisedModel(mlp);
-        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+        supervisedModel.train(&data, 0.1, 5, 1000, 40);
     }
 
     //one layer pretrain
@@ -368,7 +368,7 @@ void testPancanTraing(){
 
         MLP mlp;
         multirbm.toMLP(&mlp, data.getLabelNumber());
-        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
 
         TrainModel supervisedModel(mlp);
         supervisedModel.train(&data, 0.01, 5, 1000, 40);

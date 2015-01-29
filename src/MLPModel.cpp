@@ -93,10 +93,10 @@ void testTCGATwoLayerTraining(){
 int main(){
     srand(4321);
     //testWFICA();
-    //testMNIST();
+    testMNIST();
     //testMNISTLoading();
 
-    testMNISTGaussian();
+    //testMNISTGaussian();
     //testTCGATraining();
     //testTCGATwoLayerTraining();
     return 0;
