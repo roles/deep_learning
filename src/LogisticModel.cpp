@@ -65,7 +65,7 @@ void testPancanTraining(){
 
     Logistic logi(data.getFeatureNumber(), data.getLabelNumber());
     TrainModel logisticModel(logi);
-    logisticModel.train(&data, 0.01, 5, 1000, 30);
+    logisticModel.train(&data, 0.01, 10, 1000, 30);
 }
 
 int main(){

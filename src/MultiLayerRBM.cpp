@@ -58,6 +58,24 @@ MultiLayerRBM::MultiLayerRBM(MLP& mlp) :
     }
 }
 
+MultiLayerRBM::MultiLayerRBM(DeepAutoEncoder& dad) : 
+    MultiLayerTrainComponent("MultiLayerRBM"), 
+    persistent(false), AMSample(NULL)
+{
+    numLayer = dad.getLayerNumber();
+    layersToTrain = vector<bool>(numLayer, true);
+    for(int i = 0; i < numLayer; i++){
+        layers[i] = new RBM(dad.getLayer(i)->getInputNumber(),
+                            dad.getLayer(i)->getOutputNumber());
+        dad.getLayer(i)->getWeightTrans(layers[i]->weight);
+        memcpy(layers[i]->hbias, dad.getLayer(i)->getOutputBias(), 
+               sizeof(double) * layers[i]->numHid);
+        memcpy(layers[i]->vbias, dad.getLayer(i)->getInputBias(), 
+               sizeof(double) * layers[i]->numVis);
+    }
+    layers[numLayer-1]->setGaussianHidden(false);
+}
+
 void MultiLayerRBM::saveModel(FILE* fd){
     fwrite(&numLayer, sizeof(int), 1, fd);
     for(int i = 0; i < numLayer; i++){

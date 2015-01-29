@@ -493,12 +493,20 @@ void RBM::getWeightTrans(double *transWeight){
 void RBM::getAMDelta(int unitIdx, double *lastAMdelta){
     if(unitIdx == -1){
         for(int i = 0; i < numHid; i++){
-            temp[i] = get_sigmoid_derivative(ph1[i]) * lastAMdelta[i];
+            if(binHid){
+                temp[i] = get_sigmoid_derivative(ph1[i]) * lastAMdelta[i];
+            }else{
+                temp[i] = lastAMdelta[i];
+            }
         }
     }else{
         for(int i = 0; i < numHid; i++){
             if(i == unitIdx){
-                temp[i] = get_sigmoid_derivative(ph1[i]);
+                if(binHid){
+                    temp[i] = get_sigmoid_derivative(ph1[i]);
+                }else{
+                    temp[i] = 1.0;
+                }
             }else{
                 temp[i] = 0;
             }

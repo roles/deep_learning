@@ -340,40 +340,6 @@ void testTCGAPretrain(){
     pretrainModel.train(&data, lr, 1, 100);
 }
 
-void testPancanTraing(){
-    SVMDataset data;
-    data.loadData("../data/TCGA/Pancan-GAM-train.txt", "../data/TCGA/Pancan-GAM-valid.txt");
-
-    //one layer pretrain
-    if(true){
-        int rbmLayerSize[] = { data.getFeatureNumber(), 200};
-        MultiLayerRBM multirbm(1, rbmLayerSize);
-        multirbm.setPersistent(false);
-        multirbm.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
-
-        MultiLayerTrainModel pretrainModel(multirbm);
-        pretrainModel.train(&data, 0.01, 5, 100);
-
-        MLP mlp;
-        multirbm.toMLP(&mlp, data.getLabelNumber());
-        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
-
-        TrainModel supervisedModel(mlp);
-        supervisedModel.train(&data, 0.1, 5, 1000, 40);
-    }
-
-    //one layer pretrain
-    if(true){
-        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
-
-        MLP mlp;
-        multirbm.toMLP(&mlp, data.getLabelNumber());
-        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
-
-        TrainModel supervisedModel(mlp);
-        supervisedModel.train(&data, 0.01, 5, 1000, 40);
-    }
-}
 
 int main(){
     srand(4321);
@@ -397,6 +363,5 @@ int main(){
     
     //testTCGAPretrain();
 
-    
     return 0;
 }

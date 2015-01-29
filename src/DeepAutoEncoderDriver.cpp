@@ -144,6 +144,10 @@ void debug3(){
     printf("%lf\n", model.getValidError(&data, 10));
 }
 
+void testMNISTDeepADMaximization(){
+
+}
+
 int main(){
     //testMNISTTraining();
     //testMNISTFineTune();

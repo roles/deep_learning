@@ -165,6 +165,12 @@ void EncoderLayer::getDeltaFromHDeriv(int size){
     cblas_daxpy(numIn*numOut, 1, dw, 1, w, 1);
 }
 
+void EncoderLayer::getWeightTrans(double* transWeight){
+    for(int i = 0; i < numIn; i++)
+        for(int j = 0; j < numOut; j++)
+            transWeight[j*numIn+i] = weight[i*numOut+j];
+}
+
 
 DeepAutoEncoder::DeepAutoEncoder() : UnsuperviseTrainComponent("DeepAutoEncoder")
 {

@@ -1,5 +1,6 @@
 #include "RBM.h"
 #include "MLP.h"
+#include "DeepAutoEncoder.h"
 #include <vector>
 
 using namespace std;
@@ -13,6 +14,7 @@ class MultiLayerRBM : public MultiLayerTrainComponent {
         MultiLayerRBM(int, const vector<const char*> &);   //从多个单层模型文件读取
         MultiLayerRBM(const char*);
         MultiLayerRBM(MLP&);
+        MultiLayerRBM(DeepAutoEncoder&);
         ~MultiLayerRBM();
         TrainComponent& getLayer(int);
         int getLayerNumber() { return numLayer; }

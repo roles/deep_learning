@@ -15,6 +15,10 @@ class EncoderLayer {
         ~EncoderLayer();
         void setInput(double *input) { x = input; }
         void allocate(int);
+        int getInputNumber() { return numIn; }
+        int getOutputNumber() { return numIn; }
+        double getInputBias() { return c; }
+        double getOutputBias() { return b; }
     private:
         int numIn, numOut;
         double *x, *y, *h;
@@ -31,6 +35,8 @@ class EncoderLayer {
         void getHDeriv(EncoderLayer* prev, int);
         void getDeltaFromYDeriv(double*, int size);
         void getDeltaFromHDeriv(int size);
+
+        void getWeightTrans(double* transWeight);
 
         friend class DeepAutoEncoder;
 };
@@ -59,6 +65,9 @@ class DeepAutoEncoder : public UnsuperviseTrainComponent{
         void addLayer(int, int);
         void forward(int);
         void backpropagate(int);
+
+        int getLayerNumber() { return numLayer; }
+        EncoderLayer* getLayer(int i) { return layers[i]; }
     private:
         double getReconstructCost(double *x, double *y, int n, int size);
         int numLayer;
