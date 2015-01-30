@@ -1,12 +1,13 @@
 #include "RBM.h"
 #include "MLP.h"
-#include "DeepAutoEncoder.h"
 #include <vector>
 
 using namespace std;
 
 #ifndef _MULTIRBM_H
 #define _MULTIRBM_H
+
+class DeepAutoEncoder;
 
 class MultiLayerRBM : public MultiLayerTrainComponent {
     public:
