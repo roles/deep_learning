@@ -1,6 +1,7 @@
 #include "TrainModel.h"
 #include "MultiLayerRBM.h"
 #include "Utility.h"
+#include "mkl.h"
 
 void testMNISTTraining(){
     MNISTDataset mnist;
@@ -351,6 +352,7 @@ void testTCGAPretrain(){
 
 int main(){
     srand(4321);
+    mkl_set_num_threads(4);
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();

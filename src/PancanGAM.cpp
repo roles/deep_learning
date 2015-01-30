@@ -527,4 +527,5 @@ int main(){
     //testPancanAutoEncoder_11cancer_479feature();
     //testPancanTraining_11cancer_Merge500Mutation();
     //testPancanTraining_11cancer_MergeHCDCD();
+    //testMKL();
 }
