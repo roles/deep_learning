@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Logistic.h"
 #include "DeepAutoEncoder.h"
+#include "mkl.h"
 
 void testPancanTraining_11cancer_479feature(){
     SVMDataset data;
@@ -516,10 +517,14 @@ void testPancanTraining_11cancer_MergeHCDCD(){
     }
 }
 
+void testMKL(){
+    printf("%d\n", mkl_get_max_threads());    
+}
+
 int main(){
     //testPancanTraining_11cancer_479feature();
     //testPancanTraining_22cancer_479feature();
-    testPancanAutoEncoder_11cancer_479feature();
+    //testPancanAutoEncoder_11cancer_479feature();
     //testPancanTraining_11cancer_Merge500Mutation();
     //testPancanTraining_11cancer_MergeHCDCD();
 }
