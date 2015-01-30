@@ -17,8 +17,10 @@ class EncoderLayer {
         void allocate(int);
         int getInputNumber() { return numIn; }
         int getOutputNumber() { return numIn; }
-        double getInputBias() { return c; }
-        double getOutputBias() { return b; }
+
+        void getWeightTrans(double* transWeight);
+        double* getInputBias() { return c; }
+        double* getOutputBias() { return b; }
     private:
         int numIn, numOut;
         double *x, *y, *h;
@@ -36,7 +38,6 @@ class EncoderLayer {
         void getDeltaFromYDeriv(double*, int size);
         void getDeltaFromHDeriv(int size);
 
-        void getWeightTrans(double* transWeight);
 
         friend class DeepAutoEncoder;
 };

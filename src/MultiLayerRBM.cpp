@@ -1,6 +1,7 @@
 #include "MultiLayerRBM.h"
 #include "mkl_cblas.h"
 #include "Utility.h"
+#include "DeepAutoEncoder.h"
 #include <cfloat>
 #include <cstdio>
 

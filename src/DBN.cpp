@@ -5,22 +5,24 @@
 void testMNISTTraining(){
     MNISTDataset mnist;
     mnist.loadData();
-    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 1000, 1000};
+    int rbmLayerSize[] = { mnist.getFeatureNumber(), 1000, 1000, 1000, 1000, 1000};
 
-    MultiLayerRBM multirbm(3, rbmLayerSize);
-    multirbm.setModelFile("result/MNISTMultiLayerRBM_1000_1000_1000_0.01_sparsity.dat");
+    MultiLayerRBM multirbm(5, rbmLayerSize);
+    multirbm.setModelFile("result/MNISTMultiLayerRBM_5layer.dat");
     multirbm.setPersistent(true);
-    multirbm.setSparsity(true, 0.001, 0.99, 0.1);
+    //multirbm.setSparsity(true, 0.001, 0.99, 0.1);
 
     MultiLayerTrainModel pretrainModel(multirbm);
-    pretrainModel.train(&mnist, 0.01, 10, 100);
+    pretrainModel.train(&mnist, 0.01, 20, 100);
 
+    /*
     MLP mlp;
     multirbm.toMLP(&mlp, mnist.getLabelNumber());
     mlp.setModelFile("result/MNISTDBN_1000_1000_1000_0.1_sparsity.dat");
 
     TrainModel supervisedModel(mlp);
     supervisedModel.train(&mnist, 0.1, 10, 1000);
+    */
 }
 
 void testMNISTGuassian(){
@@ -305,13 +307,19 @@ void testMNISTAM(){
     mnist.loadData();
     double avgNorm = squareNorm(mnist.getTrainingData(0), mnist.getFeatureNumber(), 100);
 
-    MultiLayerRBM multirbm("result/MNISTMultiLayerRBM_1000_1000_1000_0.01.dat");
+    MultiLayerRBM multirbm("result/MNISTMultiLayerRBM_5layer.dat");
 
+    /*
     multirbm.activationMaxization(0, 400, avgNorm, 1000, "result/MNISTDBN_FirstLayer_AM.txt");
 
     multirbm.activationMaxization(1, 400, avgNorm, 1000, "result/MNISTDBN_SecondLayer_AM.txt");
 
     multirbm.activationMaxization(2, 400, avgNorm, 1000, "result/MNISTDBN_ThirdLayer_AM.txt");
+    */
+
+    multirbm.activationMaxization(3, 400, avgNorm, 1000, "result/MNISTDBN_ForthLayer_AM.txt");
+
+    multirbm.activationMaxization(4, 400, avgNorm, 1000, "result/MNISTDBN_FifthLayer_AM.txt");
 }
 
 void testMNISTDBNAM(){
@@ -351,7 +359,7 @@ int main(){
     //testTCGALoading();
     //testDumpTCGA();
 
-    //testMNISTAM();
+    testMNISTAM();
     //testMNISTDBNAM();
 
     //test20NewsgroupTraining();
