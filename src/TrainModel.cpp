@@ -19,6 +19,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
 
     SubDataset trainset = data->getTrainingSet();
     BatchIterator *iter = new RandomBatchIterator(&trainset, batchSize);
+    //BatchIterator *iter = new SequentialBatchIterator(&trainset, batchSize);
 
     for(int epoch = 0; epoch < numEpoch && !stop; epoch++){
         time_t startTime = time(NULL);
@@ -76,7 +77,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             fflush(stdout);
         }
 
-        component.operationPerEpoch();
+        component.operationPerEpoch(epochs);
 
     }
     component.afterTraining(batchSize);

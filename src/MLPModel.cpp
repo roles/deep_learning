@@ -20,7 +20,7 @@ void testMNIST(){
     mnist.loadData();
     MLP mlp; 
 
-    SigmoidLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
+    MLPLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
     //SigmoidLayer *secondLayer = new SigmoidLayer(500, 500);
     Logistic *thirdLayer = new Logistic(500, mnist.getLabelNumber());
     mlp.addLayer(firstLayer);
@@ -91,7 +91,7 @@ void testTCGATwoLayerTraining(){
 }
 
 int main(){
-    srand(4321);
+    srand(1);
     //testWFICA();
     testMNIST();
     //testMNISTLoading();

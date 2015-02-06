@@ -16,7 +16,7 @@ void testMNISTTraining(){
     Logistic logi(mnist.getFeatureNumber(), mnist.getLabelNumber());
     logi.setModelFile("result/LogisticModel.dat");
     TrainModel logisticModel(logi);
-    logisticModel.train(&mnist, 0.13, 600, 1000);
+    logisticModel.train(&mnist, 0.01, 10, 1000);
 }
 
 void testMNISTGuassianTraining(){

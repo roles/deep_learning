@@ -10,6 +10,8 @@ enum UnitType { Sigmoid, Tanh , Softmax };
 
 typedef double MLPBuffer[maxUnit*maxUnit];
 
+class MLP;
+
 class MLPLayer {
     public:
         MLPLayer(int, int, const char* name = "MLPLayer"); 
@@ -57,6 +59,7 @@ class MLPLayer {
         double *in, *out;
         double learningRate;
         char layerName[20];
+        friend class MLP;
 };
 
 class SigmoidLayer : public MLPLayer {
@@ -77,6 +80,18 @@ class TanhLayer : public MLPLayer {
         TanhLayer(FILE* modelFileFd);
         TanhLayer(const char*);
         TanhLayer(int, int, double*, double*);
+    private:
+        void computeNeuron(int);
+        void computeNeuronDerivative(double*, int);
+        void initializeWeight();
+};
+
+class ReLULayer : public MLPLayer {
+    public:
+        ReLULayer(int, int); 
+        ReLULayer(FILE* modelFileFd);
+        ReLULayer(const char*);
+        ReLULayer(int, int, double*, double*);
     private:
         void computeNeuron(int);
         void computeNeuronDerivative(double*, int);
