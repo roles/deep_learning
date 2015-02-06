@@ -92,6 +92,7 @@ void MLPLayer::updateWeight(int size){
                 -1.0 * learningRate / size, in, numIn,
                 delta, numOut,
                 1.0, weight, numOut);
+
 }
 
 void MLPLayer::updateBias(int size){
@@ -211,6 +212,43 @@ void TanhLayer::computeNeuronDerivative(double* deriv, int size){
 
 void TanhLayer::initializeWeight(){
     initializeWeightTanh(getWeight(), getInputNumber(), getOutputNumber());
+}
+
+ReLULayer::ReLULayer(int numIn, int numOut) :
+    MLPLayer(numIn, numOut, "ReLU")
+{ 
+    initializeWeight();
+    MLPLayer::initializeBias();
+}
+ReLULayer::ReLULayer(FILE* modelFileFd) :
+    MLPLayer(modelFileFd, "ReLU") { }
+ReLULayer::ReLULayer(const char* file) :
+    MLPLayer(file, "ReLU") { }
+ReLULayer::ReLULayer(int nIn, int nOut, double* weight, double* bias) :
+    MLPLayer(nIn, nOut, weight, bias, "ReLU") { }
+
+void ReLULayer::computeNeuron(int size){
+    double *out = getOutput();
+    int numOut = getOutputNumber();
+    for(int i = 0; i < size*numOut; i++){
+        if(out[i] < 0) out[i] = 0;
+    }
+}
+
+void ReLULayer::computeNeuronDerivative(double* deriv, int size){
+    double *out = getOutput();
+    int numOut = getOutputNumber();
+    for(int i = 0; i < size*numOut; i++){
+        if(out[i] < 0){
+            deriv[i] = 0;
+        }else{
+            deriv[i] = 1;
+        }
+    }
+}
+
+void ReLULayer::initializeWeight(){
+    initializeWeightSigmoid(getWeight(), getInputNumber(), getOutputNumber());
 }
 
 SoftmaxLayer::SoftmaxLayer(int numIn, int numOut, const char* name) :

@@ -104,3 +104,6 @@ void MLP::loadModel(FILE *fd){
         }
     }
 }
+
+void MLP::operationPerEpoch(int k) { 
+}

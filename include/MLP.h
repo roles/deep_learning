@@ -30,6 +30,7 @@ class MLP : public TrainComponent{
         inline void setLayer(int i, MLPLayer* l) { layers[i] = l; }
 
         void setGaussian(bool b) { gaussian = b; }
+        void operationPerEpoch(int k);
     private:
         MLPLayer* layers[maxLayer];
         int numLayer;

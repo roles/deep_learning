@@ -39,7 +39,7 @@ class TrainComponent : public IModel {
         virtual int getTransOutputNumber() { return getOutputNumber(); }
         virtual double* getLabel() = 0;
         virtual double getTrainingCost(int, int) { return 0.0; }
-        virtual void operationPerEpoch() { }
+        virtual void operationPerEpoch(int k) { }
         inline TrainType getTrainType() { return trainType; }
         virtual ~TrainComponent();
 

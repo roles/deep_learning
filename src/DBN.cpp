@@ -349,7 +349,6 @@ void testTCGAPretrain(){
     pretrainModel.train(&data, lr, 1, 100);
 }
 
-
 int main(){
     srand(4321);
     mkl_set_num_threads(4);
