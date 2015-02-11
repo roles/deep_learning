@@ -20,7 +20,7 @@ void testMNIST(){
     mnist.loadData();
     MLP mlp; 
 
-    MLPLayer *firstLayer = new SigmoidLayer(mnist.getFeatureNumber(), 500);
+    MLPLayer *firstLayer = new ReLULayer(mnist.getFeatureNumber(), 500);
     //SigmoidLayer *secondLayer = new SigmoidLayer(500, 500);
     Logistic *thirdLayer = new Logistic(500, mnist.getLabelNumber());
     mlp.addLayer(firstLayer);
@@ -29,7 +29,7 @@ void testMNIST(){
     mlp.setModelFile("result/MLPModel.dat");
 
     TrainModel mlpModel(mlp);
-    mlpModel.train(&mnist, 0.01, 20, 1000);
+    mlpModel.train(&mnist, 0.001, 20, 1000);
 }
 
 void testMNISTGaussian(){
