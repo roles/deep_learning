@@ -62,6 +62,7 @@ endif
 
 clean:
 	rm -rf $(MODELS) $(OBJECTS) *.out *.png *.txt src/*.o
+	find . -name "*swp" | xargs rm -rf
 
 test:
 	echo $(MKLOBJECTS)

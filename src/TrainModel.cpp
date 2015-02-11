@@ -77,7 +77,7 @@ void TrainModel::train(Dataset *data, double learningRate, int batchSize, int nu
             fflush(stdout);
         }
 
-        component.operationPerEpoch(epochs);
+        component.operationPerEpoch(epoch);
 
     }
     component.afterTraining(batchSize);
