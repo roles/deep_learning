@@ -28,7 +28,7 @@ class RBM : public UnsuperviseTrainComponent {
         void setLearningRate(double lr);
         void setPersistent(bool p) { persistent = p; };
         double* getOutput() { return h1; }
-        double* getTransOutput() { return h1; }
+        double* getTransOutput() { return ph1; }
         int getOutputNumber() { return numHid; }
         int getInputNumber() { return numVis; }
         double* getHBias() { return hbias; }

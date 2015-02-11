@@ -47,6 +47,7 @@ void MLP::runBatch(int size){
 }
 
 void MLP::setLearningRate(double lr){
+    this->learningRate = lr;
     for(int i = 0; i < numLayer; i++){
         layers[i]->setLearningRate(lr);
     }

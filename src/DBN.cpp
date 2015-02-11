@@ -351,7 +351,7 @@ void testTCGAPretrain(){
 
 int main(){
     srand(4321);
-    mkl_set_num_threads(4);
+    //mkl_set_num_threads(4);
     //testMNISTTraining();
     //testMNISTLoading();
     //testMNISTDBNSecondLayerTrain();

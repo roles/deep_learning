@@ -45,12 +45,14 @@ void testPancanTraining_11cancer_479feature(){
         MultiLayerTrainModel pretrainModel(multirbm);
         pretrainModel.train(&data, 0.01, 5, 100);
 
+        /*
         MLP mlp;
         multirbm.toMLP(&mlp, data.getLabelNumber());
         mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
 
         TrainModel supervisedModel(mlp);
         supervisedModel.train(&data, 0.01, 5, 1000, 40, -0.02);
+        */
     }
 
     //two layer pretrain
@@ -62,18 +64,20 @@ void testPancanTraining_11cancer_479feature(){
         multirbm.setModelFile("result/DBN-Pancan-GAM-twolayer-pretrain.dat");
 
         MultiLayerTrainModel pretrainModel(multirbm);
-        pretrainModel.train(&data, 0.01, 5, 100);
+        pretrainModel.train(&data, 0.01, 5, 29);
 
+        /*
         MLP mlp;
         multirbm.toMLP(&mlp, data.getLabelNumber());
         mlp.setModelFile("result/DBN-Pancan-GAM-twolayer.dat");
 
         TrainModel supervisedModel(mlp);
         supervisedModel.train(&data, 0.01, 5, 1000, 40);
+        */
     }
 
     //three layer pretrain
-    if(0){
+    if(1){
         MultiLayerRBM multirbm("result/DBN-Pancan-GAM-twolayer-pretrain.dat");
         multirbm.setPersistent(false);
         multirbm.addLayer(500);
@@ -82,14 +86,14 @@ void testPancanTraining_11cancer_479feature(){
         multirbm.setModelFile("result/DBN-Pancan-GAM-threelayer-pretrain.dat");
 
         MultiLayerTrainModel pretrainModel(multirbm);
-        pretrainModel.train(&data, 0.01, 5, 100);
+        pretrainModel.train(&data, 0.01, 5, 30);
 
         MLP mlp;
         multirbm.toMLP(&mlp, data.getLabelNumber());
         mlp.setModelFile("result/DBN-Pancan-GAM-threelayer.dat");
 
         TrainModel supervisedModel(mlp);
-        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+        supervisedModel.train(&data, 0.01, 5, 118, 40);
     }
 
     //one layer train
@@ -114,6 +118,18 @@ void testPancanTraining_11cancer_479feature(){
 
         TrainModel supervisedModel(mlp);
         supervisedModel.train(&data, 0.005, 3, 1000, 40);
+    }
+
+    //three layer train
+    if(0){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-threelayer-pretrain.dat");
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-threelayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 118, 40);
     }
 
     // logistic
@@ -517,8 +533,180 @@ void testPancanTraining_11cancer_MergeHCDCD(){
     }
 }
 
+void testPancanAM(){
+    SVMDataset data;
+    data.loadData("../data/TCGA/11cancer_479feature/Pancan-GAM-train.txt", "../data/TCGA/11cancer_479feature/Pancan-GAM-valid.txt");
+    
+    double avgNorm = squareNorm(data.getTrainingData(0), data.getFeatureNumber(), 2000);
+    MLP* mlp = new MLP("result/DBN-Pancan-GAM-threelayer.dat");
+    MultiLayerRBM multirbm(*mlp);
+    delete mlp;
+
+    multirbm.activationMaxization(0, 500, avgNorm, 1000, "result/Pancan-GAM-FirstLayer-AM.bin", true);
+    multirbm.activationMaxization(1, 500, avgNorm, 1000, "result/Pancan-GAM-SecondLayer-AM.bin", true);
+    multirbm.activationMaxization(2, 500, avgNorm, 1000, "result/Pancan-GAM-ThirdLayer-AM.bin", true);
+}
+
+void testPancanDumpHidden(){
+    SVMDataset data;
+    data.loadData("../data/TCGA/11cancer_479feature/Pancan-GAM-all.txt", "../data/TCGA/11cancer_479feature/Pancan-GAM-valid.txt");
+
+    MLP* mlp = new MLP("result/DBN-Pancan-GAM-threelayer.dat");
+    MultiLayerRBM multirbm(*mlp);
+    delete mlp;
+    TrainComponent& firstLayer = multirbm.getLayer(0);
+    TrainComponent& secondLayer = multirbm.getLayer(1);
+    TrainComponent& thirdLayer = multirbm.getLayer(2);
+
+    // dump first layer weight
+    //firstLayer.setModelFile("result/20NewsgroupDBN_FirstLayer.dat");
+    //firstLayer.saveModel();
+
+    // dump first layer hidden layer output
+    TransmissionDataset h1out(data, firstLayer);
+    h1out.dumpTrainingData("result/Pancan-GAM-FirstLayer-Hidden.bin");
+
+    // dump second layer hidden layer output
+    TransmissionDataset h2out(h1out, secondLayer);
+    h2out.dumpTrainingData("result/Pancan-GAM-SecondLayer-Hidden.bin");
+
+    TransmissionDataset h3out(h2out, thirdLayer);
+    h3out.dumpTrainingData("result/Pancan-GAM-ThirdLayer-Hidden.bin");
+}
+
 void testMKL(){
     printf("%d\n", mkl_get_max_threads());    
+}
+
+void testPancanTraining_11cancer_199mutation(){
+    SVMDataset data;
+    data.loadData("../data/TCGA/11cancer_199mutation/Pancan-GAM-train.txt", "../data/TCGA/11cancer_199mutation/Pancan-GAM-valid.txt");
+
+    //one layer no pretrain
+    if(0){
+        MLP mlp; 
+        MLPLayer *firstLayer = new TanhLayer(data.getFeatureNumber(), 500);
+        Logistic *secondLayer = new Logistic(500, data.getLabelNumber());
+        mlp.addLayer(firstLayer);
+        mlp.addLayer(secondLayer);
+
+        TrainModel mlpModel(mlp);
+        mlpModel.train(&data, 0.01, 10, 1000, 20, -0.02);
+    }
+
+    //two layer no pretrain
+    if(0){
+        MLP mlp; 
+        MLPLayer *firstLayer = new TanhLayer(data.getFeatureNumber(), 500);
+        MLPLayer *secondLayer = new TanhLayer(data.getFeatureNumber(), 500);
+        Logistic *thirdLayer = new Logistic(500, data.getLabelNumber());
+        mlp.addLayer(firstLayer);
+        mlp.addLayer(secondLayer);
+        mlp.addLayer(thirdLayer);
+
+        TrainModel mlpModel(mlp);
+        mlpModel.train(&data, 0.01, 10, 1000, 20);
+    }
+
+    //one layer pretrain
+    if(0){
+        int rbmLayerSize[] = { data.getFeatureNumber(), 200};
+        MultiLayerRBM multirbm(1, rbmLayerSize);
+        multirbm.setPersistent(false);
+        multirbm.setModelFile("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&data, 0.01, 5, 100);
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+    }
+
+    //two layer pretrain
+    if(0){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+        multirbm.setPersistent(false);
+        multirbm.addLayer(200);
+        multirbm.setLayerToTrain(0, false);
+        multirbm.setModelFile("result/DBN-Pancan-GAM-twolayer-pretrain.dat");
+
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&data, 0.01, 5, 29);
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-twolayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+    }
+
+    //three layer pretrain
+    if(1){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-twolayer-pretrain.dat");
+        multirbm.setPersistent(false);
+        multirbm.addLayer(200);
+        multirbm.setLayerToTrain(0, false);
+        multirbm.setLayerToTrain(1, false);
+        multirbm.setModelFile("result/DBN-Pancan-GAM-threelayer-pretrain.dat");
+
+        MultiLayerTrainModel pretrainModel(multirbm);
+        pretrainModel.train(&data, 0.01, 5, 30);
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-threelayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 1000, 40);
+    }
+
+    //one layer train
+    if(0){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-onelayer-pretrain.dat");
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-onelayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.005, 5, 1000, 40, -0.01);
+    }
+
+    //two layer train
+    if(0){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-twolayer-pretrain.dat");
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-twolayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.005, 3, 1000, 40);
+    }
+
+    //three layer train
+    if(0){
+        MultiLayerRBM multirbm("result/DBN-Pancan-GAM-threelayer-pretrain.dat");
+
+        MLP mlp;
+        multirbm.toMLP(&mlp, data.getLabelNumber());
+        mlp.setModelFile("result/DBN-Pancan-GAM-threelayer.dat");
+
+        TrainModel supervisedModel(mlp);
+        supervisedModel.train(&data, 0.01, 5, 118, 40);
+    }
+
+    // logistic
+    if(0){
+        Logistic logi(data.getFeatureNumber(), data.getLabelNumber());
+        TrainModel logisticModel(logi);
+        logisticModel.train(&data, 0.01, 10, 1000, 30);
+    }
 }
 
 int main(){
@@ -527,5 +715,7 @@ int main(){
     //testPancanAutoEncoder_11cancer_479feature();
     //testPancanTraining_11cancer_Merge500Mutation();
     //testPancanTraining_11cancer_MergeHCDCD();
-    //testMKL();
+    //testPancanAM();
+    //testPancanDumpHidden();
+    testPancanTraining_11cancer_199mutation();
 }
